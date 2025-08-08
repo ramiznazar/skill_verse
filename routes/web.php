@@ -1,0 +1,233 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Artisan;
+
+use App\Http\Controllers\Website\{
+    HomeController,
+    BlogController,
+    AboutController,
+    FaqController,
+    EventController,
+    CourseController,
+    ContactController,
+    CourseDetailController,
+    EventDetailController,
+    UserMessageController as FrontUserMessageController
+};
+use App\Http\Controllers\Admin\Dashboard\{
+    AuthController,
+    UserController,
+    LeadController,
+    PartnerController,
+    PartnerProfitController,
+    BatchController,
+    AccountController,
+    ExpenseController,
+    TeacherController,
+    AdmissionController,
+    CourseFeeController,
+    FeeCollectorController,
+    FeeSubmissionController,
+    TeacherSalaryController,
+    TeacherBalanceController,
+    ProfitCalculationController,
+    ReferralCommissionController
+};
+use App\Http\Controllers\Admin\Website\{
+    BannerController,
+    CounterController,
+    ProjectController,
+    TestimonialController,
+    PopularCourseController,
+    CourseCategoryController,
+    CourseLmsController,
+    CourseLanguageController,
+    CourseOutlineController,
+    BlogController as AdminBlogController,
+    EventController as AdminEventController,
+    CourseController as AdminCourseController,
+    UserMessageController as AdminUserMessageController,
+    EventLinkController,
+    EventParticipantController,
+    GallaryCategoryController,
+    GallaryImageController
+};
+use App\Http\Controllers\Admin\HomeController as AdminHomeController;
+
+/*
+|--------------------------------------------------------------------------
+| Website Routes (Public)
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/', [HomeController::class, 'home'])->name('home');
+Route::get('/course', [CourseController::class, 'course'])->name('course');
+Route::get('/course/{id}', [CourseController::class, 'courseDetail'])->name('course.detail');
+Route::get('/event', [EventController::class, 'event'])->name('event');
+Route::get('/event/{id}', [EventController::class, 'eventDetail'])->name('event.detail');
+Route::get('/about', [AboutController::class, 'about'])->name('about');
+Route::get('/blog', [BlogController::class, 'blog'])->name('blog');
+Route::get('/faq', [FaqController::class, 'faq'])->name('faq');
+Route::get('/contact', [ContactController::class, 'contact'])->name('contact');
+Route::post('/user/message', [ContactController::class, 'userMessage'])->name('user.message.store');
+
+/*
+|--------------------------------------------------------------------------
+| Admin Panel Routes (No Middleware / No Auth)
+|--------------------------------------------------------------------------
+*/
+Route::get('/register', [AuthController::class, 'register'])->name('auth.register');
+Route::post('/register/store', [AuthController::class, 'registerStore'])->name('auth.register.store');
+Route::get('/login', [AuthController::class, 'login'])->name('auth.login');
+Route::post('/login/store', [AuthController::class, 'loginStore'])->name('auth.login.store');
+Route::get('/logout', [AuthController::class, 'logout'])->name('auth.logout');
+
+Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
+    // Dashboard (No auth)
+    Route::get('/', [AdminHomeController::class, 'home'])->name('admin');
+
+    Route::get('/chart-data/weekly', [AdminHomeController::class, 'getWeeklyData'])->name('chart.weekly');
+    Route::get('/chart-data/monthly', [AdminHomeController::class, 'getMonthlyData'])->name('chart.monthly');
+    Route::get('/chart-data/yearly', [AdminHomeController::class, 'getYearlyData'])->name('chart.yearly');
+
+    Route::get('/user/index', [UserController::class, 'index'])->name('user.index');
+    Route::get('/user/create', [UserController::class, 'create'])->name('user.create');
+    Route::post('/user/store', [UserController::class, 'store'])->name('user.store');
+    Route::get('/user/edit/{id}', [UserController::class, 'edit'])->name('user.edit');
+    Route::put('/user/update/{id}', [UserController::class, 'update'])->name('user.update');
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('user.destroy');
+
+    // Admin Resources
+    Route::prefix('dashboard')->name('admin.dashboard.')->group(function () {
+        Route::resource('partners', PartnerController::class);
+        Route::get('/profit', [ProfitCalculationController::class, 'index'])->name('profit.index');
+        Route::post('/profit/calculate', [ProfitCalculationController::class, 'calculateThisMonth'])->name('profit.calculate');
+        Route::get('/profit/daily', [ProfitCalculationController::class, 'showDailyProfit'])->name('profit.daily');
+
+        Route::prefix('partner_profits')->name('partner_profits.')->group(function () {
+            Route::get('/', [PartnerProfitController::class, 'index'])->name('index');
+            Route::post('/generate', [PartnerProfitController::class, 'generateMonthlyProfit'])->name('generate_monthly');
+            Route::get('/mark-as-paid/{id}', [PartnerProfitController::class, 'markAsPaid'])->name('mark_as_paid');
+            Route::get('/move-to-balance/{id}', [PartnerProfitController::class, 'moveToBalance'])->name('move_to_balance');
+            Route::get('/full-history', [PartnerProfitController::class, 'fullHistory'])->name('full_history');
+            Route::get('/history/{partner_id}', [PartnerProfitController::class, 'history'])->name('history');
+            Route::get('/balances', [PartnerProfitController::class, 'balanceIndex'])->name('partner_balances.index');
+        });
+
+        Route::get('/referral-commission', [ReferralCommissionController::class, 'index'])->name('referrals.index');
+    });
+
+    // All Admin Resource Controllers
+    Route::resources([
+        'banner' => BannerController::class,
+        'course-category' => CourseCategoryController::class,
+        'course' => AdminCourseController::class,
+        'project' => ProjectController::class,
+        'testimonial' => TestimonialController::class,
+        'blog' => AdminBlogController::class,
+        'counter' => CounterController::class,
+        'user/message' => AdminUserMessageController::class,
+        'event' => AdminEventController::class,
+        'course-fee' => CourseFeeController::class,
+        'teacher' => TeacherController::class,
+        'batch' => BatchController::class,
+        'lead' => LeadController::class,
+        'admission' => AdmissionController::class,
+        'account' => AccountController::class,
+        'expense' => ExpenseController::class,
+    ]);
+
+    // Popular Course
+    Route::resource('popular-course', PopularCourseController::class);
+
+    // Teacher Salary
+    Route::get('/teacher-salary', [TeacherSalaryController::class, 'index'])->name('teacher-salary.index');
+    Route::put('/teacher-salary/{id}/paid', [TeacherSalaryController::class, 'StatusPaid'])->name('teacher-salary.status-paid');
+    Route::put('/teacher-salary/{id}/balance', [TeacherSalaryController::class, 'StatusBalance'])->name('teacher-salary.status-balance');
+    Route::get('/teacher-balance', [TeacherBalanceController::class, 'balance'])->name('teacher.balance');
+    Route::put('/teacher-balance/{id}/paid', [TeacherBalanceController::class, 'StatusPaid'])->name('teacher-balance.status-paid');
+
+    // Fee Submission
+    Route::get('/fee-submission', [FeeSubmissionController::class, 'index'])->name('fee-submission.index');
+    Route::get('/fee-submission/{id}', [FeeSubmissionController::class, 'create'])->name('fee-submission.create');
+    Route::post('/fee-submission/store/{id}', [FeeSubmissionController::class, 'store'])->name('fee-submission.store');
+    Route::get('/fee-submissions/{id}/receipt', [FeeSubmissionController::class, 'receipt'])->name('fee-submissions.receipt');
+    Route::get('/fee-submissions/{id}/download-pdf', [FeeSubmissionController::class, 'downloadReceipt'])->name('fee-submission.download-receipt');
+
+    //Fee Collector
+    Route::get('/fee-collector', [FeeCollectorController::class, 'index'])->name('fee-collector.index');
+    Route::get('/collector-history/{user}', [FeeCollectorController::class, 'collectorHistory'])->name('collector.history');
+    Route::get('/account-history/{account}', [FeeCollectorController::class, 'accountHistory'])->name('account.history');
+
+
+    // Course Outlines
+    Route::prefix('admin')->name('course-outline.')->group(function () {
+        Route::get('courses/{course}/outlines', [CourseOutlineController::class, 'index'])->name('index');
+        Route::get('courses/{course}/outlines/create', [CourseOutlineController::class, 'create'])->name('create');
+        Route::post('courses/{course}/outlines', [CourseOutlineController::class, 'store'])->name('store');
+        Route::get('courses/{course}/outlines/{id}/edit', [CourseOutlineController::class, 'edit'])->name('edit');
+        Route::put('courses/{course}/outlines/{id}', [CourseOutlineController::class, 'update'])->name('update');
+        Route::delete('outlines/{id}', [CourseOutlineController::class, 'destroy'])->name('destroy');
+    });
+
+
+    // Course LMS
+    Route::prefix('course-lms')->name('course-lms.')->group(function () {
+        Route::get('/{course_id}', [CourseLmsController::class, 'index'])->name('index');
+        Route::get('/create/{course_id}', [CourseLmsController::class, 'create'])->name('create');
+        Route::post('/store/{course_id}', [CourseLmsController::class, 'store'])->name('store');
+        Route::get('/{course_id}/edit/{id}', [CourseLmsController::class, 'edit'])->name('edit');
+        Route::put('/{course_id}/update/{id}', [CourseLmsController::class, 'update'])->name('update');
+        Route::delete('/{id}', [CourseLmsController::class, 'destroy'])->name('destroy');
+    });
+
+    // Event Discussion
+    Route::prefix('event-link')->name('event-link.')->group(function () {
+        Route::get('/{event_id}', [EventLinkController::class, 'index'])->name('index');
+        Route::get('/create/{event_id}', [EventLinkController::class, 'create'])->name('create');
+        Route::post('/store/{event_id}', [EventLinkController::class, 'store'])->name('store');
+        Route::get('/{event_id}/edit/{id}', [EventLinkController::class, 'edit'])->name('edit');
+        Route::put('/{event_id}/update/{id}', [EventLinkController::class, 'update'])->name('update');
+        Route::delete('/{id}', [EventLinkController::class, 'destroy'])->name('destroy');
+    });
+
+    // Event Participant
+    Route::prefix('event-participant')->name('event-participant.')->group(function () {
+        Route::get('/{event_id}', [EventParticipantController::class, 'index'])->name('index');
+        Route::get('/create/{event_id}', [EventParticipantController::class, 'create'])->name('create');
+        Route::post('/store/{event_id}', [EventParticipantController::class, 'store'])->name('store');
+        Route::get('/{event_id}/edit/{id}', [EventParticipantController::class, 'edit'])->name('edit');
+        Route::put('/{event_id}/update/{id}', [EventParticipantController::class, 'update'])->name('update');
+        Route::delete('/{id}', [EventParticipantController::class, 'destroy'])->name('destroy');
+    });
+
+    // Get batches by course
+    Route::get('admission/get-batches/{courseId}', [BatchController::class, 'getByCourse'])->name('get-batches');
+
+    //Gallary Image
+    Route::resource('gallary-category', GallaryCategoryController::class);
+    Route::resource('gallary-image', GallaryImageController::class);
+});
+
+Route::get('/optimize-app', function () {
+    Artisan::call('optimize:clear'); // Clears cache, config, route, and view caches
+    Artisan::call('cache:clear');    // Clears application cache
+    Artisan::call('config:clear');   // Clears configuration cache
+    Artisan::call('route:clear');    // Clears route cache
+    Artisan::call('view:clear');     // Clears compiled Blade views
+    Artisan::call('config:cache');   // Rebuilds configuration cache
+    Artisan::call('route:cache');    // Rebuilds route cache
+    Artisan::call('view:cache');     // Precompiles Blade templates
+    Artisan::call('optimize');       // Optimizes class loading
+
+    return "Application optimized and caches cleared successfully!";
+});
+Route::get('/migrate', function () {
+    Artisan::call('migrate');
+    return response()->json(['message' => 'Migration successful'], 200);
+});
+Route::get('/migrate/rollback', function () {
+    Artisan::call('migrate:rollback');
+    return response()->json(['message' => 'Migration rollback successfully'], 200);
+});
