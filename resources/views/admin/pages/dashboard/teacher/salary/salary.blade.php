@@ -1,4 +1,4 @@
-@extends(view: 'admin.layouts.main')
+@extends( 'admin.layouts.main')
 
 @section('content')
     <div id="main-content">

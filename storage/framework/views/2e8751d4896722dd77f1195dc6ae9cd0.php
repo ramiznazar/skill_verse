@@ -350,7 +350,7 @@
                                             <h5 class="icon-box-title mt-10 text-uppercase letter-space-2 mb-10">Expert
                                                 Instructors</h5>
                                             <p class="text-gray">Learn from industry professionals with real-world
-                                                experience and a passion for teaching.</p>
+                                                experience and passion for teaching.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -363,8 +363,8 @@
                                         <div class="ml-70 ml-sm-0">
                                             <h5 class="icon-box-title mt-10 text-uppercase letter-space-2 mb-10">Internship
                                                 Opportunities</h5>
-                                            <p class="text-gray">Get real hands-on experience through our exclusive
-                                                internship programs with top companies.</p>
+                                            <p class="text-gray">Gain valuable hands-on experience with HMS Tech Solutions'
+                                                professional team.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -419,8 +419,8 @@
                                         <div class="ml-70 ml-sm-0">
                                             <h5 class="icon-box-title mt-10 text-uppercase letter-space-2 mb-10">
                                                 Career-Focused Learning</h5>
-                                            <p class="text-gray">Build practical skills that employers demand, with
-                                                guidance every step of the way.</p>
+                                            <p class="text-gray">Build practical skills employers demand, with guidance
+                                                every step of the way.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -433,8 +433,7 @@
                                             class="text-theme-color-2">With Us</span></span>
                                 </h3>
                                 <!-- Appilication Form Start-->
-                                <form class="reservation-form mt-20"
-                                    method="post" action="<?php echo e(route('lead.store')); ?>">
+                                <form class="reservation-form mt-20" method="post" action="<?php echo e(route('lead.store')); ?>">
                                     <?php echo csrf_field(); ?>
                                     <div class="row">
                                         <div class="col-sm-6">
@@ -467,19 +466,20 @@
                                                     <select id="person_select" name="course_id" class="form-control"
                                                         required="">
                                                         <?php $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                            
-                                                        <option value="">Choose Course</option>
-                                                        <option value="<?php echo e($course->id); ?>"><?php echo e($course->title); ?></option>
+                                                            <option value="">Choose Course</option>
+                                                            <option value="<?php echo e($course->id); ?>"><?php echo e($course->title); ?>
+
+                                                            </option>
                                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                                       
+
                                                     </select>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-sm-12">
                                             <div class="form-group">
-                                                <textarea placeholder="Enter Address" rows="3" class="form-control required" name="address"
-                                                    id="form_message" aria-required="true"></textarea>
+                                                <textarea placeholder="Enter Address" rows="3" class="form-control required" name="address" id="form_message"
+                                                    aria-required="true"></textarea>
                                             </div>
                                         </div>
                                         
@@ -555,7 +555,8 @@
                                     <div class="item ">
                                         <div class="service-block bg-white">
                                             <div class="thumb"> <img alt="featured project" src="<?php echo e($course->image); ?>"
-                                                    class="img-fullwidth" style="width:100%; height:190px; object-fit:cover;">
+                                                    class="img-fullwidth"
+                                                    style="width:100%; height:190px; object-fit:cover;">
                                                 
                                                 </h4>
                                             </div>
@@ -563,7 +564,7 @@
                                                 <h4 class="line-bottom mb-10"><?php echo e($course->title); ?></h4>
                                                 <p><?php echo e($course->short_description); ?></p>
                                                 <a class="btn btn-dark btn-theme-colored btn-sm text-uppercase mt-10"
-                                                    href="<?php echo e(route('course.detail',$course->id)); ?>">view details</a>
+                                                    href="<?php echo e(route('course.detail', $course->id)); ?>">view details</a>
                                             </div>
                                         </div>
                                     </div>
@@ -640,8 +641,8 @@
         </section>
 
         <!-- Divider: Funfact -->
-        <section id="counter" class="divider parallax layer-overlay overlay-theme-colored-9" data-bg-img="images/bg/bg2.jpg"
-            data-parallax-ratio="0.7">
+        <section id="counter" class="divider parallax layer-overlay overlay-theme-colored-9"
+            data-bg-img="images/bg/bg2.jpg" data-parallax-ratio="0.7">
             <div class="container">
                 <div class="row">
 
@@ -649,7 +650,7 @@
                         <div class="col-xs-12 col-sm-6 col-md-3 mb-md-50">
                             <div class="funfact text-center">
                                 <i class="<?php echo e($counter->icon_class); ?> mt-5 text-theme-color-2"></i>
-                                <h2 data-animation-duration="2000" data-value="<?php echo e($counter->number); ?>"
+                                <h2 data-animation-duration="2000" data-value="<?php echo e($counter->number); ?><?php echo e("+"); ?>"
                                     class="animate-number text-white mt-0 font-38 font-weight-500">0
                                 </h2>
                                 <h5 class="text-white text-uppercase mb-0"><?php echo e($counter->title); ?></h5>
@@ -736,8 +737,8 @@
         </section>
 
         <!-- Section: Client Say -->
-        <section id="client" class="divider parallax layer-overlay overlay-theme-colored-9" data-background-ratio="0.5"
-            data-bg-img="images/bg/bg2.jpg">
+        <section id="client" class="divider parallax layer-overlay overlay-theme-colored-9"
+            data-background-ratio="0.5" data-bg-img="images/bg/bg2.jpg">
             <div class="container pt-60 pb-60">
                 <div class="row">
                     <div class="col-md-8 col-md-offset-2">

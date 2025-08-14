@@ -151,4 +151,4 @@
     </div>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make(view: 'admin.layouts.main', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH E:\projects\codezy\zain-changes\codezy\resources\views/admin/pages/dashboard/teacher/salary/salary.blade.php ENDPATH**/ ?>
+<?php echo $__env->make( 'admin.layouts.main', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH E:\projects\codezy\zain-changes\codezy\resources\views/admin/pages/dashboard/teacher/salary/salary.blade.php ENDPATH**/ ?>

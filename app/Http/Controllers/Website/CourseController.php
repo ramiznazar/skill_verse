@@ -14,7 +14,7 @@ class CourseController extends Controller
 {
     public function course()
     {
-        $courses = Course::with('courseCategory')->paginate(6);
+        $courses = Course::with('courseCategory')->latest()->paginate(6);
         $categories = CourseCategory::withCount('course')->get();
         $popularCourses = PopularCourse::all();
         return view('website.pages.course.course', compact('courses', 'categories', 'popularCourses'));
