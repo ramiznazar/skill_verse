@@ -189,7 +189,7 @@
                                     <a href="{{ route('event') }}">Events</a>
                                 </li>
                                 <li class="{{ request()->routeIs('course') ? 'active' : '' }}">
-                                    <a href="{{ route('course') }}">Course</a>
+                                    <a href="{{ route('course') }}">Courses</a>
                                 </li>
                                 <li class="{{ request()->routeIs('blog') ? 'active' : '' }}">
                                     <a href="{{ route('blog') }}">Blog</a>

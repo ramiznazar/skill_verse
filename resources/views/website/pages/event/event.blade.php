@@ -31,13 +31,13 @@
                                 <div class="row">
                                     <div class="col-sm-4 pr-0 pr-sm-15">
                                         <div class="thumb p-15">
-                                            <img class="img-fullwidth" src="{{ $event->image }}" alt="...">
+                                            <img class="img-fullwidth" src="{{ $event->image }}" alt="..." height="220">
                                         </div>
                                     </div>
                                     <div class="col-sm-4 pl-0 pl-sm-15">
                                         <div class="event-details p-15 mt-20">
                                             <h4 class="mt-0 text-uppercase font-weight-500">{{ $event->title }}</h4>
-                                            <p>{{ Str::words($event->description, 24, '...') }}</p>
+                                            <p>{{ Str::words($event->description, 30, '...') }}</p>
                                             <a href="{{ route('event.detail',$event->id) }}"
                                                 class="btn btn-flat btn-dark btn-theme-colored btn-sm mt-10">Details <i
                                                     class="fa fa-angle-double-right"></i></a>

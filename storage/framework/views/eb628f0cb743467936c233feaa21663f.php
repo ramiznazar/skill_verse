@@ -118,7 +118,7 @@
                                     <a href="<?php echo e(route('event')); ?>">Events</a>
                                 </li>
                                 <li class="<?php echo e(request()->routeIs('course') ? 'active' : ''); ?>">
-                                    <a href="<?php echo e(route('course')); ?>">Course</a>
+                                    <a href="<?php echo e(route('course')); ?>">Courses</a>
                                 </li>
                                 <li class="<?php echo e(request()->routeIs('blog') ? 'active' : ''); ?>">
                                     <a href="<?php echo e(route('blog')); ?>">Blog</a>

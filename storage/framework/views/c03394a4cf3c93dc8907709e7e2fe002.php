@@ -1,9 +1,9 @@
-@extends('website.layouts.main')
-@section('content')
+
+<?php $__env->startSection('content'); ?>
     <div class="main-content bg-lighter">
         <!-- Section: inner-header -->
         <section class="inner-header divider parallax layer-overlay overlay-dark-5"
-            data-bg-img="{{ asset('assets/website/images/institute/15.jpg') }}">
+            data-bg-img="<?php echo e(asset('assets/website/images/institute/15.jpg')); ?>">
             <div class="container pt-70 pb-20">
                 <!-- Section Content -->
                 <div class="section-content">
@@ -11,8 +11,8 @@
                         <div class="col-md-12">
                             <h2 class="title text-white">Courses</h2>
                             <ol class="breadcrumb text-left text-black mt-10">
-                                <li><a href="{{ route('home') }}">Home</a></li>
-                                {{-- <li><a href="#">Pages</a></li> --}}
+                                <li><a href="<?php echo e(route('home')); ?>">Home</a></li>
+                                
                                 <li class="active text-gray-silver">Courses</li>
                             </ol>
                         </div>
@@ -28,24 +28,25 @@
                     <div class="col-md-9 blog-pull-right">
                         <div class="row">
 
-                            @foreach ($courses as $course)
+                            <?php $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                 <div class="col-sm-6 col-md-4 course-card"
-                                    data-category-id="{{ $course->course_category_id }}">
+                                    data-category-id="<?php echo e($course->course_category_id); ?>">
                                     <div class="service-block bg-white">
                                         <div class="thumb">
-                                            <img alt="featured project" src="{{ $course->image }}"
+                                            <img alt="featured project" src="<?php echo e($course->image); ?>"
                                                 style="width:100%; height:190px; object-fit:cover;">
                                         </div>
                                         <div class="content text-left flip p-25 pt-0">
-                                            <h4 class="line-bottom mb-10">{{ $course->title }}</h4>
-                                            <p>{{ \Illuminate\Support\Str::words($course->short_description, 20, '...') }}
+                                            <h4 class="line-bottom mb-10"><?php echo e($course->title); ?></h4>
+                                            <p><?php echo e(\Illuminate\Support\Str::words($course->short_description, 20, '...')); ?>
+
                                             </p>
                                             <a class="btn btn-dark btn-theme-colored btn-sm text-uppercase mt-10"
-                                                href="{{ route('course.detail', $course->id) }}">view details</a>
+                                                href="<?php echo e(route('course.detail', $course->id)); ?>">view details</a>
                                         </div>
                                     </div>
                                 </div>
-                            @endforeach
+                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
                         </div>
                     </div>
@@ -74,14 +75,15 @@
                                 <div class="categories">
                                     <ul class="list list-border angle-double-right">
 
-                                        @foreach ($categories as $category)
+                                        <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <li>
-                                                <a href="#" class="category-filter" data-id="{{ $category->id }}">
-                                                    {{ $category->name }}
-                                                    <span>({{ $category->course_count }})</span>
+                                                <a href="#" class="category-filter" data-id="<?php echo e($category->id); ?>">
+                                                    <?php echo e($category->name); ?>
+
+                                                    <span>(<?php echo e($category->course_count); ?>)</span>
                                                 </a>
                                             </li>
-                                        @endforeach
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </ul>
 
 
@@ -92,63 +94,55 @@
                                 </h5>
                                 <div class="latest-posts">
 
-                                    {{-- @foreach ($popularCourses as $popular) --}}
+                                    
                                         <article class="post media-post clearfix pb-0 mb-10">
-                                            <a class="post-thumb" href="{{ route('course.detail',$generativeAi->id) }}"><img src="{{ $generativeAi->image }}"
+                                            <a class="post-thumb" href="<?php echo e(route('course.detail',$generativeAi->id)); ?>"><img src="<?php echo e($generativeAi->image); ?>"
                                                     alt="" height="70" width="70"></a>
                                             <div class="post-right">
-                                                <h5 class="post-title mt-0"><a href="{{ route('course.detail',$generativeAi->id) }}">{{ $generativeAi->title }}</a>
+                                                <h5 class="post-title mt-0"><a href="<?php echo e(route('course.detail',$generativeAi->id)); ?>"><?php echo e($generativeAi->title); ?></a>
                                                 </h5>
-                                                <p style="font-size: 10px; margin-top: -10px " >{{ \Illuminate\Support\Str::words($generativeAi->short_description, 14, '...') }}</p>
+                                                <p style="font-size: 10px; margin-top: -10px " ><?php echo e(\Illuminate\Support\Str::words($generativeAi->short_description, 14, '...')); ?></p>
                                             </div>
                                         </article>
                                         <article class="post media-post clearfix pb-0 mb-10">
-                                            <a class="post-thumb" href="{{ route('course.detail',$freelancing->id) }}"><img src="{{ $freelancing->image }}"
+                                            <a class="post-thumb" href="<?php echo e(route('course.detail',$freelancing->id)); ?>"><img src="<?php echo e($freelancing->image); ?>"
                                                     alt="" height="70" width="70"></a>
                                             <div class="post-right">
-                                                <h5 class="post-title mt-0"><a href="{{ route('course.detail',$freelancing->id) }}">{{ $freelancing->title }}</a>
+                                                <h5 class="post-title mt-0"><a href="<?php echo e(route('course.detail',$freelancing->id)); ?>"><?php echo e($freelancing->title); ?></a>
                                                 </h5>
-                                                <p style="font-size: 10px; margin-top: -10px " >{{ \Illuminate\Support\Str::words($freelancing->short_description, 14, '...') }}</p>
+                                                <p style="font-size: 10px; margin-top: -10px " ><?php echo e(\Illuminate\Support\Str::words($freelancing->short_description, 14, '...')); ?></p>
                                             </div>
                                         </article>
                                         <article class="post media-post clearfix pb-0 mb-10">
-                                            <a class="post-thumb" href="{{ route('course.detail',$development->id) }}"><img src="{{ $development->image }}"
+                                            <a class="post-thumb" href="<?php echo e(route('course.detail',$development->id)); ?>"><img src="<?php echo e($development->image); ?>"
                                                     alt="" height="70" width="70"></a>
                                             <div class="post-right">
-                                                <h5 class="post-title mt-0"><a href="{{ route('course.detail',$development->id) }}">{{ $development->title }}</a>
+                                                <h5 class="post-title mt-0"><a href="<?php echo e(route('course.detail',$development->id)); ?>"><?php echo e($development->title); ?></a>
                                                 </h5>
-                                                <p style="font-size: 10px; margin-top: -10px " >{{ \Illuminate\Support\Str::words($development->short_description, 14, '...') }}</p>
+                                                <p style="font-size: 10px; margin-top: -10px " ><?php echo e(\Illuminate\Support\Str::words($development->short_description, 14, '...')); ?></p>
                                             </div>
                                         </article>
-                                    {{-- @endforeach --}}
+                                    
 
                                 </div>
                             </div>
-                            {{-- <div class="widget">
-                                <h5 class="widget-title line-bottom">Photos <span class="text-theme-color-2">from
-                                        Flickr</span></h5>
-                                <div id="flickr-feed" class="clearfix">
-                                    <!-- Flickr Link -->
-                                    <script type="text/javascript"
-                                        src="https://www.flickr.com/badge_code_v2.gne?count=9&amp;display=latest&amp;size=s&amp;layout=x&amp;source=user&amp;user=52617155@N08">
-                                    </script>
-                                </div>
-                            </div> --}}
+                            
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-12">
                         <div class="col-md-12 text-left">
-                            {{ $courses->links('pagination::bootstrap-4') }}
+                            <?php echo e($courses->links('pagination::bootstrap-4')); ?>
+
                         </div>
                     </div>
                 </div>
             </div>
         </section>
     </div>
-@endsection
-@section('additional-javascript')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('additional-javascript'); ?>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const categoryLinks = document.querySelectorAll(".category-filter");
@@ -203,4 +197,6 @@
             color: #007bff;
         }
     </style>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('website.layouts.main', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH E:\projects\codezy\zain-changes\codezy\resources\views/website/pages/course/course.blade.php ENDPATH**/ ?>

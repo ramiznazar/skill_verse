@@ -881,8 +881,8 @@
             <div class="container pt-60 pb-60">
                 <div class="row">
                     <div class="col-md-8 col-md-offset-2">
-                        <h2 class="line-bottom-center text-gray-lightgray text-center mt-0 mb-30">Our Happy
-                            Students say</h2>
+                        <h2 class="line-bottom-center text-gray-lightgray text-center mt-0 mb-30">Success Stories from Our
+                            Students</h2>
                         <div class="owl-carousel-1col" data-dots="true">
 
                             @foreach ($feedbacks as $feedback)

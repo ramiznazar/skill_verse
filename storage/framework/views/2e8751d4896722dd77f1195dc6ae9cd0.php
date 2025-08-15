@@ -650,7 +650,7 @@
                         <div class="col-xs-12 col-sm-6 col-md-3 mb-md-50">
                             <div class="funfact text-center">
                                 <i class="<?php echo e($counter->icon_class); ?> mt-5 text-theme-color-2"></i>
-                                <h2 data-animation-duration="2000" data-value="<?php echo e($counter->number); ?><?php echo e("+"); ?>"
+                                <h2 data-animation-duration="2000" data-value="<?php echo e($counter->number); ?>"
                                     class="animate-number text-white mt-0 font-38 font-weight-500">0
                                 </h2>
                                 <h5 class="text-white text-uppercase mb-0"><?php echo e($counter->title); ?></h5>
@@ -673,7 +673,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <h2 class="text-uppercase text-theme-colored title line-bottom line-height-1 mt-0 mb-0">
-                                Our<span class="text-theme-color-2 font-weight-400"> Gllery</span></h2>
+                                Our<span class="text-theme-color-2 font-weight-400"> Gallery</span></h2>
                         </div>
                     </div>
                 </div>
@@ -742,8 +742,8 @@
             <div class="container pt-60 pb-60">
                 <div class="row">
                     <div class="col-md-8 col-md-offset-2">
-                        <h2 class="line-bottom-center text-gray-lightgray text-center mt-0 mb-30">Our Happy
-                            Students say</h2>
+                        <h2 class="line-bottom-center text-gray-lightgray text-center mt-0 mb-30">Success Stories from Our
+                            Students</h2>
                         <div class="owl-carousel-1col" data-dots="true">
 
                             <?php $__currentLoopData = $feedbacks; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $feedback): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
