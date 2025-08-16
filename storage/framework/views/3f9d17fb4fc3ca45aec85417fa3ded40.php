@@ -1,5 +1,5 @@
-@extends('admin.layouts.main')
-@section('content')
+
+<?php $__env->startSection('content'); ?>
     <div id="main-content">
         <div class="block-header">
             <div class="row clearfix">
@@ -7,7 +7,7 @@
                     <h2>Course Outlines</h2>
                 </div>
                 <div class="col-md-6 col-sm-12 text-right">
-                    <a href="{{ route('course-outline.index', $course->id) }}" class="btn btn-sm btn-primary"
+                    <a href="<?php echo e(route('course-outline.index', $course->id)); ?>" class="btn btn-sm btn-primary"
                         title="">All Outlines</a>
                 </div>
             </div>
@@ -21,21 +21,28 @@
                             <h2>Add New Course</h2>
                         </div>
                         <div class="body">
-                            <form id="basic-form" action="{{ route('course-outline.store', $course->id) }}" method="POST"
+                            <form id="basic-form" action="<?php echo e(route('course-outline.store', $course->id)); ?>" method="POST"
                                 novalidate>
-                                @csrf
+                                <?php echo csrf_field(); ?>
 
-                                {{-- Week Input --}}
+                                
                                 <div class="form-group">
                                     <label for="week">Week</label>
                                     <input type="text" name="week" class="form-control" placeholder="e.g., Week 1"
-                                        value="{{ old('week') }}">
-                                    @error('week')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
+                                        value="<?php echo e(old('week')); ?>">
+                                    <?php $__errorArgs = ['week'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <small class="text-danger"><?php echo e($message); ?></small>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
 
-                                {{-- Topics Section --}}
+                                
                                 <div id="topics-wrapper">
                                     <div class="form-group topic-block">
                                         <label>Topic</label>
@@ -61,8 +68,8 @@
             </div>
         </div>
     </div>
-@endsection
-@section('additional-javascript')
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('additional-javascript'); ?>
     <script>
         $(function() {
             // validation needs name of the element
@@ -72,8 +79,8 @@
             $('#basic-form').parsley();
         });
     </script>
-@endsection
-{{-- JavaScript for Adding Topics --}}
+<?php $__env->stopSection(); ?>
+
 <script>
     let topicIndex = 1;
 
@@ -92,3 +99,5 @@
         topicIndex++;
     }
 </script>
+
+<?php echo $__env->make('admin.layouts.main', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH E:\projects\codezy\zain-changes\codezy\resources\views/admin/pages/website/course/course-outline/create.blade.php ENDPATH**/ ?>

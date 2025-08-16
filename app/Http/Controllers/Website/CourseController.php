@@ -8,7 +8,7 @@ use App\Models\Course;
 use App\Models\CourseCategory;
 use App\Models\CourseOutline;
 use App\Models\CourseLms;
-use App\Models\PopularCour
+use App\Models\PopularCourse;
 
 class CourseController extends Controller
 {
@@ -17,10 +17,10 @@ class CourseController extends Controller
         $courses = Course::with('courseCategory')->latest()->paginate(6);
         $categories = CourseCategory::withCount('course')->get();
         $popularCourses = PopularCourse::all();
-       $generativeAi = Course::where('title', 'Generative Ai')->first();
-       $freelancing = Course::where('title','Freelancing')->first();
-       $development = Course::where('title','Web Development')->first();
-        return view('website.pages.course.course', compact('courses', 'categories', 'popularCourses','generativeAi','freelancing','development'));
+        $generativeAi = Course::where('title', 'Generative Ai')->first();
+        $freelancing = Course::where('title', 'Freelancing')->first();
+        $development = Course::where('title', 'Web Development')->first();
+        return view('website.pages.course.course', compact('courses', 'categories', 'popularCourses', 'generativeAi', 'freelancing', 'development'));
     }
     public function courseDetail($id)
     {

@@ -2,7 +2,8 @@
 <?php $__env->startSection('content'); ?>
     <div class="main-content">
         <!-- Section: inner-header -->
-        <section class="inner-header divider parallax layer-overlay overlay-dark-5" data-bg-img="<?php echo e(asset('assets/website/images/institute/15.jpg')); ?>">
+        <section class="inner-header divider parallax layer-overlay overlay-dark-5"
+            data-bg-img="<?php echo e(asset('assets/website/images/institute/15.jpg')); ?>">
             <div class="container pt-70 pb-20">
                 <!-- Section Content -->
                 <div class="section-content">
@@ -26,9 +27,11 @@
                 <div class="row">
                     <div class="col-md-8 blog-pull-right">
                         <div class="single-service">
-                            <img src="<?php echo e($course->image); ?>" alt="">
+                            <img src="<?php echo e(asset($course->image)); ?>" alt="" style="width: 100%; max-height: 400px; object-fit: cover;">
                             <h3 class="text-theme-colored line-bottom text-theme-colored"><?php echo e($course->title); ?></h3>
-                            <h4 class="mt-0"><span class="text-theme-color-2">Duration :</span> <?php echo e($course->duration); ?></h4>
+                            <h4 class="mt-0"><span class="text-theme-color-2">Duration :</span> <?php echo e($course->duration); ?>
+
+                            </h4>
                             
                             <h5><?php echo e($course->description); ?></p>
                                 <h4 class="line-bottom mt-20 mb-20 text-theme-colored">Course Outline</h4>

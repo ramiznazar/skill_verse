@@ -2,7 +2,8 @@
 @section('content')
     <div class="main-content">
         <!-- Section: inner-header -->
-        <section class="inner-header divider parallax layer-overlay overlay-dark-5" data-bg-img="{{ asset('assets/website/images/institute/15.jpg') }}">
+        <section class="inner-header divider parallax layer-overlay overlay-dark-5"
+            data-bg-img="{{ asset('assets/website/images/institute/15.jpg') }}">
             <div class="container pt-70 pb-20">
                 <!-- Section Content -->
                 <div class="section-content">
@@ -26,9 +27,10 @@
                 <div class="row">
                     <div class="col-md-8 blog-pull-right">
                         <div class="single-service">
-                            <img src="{{ $course->image }}" alt="">
+                            <img src="{{ asset($course->image) }}" alt="" style="width: 100%; max-height: 400px; object-fit: cover;">
                             <h3 class="text-theme-colored line-bottom text-theme-colored">{{ $course->title }}</h3>
-                            <h4 class="mt-0"><span class="text-theme-color-2">Duration :</span> {{ $course->duration }}</h4>
+                            <h4 class="mt-0"><span class="text-theme-color-2">Duration :</span> {{ $course->duration }}
+                            </h4>
                             {{-- <ul class="review_text list-inline">
                                 <li>
                                     <div class="star-rating" title="Rated 4.50 out of 5"><span
