@@ -85,11 +85,11 @@
                 <div class="widget dark">
                     <h5 class="widget-title mb-10">Connect With Us</h5>
                     <ul class="styled-icons icon-bordered icon-sm">
-                        <li><a href="https://www.facebook.com/profile.php?id=61568151690543"><i class="fab fa-facebook text-white"></i></a></li>
-                        <li><a href="https://www.youtube.com/" target="_blank"><i
+                        <li><a href="https://www.facebook.com/share/16BQnwqP9D/"><i class="fab fa-facebook text-white"></i></a></li>
+                        <li><a href="https://youtube.com/@skillverse-01?si=hu_gZaGGSAcZmDOY" target="_blank"><i
                                     class="fab fa-youtube text-white"></i></a></li>
                         <li><a href="#"><i class="fab fa-instagram text-white"></i></a></li>
-                        <li><a href="https://www.tiktok.com/@skill.verse"><i class="fab fa-tiktok text-white"></i></a></li>
+                        <li><a href="https://www.tiktok.com/@skill.verse4?_t=ZS-8yw3xcafirN&_r=1"><i class="fab fa-tiktok text-white"></i></a></li>
                         <li><a href="#"><i class="fab fa-linkedin text-white"></i></a></li>
                     </ul>
                 </div>

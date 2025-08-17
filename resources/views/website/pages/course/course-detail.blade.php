@@ -64,14 +64,14 @@
                                                         </tr>
                                                         <tr>
                                                             <th>Topic</th>
-                                                            <th>Time</th>
+                                                            {{-- <th>Time</th> --}}
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         @foreach ($outline->topics as $topic)
                                                             <tr>
                                                                 <td>{{ $topic['topic'] }}</td>
-                                                                <td>{{ $topic['time'] }}</td>
+                                                                {{-- <td>{{ $topic['time'] }}  min</td> --}}
                                                             </tr>
                                                         @endforeach
                                                     </tbody>

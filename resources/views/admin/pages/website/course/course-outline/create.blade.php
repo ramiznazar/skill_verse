@@ -44,7 +44,7 @@
 
                                         <label class="mt-2">Time</label>
                                         <input type="text" name="topics[0][time]" class="form-control"
-                                            placeholder="e.g., 45 mins" required>
+                                            placeholder="e.g., 45 mins" >
                                     </div>
                                 </div>
 

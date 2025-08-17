@@ -61,14 +61,14 @@
                                                         </tr>
                                                         <tr>
                                                             <th>Topic</th>
-                                                            <th>Time</th>
+                                                            
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         <?php $__currentLoopData = $outline->topics; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $topic): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                             <tr>
                                                                 <td><?php echo e($topic['topic']); ?></td>
-                                                                <td><?php echo e($topic['time']); ?></td>
+                                                                
                                                             </tr>
                                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                     </tbody>

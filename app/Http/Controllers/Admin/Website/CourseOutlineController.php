@@ -37,7 +37,7 @@ class CourseOutlineController extends Controller
             'week' => 'required|string|max:255',
             'topics' => 'required|array',
             'topics.*.topic' => 'required|string|max:255',
-            'topics.*.time' => 'required|string|max:255',
+            'topics.*.time' => 'nullable|string|max:255',
         ]);
 
         CourseOutline::create([
@@ -68,7 +68,7 @@ class CourseOutlineController extends Controller
             'week' => 'required|string|max:255',
             'topics' => 'required|array',
             'topics.*.topic' => 'required|string|max:255',
-            'topics.*.time' => 'required|string|max:255',
+            'topics.*.time' => 'nullable|string|max:255',
         ]);
 
         $outline = CourseOutline::findOrFail($id);

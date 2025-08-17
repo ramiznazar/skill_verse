@@ -48,7 +48,7 @@
 
                                             <label class="mt-2">Time</label>
                                             <input type="text" name="topics[{{ $index }}][time]" class="form-control"
-                                                   value="{{ $topic['time'] }}" required>
+                                                   value="{{ $topic['time'] }}">
                                         </div>
                                     @endforeach
                                 </div>

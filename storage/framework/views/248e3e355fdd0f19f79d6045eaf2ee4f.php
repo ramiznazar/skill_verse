@@ -72,8 +72,7 @@
                             </a>
                             <div class="icon-box-details">
                                 <h4 class="icon-box-title font-16 font-weight-600 m-0 mb-5">Short-Term Courses</h4>
-                                <p class="text-gray font-13 mb-0">Our tech courses are designed to be completed in a short
-                                    time with high impact learning.</p>
+                                <p class="text-gray font-13 mb-0">Our tech courses are designed for quick completion with high-impact learning.</p>
                             </div>
                         </div>
                     </div>
@@ -86,8 +85,7 @@
                             </a>
                             <div class="icon-box-details">
                                 <h4 class="icon-box-title font-16 font-weight-600 m-0 mb-5">Internship Opportunity</h4>
-                                <p class="text-gray font-13 mb-0">Get hands-on experience with our internship programs
-                                    included in the course.</p>
+                                <p class="text-gray font-13 mb-0">Gain hands-on experience through internships included with the course.</p>
                             </div>
                         </div>
                     </div>
@@ -100,8 +98,7 @@
                             </a>
                             <div class="icon-box-details">
                                 <h4 class="icon-box-title font-16 font-weight-600 m-0 mb-5">Affordable Fees</h4>
-                                <p class="text-gray font-13 mb-0">We provide high-quality tech education at budget-friendly,
-                                    discounted prices with regular promotions and offers.</p>
+                                <p class="text-gray font-13 mb-0">We offer quality tech education at affordable prices with regular discounts.</p>
                             </div>
                         </div>
                     </div>
@@ -114,8 +111,7 @@
                             </a>
                             <div class="icon-box-details">
                                 <h4 class="icon-box-title font-16 font-weight-600 m-0 mb-5">Supportive Environment</h4>
-                                <p class="text-gray font-13 mb-0">Learn in a motivating, friendly, tech-driven environment
-                                    with growth and confidence.</p>
+                                <p class="text-gray font-13 mb-0">Grow your skills in a motivating environment of confidence and success.</p>
                             </div>
                         </div>
                     </div>
@@ -128,8 +124,7 @@
                             </a>
                             <div class="icon-box-details">
                                 <h4 class="icon-box-title font-16 font-weight-600 m-0 mb-5">Industry Trainers</h4>
-                                <p class="text-gray font-13 mb-0">Courses taught by experienced professionals working in the
-                                    tech industry.</p>
+                                <p class="text-gray font-13 mb-0">Learn from seasoned professionals currently working in the tech industry.</p>
                             </div>
                         </div>
                     </div>
@@ -142,8 +137,7 @@
                             </a>
                             <div class="icon-box-details">
                                 <h4 class="icon-box-title font-16 font-weight-600 m-0 mb-5">Job Support</h4>
-                                <p class="text-gray font-13 mb-0">We assist students with career advice, portfolio building,
-                                    and job placement help.</p>
+                                <p class="text-gray font-13 mb-0">Get guidance, portfolio support, and job placement assistance after training.</p>
                             </div>
                         </div>
                     </div>
