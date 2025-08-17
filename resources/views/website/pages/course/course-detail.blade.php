@@ -27,7 +27,8 @@
                 <div class="row">
                     <div class="col-md-8 blog-pull-right">
                         <div class="single-service">
-                            <img src="{{ asset($course->image) }}" alt="" style="width: 100%; max-height: 400px; object-fit: cover;">
+                            <img src="{{ asset($course->image) }}" alt=""
+                                style="width: 100%; max-height: 400px; object-fit: cover;">
                             <h3 class="text-theme-colored line-bottom text-theme-colored">{{ $course->title }}</h3>
                             <h4 class="mt-0"><span class="text-theme-color-2">Duration :</span> {{ $course->duration }}
                             </h4>
@@ -41,7 +42,7 @@
                                 <h4 class="line-bottom mt-20 mb-20 text-theme-colored">Course Outline</h4>
 
                                 @if ($courseOutlines->isNotEmpty())
-                                    <ul id="myTab" class="nav nav-tabs boot-tabs">
+                                    <ul id="myTab" class="nav nav-tabs boot-tabs tabs-inline">
                                         @foreach ($courseOutlines as $index => $outline)
                                             <li class="{{ $index === 0 ? 'active' : '' }}">
                                                 <a href="#week{{ $index }}"
@@ -49,6 +50,7 @@
                                             </li>
                                         @endforeach
                                     </ul>
+
 
                                     <div id="myTabContent" class="tab-content">
                                         @foreach ($courseOutlines as $index => $outline)
@@ -63,7 +65,7 @@
                                                             </td>
                                                         </tr>
                                                         <tr>
-                                                            <th>Topic</th>
+                                                            <th>Topics</th>
                                                             {{-- <th>Time</th> --}}
                                                         </tr>
                                                     </thead>

@@ -27,7 +27,8 @@
                 <div class="row">
                     <div class="col-md-8 blog-pull-right">
                         <div class="single-service">
-                            <img src="<?php echo e(asset($course->image)); ?>" alt="" style="width: 100%; max-height: 400px; object-fit: cover;">
+                            <img src="<?php echo e(asset($course->image)); ?>" alt=""
+                                style="width: 100%; max-height: 400px; object-fit: cover;">
                             <h3 class="text-theme-colored line-bottom text-theme-colored"><?php echo e($course->title); ?></h3>
                             <h4 class="mt-0"><span class="text-theme-color-2">Duration :</span> <?php echo e($course->duration); ?>
 
@@ -37,7 +38,7 @@
                                 <h4 class="line-bottom mt-20 mb-20 text-theme-colored">Course Outline</h4>
 
                                 <?php if($courseOutlines->isNotEmpty()): ?>
-                                    <ul id="myTab" class="nav nav-tabs boot-tabs">
+                                    <ul id="myTab" class="nav nav-tabs boot-tabs tabs-inline">
                                         <?php $__currentLoopData = $courseOutlines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $outline): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <li class="<?php echo e($index === 0 ? 'active' : ''); ?>">
                                                 <a href="#week<?php echo e($index); ?>"
@@ -45,6 +46,7 @@
                                             </li>
                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </ul>
+
 
                                     <div id="myTabContent" class="tab-content">
                                         <?php $__currentLoopData = $courseOutlines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $outline): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
@@ -60,7 +62,7 @@
                                                             </td>
                                                         </tr>
                                                         <tr>
-                                                            <th>Topic</th>
+                                                            <th>Topics</th>
                                                             
                                                         </tr>
                                                     </thead>

@@ -7745,3 +7745,23 @@ blockquote p {
     border-color: #eeeeee;
     color: #333333;
 }
+
+
+.tabs-inline {
+    display: flex;          /* make items flex */
+    flex-wrap: nowrap;      /* force single line */
+    justify-content: start; /* align to the left */
+    gap: 4px;               /* small spacing between tabs */
+}
+
+.tabs-inline > li {
+    flex: 1 1 auto;         /* allow shrinking */
+    float: none !important; /* override bootstrap float */
+    text-align: center;     /* center text inside tab */
+}
+
+.tabs-inline > li > a {
+    padding: 8px 8px;       /* smaller padding */
+    font-size: 13px;        /* shrink font a bit */
+    white-space: nowrap;    /* prevent breaking Week 10 */
+}
