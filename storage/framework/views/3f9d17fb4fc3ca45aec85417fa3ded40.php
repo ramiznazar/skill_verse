@@ -43,15 +43,31 @@ unset($__errorArgs, $__bag); ?>
                                 </div>
 
                                 
+                                <div class="form-group">
+                                    <label for="title">Title</label>
+                                    <input type="text" name="title" class="form-control"
+                                        placeholder="e.g., Introduction to HTML & Tools" value="<?php echo e(old('title')); ?>"
+                                        required>
+                                    <?php $__errorArgs = ['title'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <small class="text-danger"><?php echo e($message); ?></small>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                                </div>
+
+                                
                                 <div id="topics-wrapper">
                                     <div class="form-group topic-block">
                                         <label>Topic</label>
                                         <input type="text" name="topics[0][topic]" class="form-control"
                                             placeholder="Enter topic" required>
 
-                                        <label class="mt-2">Time</label>
-                                        <input type="text" name="topics[0][time]" class="form-control"
-                                            placeholder="e.g., 45 mins" >
+                                        
                                     </div>
                                 </div>
 
@@ -91,10 +107,11 @@ unset($__errorArgs, $__bag); ?>
                 <label>Topic</label>
                 <input type="text" name="topics[${topicIndex}][topic]" class="form-control" placeholder="Enter topic" required>
 
-                <label class="mt-2">Time</label>
-                <input type="text" name="topics[${topicIndex}][time]" class="form-control" placeholder="e.g., 45 mins" required>
+                
             </div>
         `;
+        //<label class="mt-2">Time</label>
+        //        <input type="text" name="topics[${topicIndex}][time]" class="form-control" placeholder="e.g., 45 mins" required>
         wrapper.insertAdjacentHTML('beforeend', newTopicHTML);
         topicIndex++;
     }

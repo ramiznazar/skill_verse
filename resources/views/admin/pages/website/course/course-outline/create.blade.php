@@ -35,6 +35,17 @@
                                     @enderror
                                 </div>
 
+                                {{-- Title Input --}}
+                                <div class="form-group">
+                                    <label for="title">Title</label>
+                                    <input type="text" name="title" class="form-control"
+                                        placeholder="e.g., Introduction to HTML & Tools" value="{{ old('title') }}"
+                                        required>
+                                    @error('title')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
                                 {{-- Topics Section --}}
                                 <div id="topics-wrapper">
                                     <div class="form-group topic-block">
@@ -42,9 +53,9 @@
                                         <input type="text" name="topics[0][topic]" class="form-control"
                                             placeholder="Enter topic" required>
 
-                                        <label class="mt-2">Time</label>
+                                        {{-- <label class="mt-2">Time</label>
                                         <input type="text" name="topics[0][time]" class="form-control"
-                                            placeholder="e.g., 45 mins" >
+                                            placeholder="e.g., 45 mins"> --}}
                                     </div>
                                 </div>
 
@@ -84,10 +95,11 @@
                 <label>Topic</label>
                 <input type="text" name="topics[${topicIndex}][topic]" class="form-control" placeholder="Enter topic" required>
 
-                <label class="mt-2">Time</label>
-                <input type="text" name="topics[${topicIndex}][time]" class="form-control" placeholder="e.g., 45 mins" required>
+                
             </div>
         `;
+        //<label class="mt-2">Time</label>
+        //        <input type="text" name="topics[${topicIndex}][time]" class="form-control" placeholder="e.g., 45 mins" required>
         wrapper.insertAdjacentHTML('beforeend', newTopicHTML);
         topicIndex++;
     }

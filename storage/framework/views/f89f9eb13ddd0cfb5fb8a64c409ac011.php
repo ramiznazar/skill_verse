@@ -55,7 +55,7 @@
                                                         <tr>
                                                             <td colspan="2"
                                                                 class="text-center font-16 font-weight-600 bg-theme-color-2 text-white">
-                                                                <?php echo e($outline->week); ?>
+                                                                <?php echo e($outline->title); ?>
 
                                                             </td>
                                                         </tr>

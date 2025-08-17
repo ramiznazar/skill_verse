@@ -37,6 +37,17 @@
                                     @enderror
                                 </div>
 
+                                 {{-- Title Input --}}
+                                <div class="form-group">
+                                    <label for="title">Title</label>
+                                    <input type="text" name="title" class="form-control"
+                                        placeholder="e.g., Introduction to HTML & Tools" value="{{ old('title', $outline->title) }}"
+                                        required>
+                                    @error('title')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
+                                </div>
+
                                 {{-- Topics --}}
                                 <div id="topics-wrapper">
                                     @php $topics = old('topics', $outline->topics ?? []); @endphp
@@ -46,9 +57,9 @@
                                             <input type="text" name="topics[{{ $index }}][topic]" class="form-control"
                                                    value="{{ $topic['topic'] }}" required>
 
-                                            <label class="mt-2">Time</label>
+                                            {{-- <label class="mt-2">Time</label>
                                             <input type="text" name="topics[{{ $index }}][time]" class="form-control"
-                                                   value="{{ $topic['time'] }}">
+                                                   value="{{ $topic['time'] }}"> --}}
                                         </div>
                                     @endforeach
                                 </div>
@@ -77,10 +88,10 @@
             <div class="form-group topic-block">
                 <label>Topic</label>
                 <input type="text" name="topics[${topicIndex}][topic]" class="form-control" required>
-                <label class="mt-2">Time</label>
-                <input type="text" name="topics[${topicIndex}][time]" class="form-control" required>
-            </div>
-        `;
+                </div>
+                `;
+                // <label class="mt-2">Time</label>
+                // <input type="text" name="topics[${topicIndex}][time]" class="form-control" required>
         wrapper.insertAdjacentHTML('beforeend', html);
         topicIndex++;
     }

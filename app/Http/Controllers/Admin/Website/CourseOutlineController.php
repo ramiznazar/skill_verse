@@ -35,6 +35,7 @@ class CourseOutlineController extends Controller
     {
         $request->validate([
             'week' => 'required|string|max:255',
+            'title' => 'nullable|string|max:255',
             'topics' => 'required|array',
             'topics.*.topic' => 'required|string|max:255',
             'topics.*.time' => 'nullable|string|max:255',
@@ -42,11 +43,14 @@ class CourseOutlineController extends Controller
 
         CourseOutline::create([
             'course_id' => $course_id,
+            'title' => $request->title,
             'week' => $request->week,
             'topics' => $request->topics, // JSON column
         ]);
 
-        return redirect()->route('course-outline.index', $course_id)->with('store', 'Course Outline added successfully!');
+        return redirect()
+            ->route('course-outline.index', $course_id)
+            ->with('store', 'Course Outline added successfully!');
     }
 
     /**
@@ -66,6 +70,7 @@ class CourseOutlineController extends Controller
     {
         $request->validate([
             'week' => 'required|string|max:255',
+            'title' => 'required|string|max:255',
             'topics' => 'required|array',
             'topics.*.topic' => 'required|string|max:255',
             'topics.*.time' => 'nullable|string|max:255',
@@ -74,6 +79,7 @@ class CourseOutlineController extends Controller
         $outline = CourseOutline::findOrFail($id);
         $outline->update([
             'course_id' => $course_id,
+            'title' => $request->title,
             'week' => $request->week,
             'topics' => $request->topics,
         ]);

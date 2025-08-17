@@ -44,6 +44,24 @@ endif;
 unset($__errorArgs, $__bag); ?>
                                 </div>
 
+                                 
+                                <div class="form-group">
+                                    <label for="title">Title</label>
+                                    <input type="text" name="title" class="form-control"
+                                        placeholder="e.g., Introduction to HTML & Tools" value="<?php echo e(old('title', $outline->title)); ?>"
+                                        required>
+                                    <?php $__errorArgs = ['title'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <small class="text-danger"><?php echo e($message); ?></small>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                                </div>
+
                                 
                                 <div id="topics-wrapper">
                                     <?php $topics = old('topics', $outline->topics ?? []); ?>
@@ -53,9 +71,7 @@ unset($__errorArgs, $__bag); ?>
                                             <input type="text" name="topics[<?php echo e($index); ?>][topic]" class="form-control"
                                                    value="<?php echo e($topic['topic']); ?>" required>
 
-                                            <label class="mt-2">Time</label>
-                                            <input type="text" name="topics[<?php echo e($index); ?>][time]" class="form-control"
-                                                   value="<?php echo e($topic['time']); ?>">
+                                            
                                         </div>
                                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </div>
@@ -84,10 +100,10 @@ unset($__errorArgs, $__bag); ?>
             <div class="form-group topic-block">
                 <label>Topic</label>
                 <input type="text" name="topics[${topicIndex}][topic]" class="form-control" required>
-                <label class="mt-2">Time</label>
-                <input type="text" name="topics[${topicIndex}][time]" class="form-control" required>
-            </div>
-        `;
+                </div>
+                `;
+                // <label class="mt-2">Time</label>
+                // <input type="text" name="topics[${topicIndex}][time]" class="form-control" required>
         wrapper.insertAdjacentHTML('beforeend', html);
         topicIndex++;
     }

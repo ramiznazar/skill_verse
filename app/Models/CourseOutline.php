@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class CourseOutline extends Model
 {
     use HasFactory;
-    protected $fillable = ['course_id', 'week', 'topics'];
+    protected $fillable = ['course_id', 'week','title', 'topics'];
 protected $casts = ['topics' => 'array'];
     public function course()
     {

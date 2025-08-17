@@ -52,12 +52,16 @@
                             <div class="widget no-border m-0 mr-15 pull-right flip sm-pull-none sm-text-center">
                                 <ul
                                     class="styled-icons icon-circled icon-sm pull-right flip sm-pull-none sm-text-center mt-sm-15">
-                                    <li><a href="https://www.facebook.com/share/16BQnwqP9D/"><i class="fab fa-facebook text-white"></i></a></li>
-                                    <li><a href="https://youtube.com/@skillverse-01?si=hu_gZaGGSAcZmDOY" target="_blank"><i
-                                                class="fab fa-youtube text-white"></i></a></li>
-                                    <li><a href="#"><i class="fab fa-instagram text-white"></i></a></li>
-                                    <li><a href="https://www.tiktok.com/@skill.verse4?_t=ZS-8yw3xcafirN&_r=1"><i class="fab fa-tiktok text-white"></i></a></li>
-                                    <li><a href="#"><i class="fab fa-linkedin text-white"></i></a></li>
+                                    <li><a href="https://www.facebook.com/share/16BQnwqP9D/" target="_blank"><i
+                                                class="fab fa-facebook text-white"></i></a></li>
+                                    <li><a href="https://youtube.com/@skillverse-01?si=hu_gZaGGSAcZmDOY"
+                                            target="_blank"><i class="fab fa-youtube text-white"></i></a></li>
+                                    <li><a href="#" target="_blank"><i
+                                                class="fab fa-instagram text-white"></i></a></li>
+                                    <li><a href="https://www.tiktok.com/@skill.verse4?_t=ZS-8yw3xcafirN&_r=1"
+                                            target="_blank"><i class="fab fa-tiktok text-white"></i></a></li>
+                                    <li><a href="https://www.linkedin.com/company/108634627" target="_blank"><i
+                                                class="fab fa-linkedin text-white"></i></a></li>
                                 </ul>
                             </div>
                         </div>

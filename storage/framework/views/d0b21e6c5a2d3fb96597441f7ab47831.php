@@ -7,7 +7,8 @@
                     <h2>Course Outlines</h2>
                 </div>
                 <div class="col-md-6 col-sm-12 text-right">
-                    <a href="<?php echo e(route('course-outline.create', $course->id)); ?>" class="btn btn-sm btn-primary" title="">Create New</a>
+                    <a href="<?php echo e(route('course-outline.create', $course->id)); ?>" class="btn btn-sm btn-primary"
+                        title="">Create New</a>
                 </div>
             </div>
         </div>
@@ -32,8 +33,10 @@
                         <div class="header">
                             <h2>All Course Outlines</h2>
                             <ul class="header-dropdown dropdown dropdown-animated scale-left">
-                                <li><a href="javascript:void(0);" data-toggle="cardloading" data-loading-effect="pulse"><i class="icon-refresh"></i></a></li>
-                                <li><a href="javascript:void(0);" class="full-screen"><i class="icon-size-fullscreen"></i></a></li>
+                                <li><a href="javascript:void(0);" data-toggle="cardloading" data-loading-effect="pulse"><i
+                                            class="icon-refresh"></i></a></li>
+                                <li><a href="javascript:void(0);" class="full-screen"><i
+                                            class="icon-size-fullscreen"></i></a></li>
                             </ul>
                         </div>
                         <div class="body">
@@ -43,6 +46,7 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Course Name</th>
+                                            <th>Title</th>
                                             <th>Week</th>
                                             <th>Topics</th>
                                             <th>Options</th>
@@ -53,11 +57,15 @@
                                             <tr>
                                                 <td><?php echo e($loop->iteration); ?></td>
                                                 <td><?php echo e($outline->course->title); ?></td>
-                                                <td><strong><?php echo e($outline->week); ?></strong></td>
+                                                <td><strong><?php echo e($outline->title); ?></strong></td>
+                                                <td><?php echo e($outline->week); ?></td>
                                                 <td>
                                                     <ul class="mb-0 pl-3">
                                                         <?php $__currentLoopData = $outline->topics; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $topic): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                            <li><?php echo e($topic['topic']); ?> – <small><?php echo e($topic['time']); ?></small></li>
+                                                            <li><?php echo e($topic['topic']); ?>
+
+                                                             
+                                                            </li>
                                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                     </ul>
                                                 </td>
@@ -65,20 +73,20 @@
                                                     <div class="d-flex align-items-center">
                                                         
                                                         <a href="<?php echo e(route('course-outline.edit', [$course->id, $outline->id])); ?>"
-                                                           class="btn btn-sm btn-icon btn-pure btn-default on-default button-edit"
-                                                           data-toggle="tooltip" data-original-title="Edit">
+                                                            class="btn btn-sm btn-icon btn-pure btn-default on-default button-edit"
+                                                            data-toggle="tooltip" data-original-title="Edit">
                                                             <i class="icon-pencil" aria-hidden="true"></i>
                                                         </a>
 
                                                         
                                                         <form action="<?php echo e(route('course-outline.destroy', $outline->id)); ?>"
-                                                              method="POST" onsubmit="return confirm('Are you sure?')">
+                                                            method="POST" onsubmit="return confirm('Are you sure?')">
                                                             <?php echo csrf_field(); ?>
                                                             <?php echo method_field('DELETE'); ?>
                                                             <button type="submit"
-                                                                    class="btn btn-sm btn-icon btn-pure btn-default on-default button-remove"
-                                                                    data-toggle="tooltip" data-original-title="Remove"
-                                                                    style="margin-left: 6px;">
+                                                                class="btn btn-sm btn-icon btn-pure btn-default on-default button-remove"
+                                                                data-toggle="tooltip" data-original-title="Remove"
+                                                                style="margin-left: 6px;">
                                                                 <i class="icon-trash" aria-hidden="true"></i>
                                                             </button>
                                                         </form>
@@ -88,11 +96,12 @@
                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         <?php if($outlines->isEmpty()): ?>
                                             <tr>
-                                                <td colspan="5" class="text-center">No course outlines found.</td>
+                                                <td colspan="6" class="text-center">No course outlines found.</td>
                                             </tr>
                                         <?php endif; ?>
                                     </tbody>
                                 </table>
+
                             </div>
                         </div>
                     </div>
@@ -100,12 +109,13 @@
             </div>
         </div>
     </div>
-
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('additional-javascript'); ?>
     <script>
-        $('.sparkbar').sparkline('html', { type: 'bar' });
+        $('.sparkbar').sparkline('html', {
+            type: 'bar'
+        });
     </script>
 <?php $__env->stopSection(); ?>
 
