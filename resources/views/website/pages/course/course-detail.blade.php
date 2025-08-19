@@ -72,7 +72,7 @@
                                                     <tbody>
                                                         @foreach ($outline->topics as $topic)
                                                             <tr>
-                                                                <td>{{ $topic['topic'] }}</td>
+                                                                <td>{!! $topic['topic'] !!}</td>
                                                                 {{-- <td>{{ $topic['time'] }}  min</td> --}}
                                                             </tr>
                                                         @endforeach
