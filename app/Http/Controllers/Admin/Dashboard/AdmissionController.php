@@ -14,18 +14,16 @@ class AdmissionController extends Controller
     /**
      * Display a listing of the resource.
      */
-public function index()
-{
-    $admissions = Admission::with(['course', 'batch'])->get();
-    $totalStudents = $admissions->count();
+    public function index()
+    {
+        $admissions = Admission::with(['course', 'batch'])->get();
+        $totalStudents = $admissions->count();
 
-    // Count active students
-    $activeStudents = $admissions->where('student_status', 'active')->count();
+        // Count active students
+        $activeStudents = $admissions->where('student_status', 'active')->count();
 
-    return view('admin.pages.dashboard.admission.index', compact('admissions', 'totalStudents', 'activeStudents'));
-}
-
-
+        return view('admin.pages.dashboard.admission.index', compact('admissions', 'totalStudents', 'activeStudents'));
+    }
 
     /**
      * Show the form for creating a new resource.
@@ -39,7 +37,7 @@ public function index()
         }
         $courses = Course::all();
         $batches = Batch::all();
-        return view('admin.pages.dashboard.admission.create', compact('lead','courses', 'batches'));
+        return view('admin.pages.dashboard.admission.create', compact('lead', 'courses', 'batches'));
     }
 
     /**

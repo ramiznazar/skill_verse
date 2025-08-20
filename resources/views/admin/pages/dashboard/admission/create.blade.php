@@ -20,6 +20,7 @@
                             <h2>Add New Student</h2>
                         </div>
                         <div class="body">
+
                             <form id="admission-form" action="{{ route('admission.store') }}" method="POST"
                                 enctype="multipart/form-data">
                                 @csrf
@@ -131,7 +132,7 @@
                                         <div class="form-group">
                                             <label>Email</label>
                                             <input type="email" name="email"
-                                                value="{{ old('email', $lead->dob ?? '') }}" class="form-control">
+                                                value="{{ old('email', $lead->email ?? '') }}" class="form-control">
                                             @error('email')
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
@@ -254,7 +255,6 @@
                                             <small class="text-danger">{{ $message }}</small>
                                         @enderror
                                     </div>
-
                                 </div>
 
                                 <div class="row mt-3" id="referral_details_section" style="display: none;">
@@ -286,7 +286,6 @@
                                     </div>
                                 </div>
 
-
                                 <div class="form-group mt-3">
                                     <label>Address</label>
                                     <textarea name="address" class="form-control" rows="3">{{ old('address', $lead->address ?? '') }}</textarea>
@@ -300,21 +299,6 @@
                                 {{-- Fee Section --}}
                                 <div class="row">
                                     <div class="col-md-12">
-                                        <label class="form-label">Payment Type</label>
-                                        <div class="d-flex flex-column">
-                                            <label><input type="radio" name="payment_type" value="full_fee"
-                                                    {{ old('payment_type') == 'full_fee' ? 'checked' : '' }}> Full
-                                                Payment</label>
-                                            <label><input type="radio" name="payment_type" value="installment"
-                                                    {{ old('payment_type') == 'installment' ? 'checked' : '' }}>
-                                                Installments (+₨3000)</label>
-                                        </div>
-                                        @error('payment_type')
-                                            <small class="text-danger">{{ $message }}</small>
-                                        @enderror
-                                    </div>
-
-                                    <div class="col-md-12">
                                         <label>Total Fee</label>
                                         <input type="number" id="full_fee" name="full_fee" class="form-control"
                                             value="{{ old('full_fee') }}">
@@ -322,10 +306,48 @@
                                             <small class="text-danger">{{ $message }}</small>
                                         @enderror
                                     </div>
+                                    <div class="col-md-12">
+                                        <label class="form-label">Payment Type</label>
+                                        <div class="d-flex flex-column">
+                                            <label><input type="radio" name="payment_type" value="full_fee"
+                                                    {{ old('payment_type') == 'full_fee' ? 'checked' : '' }}> Full
+                                                Payment</label>
+                                            <label><input type="radio" name="payment_type" value="installment"
+                                                    {{ old('payment_type') == 'installment' ? 'checked' : '' }}>
+                                                Installments</label>
+                                        </div>
+                                        @error('payment_type')
+                                            <small class="text-danger">{{ $message }}</small>
+                                        @enderror
+                                    </div>
+
+                                    {{-- Calculated Total (after options) --}}
+                                    <div class="col-md-12 mt-2">
+                                        <label>Calculated Total (after options)</label>
+                                        <input type="text" id="calculated_total" class="form-control" value="0"
+                                            readonly>
+                                        {{-- <small id="calculated_breakdown" class="text-muted d-block mt-1"></small> --}}
+                                        {{-- Additional charges checkbox --}}
+                                        <div class="row mb-2">
+                                            <div class="col-md-12">
+                                                <div class="form-check">
+                                                    <input class="form-check-input" type="checkbox"
+                                                        id="apply_additional_charges" name="apply_additional_charges"
+                                                        value="1"
+                                                        {{ old('apply_additional_charges') ? 'checked' : '' }}>
+                                                    <small class="form-check-label" for="apply_additional_charges">
+                                                        (Apply additional charges — ₨1000 per installment)
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 {{-- Installment Fields --}}
                                 <div id="installment-section" style="display: none;" class="mt-3">
+
+
                                     <div class="row mb-3">
                                         <div class="col-md-12">
                                             <label>Installment Count</label>
@@ -379,7 +401,6 @@
         // Load batches by course
         $('#course_id').on('change', function() {
             let courseId = $(this).val();
-            console.log(courseId)
             $('#batch_id').html('<option>Loading...</option>');
             $.get(`get-batches/${courseId}`, function(data) {
                 let html = '<option value="">Select Batch</option>';
@@ -392,11 +413,12 @@
         });
 
         let fullFee = 0;
+        const PER_INSTALLMENT_CHARGE = 1000;
 
         // When batch is selected, set fee value
         $('#batch_id').on('change', function() {
             let fee = $(this).find(':selected').data('fee') || 0;
-            fullFee = parseInt(fee);
+            fullFee = parseInt(fee) || 0;
             $('#full_fee').val(fullFee);
             autoDistributeInstallments();
         });
@@ -407,13 +429,16 @@
             autoDistributeInstallments();
         });
 
-        // Toggle section
+        // Toggle section on payment type
         $('input[name="payment_type"]').on('change', function() {
             if ($(this).val() === 'installment') {
                 $('#installment-section').show();
+                $('#apply_additional_charges').prop('disabled', false);
                 autoDistributeInstallments();
             } else {
                 $('#installment-section').hide();
+                $('#apply_additional_charges').prop('checked', false).prop('disabled', true);
+                renderTotal(); // refresh calculated total for full payment
             }
         });
 
@@ -429,15 +454,52 @@
             autoDistributeInstallments();
         });
 
-        // Manual edit of installments (1 and 2) triggers recalculation
+        // Recalc when additional charges checkbox is toggled
+        $(document).on('change', '#apply_additional_charges', function() {
+            autoDistributeInstallments();
+        });
+
+        // Manual edit of installments (1 and 2) triggers recalculation of remaining
         $('#installment_1, #installment_2').on('input', function() {
             adjustRemainingInstallments();
         });
 
-        // Distribute initial fee
+        // --- Totals helpers ---
+        function computeTotalParts() {
+            const paymentType = $('input[name="payment_type"]:checked').val();
+            const isInstallment = paymentType === 'installment';
+            const count = parseInt($('#installment_count').val()) || 0;
+            const applyExtra = $('#apply_additional_charges').is(':checked');
+
+            const base = parseInt(fullFee) || 0;
+            const extra = (isInstallment && applyExtra) ? (PER_INSTALLMENT_CHARGE * count) : 0;
+            const total = base + extra;
+
+            return {
+                base,
+                extra,
+                total,
+                count,
+                applyExtra,
+                isInstallment
+            };
+        }
+
+        function renderTotal() {
+            const p = computeTotalParts();
+            $('#calculated_total').val(p.total);
+            if (p.applyExtra && p.isInstallment) {
+                $('#calculated_breakdown').text(
+                    `Base: ₨${p.base} + Extra: ₨${PER_INSTALLMENT_CHARGE} × ${p.count} = ₨${p.extra}`);
+            } else {
+                $('#calculated_breakdown').text(`Base: ₨${p.base}`);
+            }
+        }
+
+        // Distribute fee across installments
         function autoDistributeInstallments() {
             const count = parseInt($('#installment_count').val());
-            const total = fullFee + 3000;
+            const total = computeTotalParts().total;
 
             if (count === 2) {
                 const half = Math.ceil(total / 2);
@@ -451,26 +513,27 @@
                 $('#installment_2').val(part);
                 $('#installment_3').val(remain);
             }
+            renderTotal();
         }
 
         // Re-adjust remaining amount based on admin input
         function adjustRemainingInstallments() {
             const count = parseInt($('#installment_count').val());
-            const total = fullFee + 3000;
+            const total = computeTotalParts().total;
 
             const inst1 = parseInt($('#installment_1').val()) || 0;
             const inst2 = parseInt($('#installment_2').val()) || 0;
 
             if (count === 2) {
-                $('#installment_2').val(total - inst1);
+                $('#installment_2').val(Math.max(total - inst1, 0));
                 $('#installment_3').val('');
             } else {
                 const inst3 = total - inst1 - inst2;
                 $('#installment_3').val(inst3 > 0 ? inst3 : 0);
             }
+            renderTotal();
         }
-    </script>
-    <script>
+
         // Referral logic toggle
         document.addEventListener('DOMContentLoaded', function() {
             const referralType = document.getElementById('referral_type');
@@ -488,6 +551,31 @@
 
             toggleReferralFields();
             referralType.addEventListener('change', toggleReferralFields);
+
+            // Initialize payment section visibility/state
+            const paymentType = $('input[name="payment_type"]:checked').length ?
+                $('input[name="payment_type"]:checked').val() :
+                null;
+
+            if (paymentType === 'installment') {
+                $('#installment-section').show();
+                $('#apply_additional_charges').prop('disabled', false);
+            } else {
+                $('#installment-section').hide();
+                $('#apply_additional_charges').prop('checked', false).prop('disabled', true);
+            }
+
+            // Respect current count for visibility of installment 3
+            const count = parseInt($('#installment_count').val());
+            if (count === 2) {
+                $('#installment_3_wrapper').hide();
+                $('#installment_3').val('');
+            } else {
+                $('#installment_3_wrapper').show();
+            }
+
+            // Initial totals render
+            autoDistributeInstallments();
         });
     </script>
 @endsection
