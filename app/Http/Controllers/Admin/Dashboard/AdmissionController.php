@@ -59,23 +59,25 @@ class AdmissionController extends Controller
             'email'            => 'nullable|email|max:255',
             'phone'            => 'nullable|string|max:20',
             'joining_date'     => 'nullable|date',
-            'student_status'           => 'required',
+            'student_status'   => 'required',
             'gender'           => 'nullable|in:male,female',
             'qualification'    => 'nullable|string|max:100',
             'last_institute'   => 'nullable|string|max:255',
             'referral_source'  => 'nullable|string|max:255',
-            'referral_source_contact'  => 'nullable|string|max:255',
-            'referral_source_commission'  => 'nullable|string|max:255',
+            'referral_source_contact'   => 'nullable|string|max:255',
+            'referral_source_commission' => 'nullable|string|max:255',
             'address'          => 'nullable|string',
 
-            'payment_type'     => 'required',
+            'payment_type'     => 'required|in:full_fee,installment',
             'full_fee'         => 'required|numeric|min:0',
 
-            'installment_1'    => 'nullable|numeric|min:0',
-            'installment_2'    => 'nullable|numeric|min:0',
-            'installment_3'    => 'nullable|numeric|min:0',
-            'referral_type' => 'nullable|in:ads,referral,other',
-
+            // Installment-related
+            'installment_count'        => 'nullable|in:2,3',
+            'installment_1'            => 'nullable|numeric|min:0',
+            'installment_2'            => 'nullable|numeric|min:0',
+            'installment_3'            => 'nullable|numeric|min:0',
+            'apply_additional_charges' => 'nullable',
+            'referral_type'            => 'nullable|in:ads,referral,other',
         ]);
 
         // Handle image upload
@@ -87,13 +89,10 @@ class AdmissionController extends Controller
             $imagePath = 'assets/admin/images/code/admission/' . $imageName;
         }
 
-        // Validate installments total if installment mode
         if ($request->payment_type === 'installment') {
-            // Get installment count (default to 3 if missing)
+            // Dynamic validation
             $count = (int) $request->input('installment_count', 3);
-            if (!in_array($count, [2, 3], true)) {
-                $count = 3;
-            }
+            if (!in_array($count, [2, 3], true)) $count = 3;
 
             $base = (int) $request->input('full_fee', 0);
             $applyExtra = $request->boolean('apply_additional_charges');
@@ -112,17 +111,14 @@ class AdmissionController extends Controller
                 ]);
             }
         } else {
-            // Full payment: installments must be empty/zero
-            $anyInst =
-                ($request->filled('installment_1') && (int)$request->installment_1 > 0) ||
-                ($request->filled('installment_2') && (int)$request->installment_2 > 0) ||
-                ($request->filled('installment_3') && (int)$request->installment_3 > 0);
-
-            if ($anyInst) {
-                return back()->withInput()->withErrors([
-                    'payment_type' => 'Installments should not be filled when Full Payment is selected.'
-                ]);
-            }
+            // Full payment: sanitize installment fields so they can't trigger errors
+            $request->merge([
+                'installment_count'        => null,
+                'installment_1'            => 0,
+                'installment_2'            => 0,
+                'installment_3'            => 0,
+                'apply_additional_charges' => false,
+            ]);
         }
 
         $lastRollNo = Admission::max('roll_no');
@@ -143,26 +139,25 @@ class AdmissionController extends Controller
             'phone'            => $request->phone,
             'joining_date'     => $request->joining_date,
             'student_status'   => $request->student_status,
-            // 'fee_status'       => $request->fee_status,
             'gender'           => $request->gender,
             'qualification'    => $request->qualification,
             'last_institute'   => $request->last_institute,
             'referral_source'  => $request->referral_source,
-            'referral_source_contact'  => $request->referral_source_contact,
-            'referral_source_commission'  => $request->referral_source_commission,
+            'referral_source_contact'   => $request->referral_source_contact,
+            'referral_source_commission' => $request->referral_source_commission,
             'address'          => $request->address,
 
             'payment_type'     => $request->payment_type,
-            'full_fee'         => $request->full_fee,
-            'installment_1'    => $request->installment_1,
-            'installment_2'    => $request->installment_2,
-            'installment_3'    => $request->installment_3,
-            'referral_type' => $request->referral_type,
-
+            'full_fee'         => (int) $request->full_fee,
+            'installment_1'    => (int) $request->installment_1,
+            'installment_2'    => (int) $request->installment_2,
+            'installment_3'    => (int) $request->installment_3,
+            'referral_type'    => $request->referral_type,
         ]);
 
         return redirect()->route('admission.index')->with('store', 'Admission created successfully.');
     }
+
 
     /**
      * Display the specified resource.
@@ -237,30 +232,30 @@ class AdmissionController extends Controller
             'payment_type'     => 'required|in:full_fee,installment',
             'full_fee'         => 'required|numeric|min:0',
 
-            'installment_count' => 'nullable|in:2,3',
-            'installment_1'     => 'nullable|numeric|min:0',
-            'installment_2'     => 'nullable|numeric|min:0',
-            'installment_3'     => 'nullable|numeric|min:0',
+            'installment_count'        => 'nullable|in:2,3',
+            'installment_1'            => 'nullable|numeric|min:0',
+            'installment_2'            => 'nullable|numeric|min:0',
+            'installment_3'            => 'nullable|numeric|min:0',
             'apply_additional_charges' => 'nullable',
 
-            'referral_type' => 'nullable|in:ads,referral,other',
+            'referral_type'    => 'nullable|in:ads,referral,other',
             'calculated_total' => 'nullable|numeric|min:0',
         ]);
 
-        // Validate installments in installment mode (dynamic)
+        // --- Payment logic ---
         if ($request->payment_type === 'installment') {
             $count = (int) $request->input('installment_count', 3);
             if (!in_array($count, [2, 3], true)) $count = 3;
 
-            $base = (int) $request->input('full_fee', 0);
+            $base       = (int) $request->input('full_fee', 0);
             $applyExtra = $request->boolean('apply_additional_charges');
-            $extra = $applyExtra ? (1000 * $count) : 0;
+            $extra      = $applyExtra ? (1000 * $count) : 0;
 
             $inst1 = (int) $request->input('installment_1', 0);
             $inst2 = (int) $request->input('installment_2', 0);
             $inst3 = $count === 3 ? (int) $request->input('installment_3', 0) : 0;
 
-            $sum = $inst1 + $inst2 + $inst3;
+            $sum      = $inst1 + $inst2 + $inst3;
             $expected = $base + $extra;
 
             if ($sum !== $expected) {
@@ -269,30 +264,28 @@ class AdmissionController extends Controller
                 ]);
             }
         } else {
-            // Full payment mode -> installments should be empty/zero
-            $anyInst =
-                ($request->filled('installment_1') && (int)$request->installment_1 > 0) ||
-                ($request->filled('installment_2') && (int)$request->installment_2 > 0) ||
-                ($request->filled('installment_3') && (int)$request->installment_3 > 0);
-
-            if ($anyInst) {
-                return back()->withInput()->withErrors([
-                    'payment_type' => 'Installments should not be filled when Full Payment is selected.'
-                ]);
-            }
+            // ✅ Full payment: DO NOT error. Just clear/zero installment fields.
+            $request->merge([
+                'installment_count'        => null,
+                'installment_1'            => 0,
+                'installment_2'            => 0,
+                'installment_3'            => 0,
+                'apply_additional_charges' => false,
+            ]);
         }
 
-        // Image (replace existing if new uploaded)
+        // --- Image replace (optional) ---
         if ($request->hasFile('image')) {
             if ($admission->image && file_exists(public_path($admission->image))) {
                 @unlink(public_path($admission->image));
             }
             $image = $request->file('image');
-            $name = time() . '_' . $image->getClientOriginalName();
+            $name  = time() . '_' . $image->getClientOriginalName();
             $image->move(public_path('assets/admin/images/code/admission/'), $name);
             $admission->image = 'assets/admin/images/code/admission/' . $name;
         }
 
+        // --- Save ---
         $admission->update([
             'course_id'        => $request->course_id,
             'batch_id'         => $request->batch_id,
@@ -317,16 +310,13 @@ class AdmissionController extends Controller
             'full_fee'         => (int) $request->full_fee,
             'installment_1'    => (int) $request->installment_1,
             'installment_2'    => (int) $request->installment_2,
-            'installment_3'    => (int) ($request->input('installment_count') == 3 ? $request->installment_3 : 0),
+            'installment_3'    => (int) $request->installment_3, // safe: merged to 0 on full payment
             'referral_type'    => $request->referral_type,
-
-            // If you store it:
             // 'calculated_total' => (int) $request->input('calculated_total', $request->full_fee),
         ]);
 
         return redirect()->route('admission.index')->with('update', 'Admission updated successfully.');
     }
-
 
     /**
      * Remove the specified resource from storage.

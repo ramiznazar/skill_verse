@@ -208,15 +208,15 @@
                                  class="mt-3">
 
                                 {{-- Additional charges checkbox --}}
-                                <div class="row mb-2">
+                                <div class="row mb-2" style="margin-top: -15px">
                                     <div class="col-md-12">
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox"
                                                 id="apply_additional_charges" name="apply_additional_charges" value="1"
                                                 {{ old('apply_additional_charges', $applyExtraDefault) ? 'checked' : '' }}>
-                                            <label class="form-check-label" for="apply_additional_charges">
+                                            <small class="form-check-label" for="apply_additional_charges">
                                                 Apply additional charges — ₨1000 per installment
-                                            </label>
+                                            </small>
                                         </div>
                                     </div>
                                 </div>
