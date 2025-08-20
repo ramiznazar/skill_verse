@@ -88,18 +88,42 @@ class AdmissionController extends Controller
 
         // Validate installments total if installment mode
         if ($request->payment_type === 'installment') {
-            $expectedTotal = $request->full_fee + 3000;
-            $totalInstallments =
-                ($request->installment_1 ?? 0) +
-                ($request->installment_2 ?? 0) +
-                ($request->installment_3 ?? 0);
+            // Get installment count (default to 3 if missing)
+            $count = (int) $request->input('installment_count', 3);
+            if (!in_array($count, [2, 3], true)) {
+                $count = 3;
+            }
 
-            if ($totalInstallments !== $expectedTotal) {
+            $base = (int) $request->input('full_fee', 0);
+            $applyExtra = $request->boolean('apply_additional_charges');
+            $extra = $applyExtra ? (1000 * $count) : 0;
+
+            $inst1 = (int) $request->input('installment_1', 0);
+            $inst2 = (int) $request->input('installment_2', 0);
+            $inst3 = $count === 3 ? (int) $request->input('installment_3', 0) : 0;
+
+            $sum = $inst1 + $inst2 + $inst3;
+            $expected = $base + $extra;
+
+            if ($sum !== $expected) {
                 return back()->withInput()->withErrors([
-                    'installment_1' => 'Installment total must equal full fee + 3000 (expected: ' . $expectedTotal . ')'
+                    'installment_1' => "Installment total must equal full fee + applicable extras (expected: {$expected})."
+                ]);
+            }
+        } else {
+            // Full payment: installments must be empty/zero
+            $anyInst =
+                ($request->filled('installment_1') && (int)$request->installment_1 > 0) ||
+                ($request->filled('installment_2') && (int)$request->installment_2 > 0) ||
+                ($request->filled('installment_3') && (int)$request->installment_3 > 0);
+
+            if ($anyInst) {
+                return back()->withInput()->withErrors([
+                    'payment_type' => 'Installments should not be filled when Full Payment is selected.'
                 ]);
             }
         }
+
         $lastRollNo = Admission::max('roll_no');
         $newRollNo = $lastRollNo ? $lastRollNo + 1 : 1;
 
