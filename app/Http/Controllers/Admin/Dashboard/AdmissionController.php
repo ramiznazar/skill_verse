@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\Admin\Dashboard;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Lead;
 use App\Models\Batch;
 use App\Models\Course;
-use App\Models\Lead;
 use App\Models\Admission;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Storage;
 
 class AdmissionController extends Controller
 {
@@ -174,13 +175,36 @@ class AdmissionController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+
+    public function edit($id)
     {
+        $admission = Admission::findOrFail($id);
+
+        // infer installment_count from saved data (3 if a third installment exists)
+        $preCount = ($admission->installment_3 ?? 0) > 0 ? 3 : 2;
+
+        // infer whether extra charges were applied previously (1000 × count)
+        $savedFee   = (int) $admission->full_fee;
+        $inst1      = (int) $admission->installment_1;
+        $inst2      = (int) $admission->installment_2;
+        $inst3      = (int) ($preCount === 3 ? $admission->installment_3 : 0);
+        $sumInst    = $inst1 + $inst2 + $inst3;
+        $expectedIfExtra = $savedFee + (1000 * $preCount);
+        $applyExtraDefault = ($sumInst === $expectedIfExtra);
+
+        // load $courses, $batches as you already do
         $courses = Course::all();
         $batches = Batch::all();
-        $admission = Admission::findOrFail($id);
-        return view('admin.pages.dashboard.admission.update', compact('courses', 'batches', 'admission'));
+
+        return view('admin.pages.dashboard.admission.update', compact(
+            'admission',
+            'courses',
+            'batches',
+            'preCount',
+            'applyExtraDefault'
+        ));
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -206,33 +230,63 @@ class AdmissionController extends Controller
             'qualification'    => 'nullable|string|max:100',
             'last_institute'   => 'nullable|string|max:255',
             'referral_source'  => 'nullable|string|max:255',
-            'referral_source_contact'  => 'nullable|string|max:255',
-            'referral_source_commission'  => 'nullable|string|max:255',
+            'referral_source_contact'   => 'nullable|string|max:255',
+            'referral_source_commission' => 'nullable|string|max:255',
             'address'          => 'nullable|string',
 
-            'payment_type'     => 'required',
+            'payment_type'     => 'required|in:full_fee,installment',
             'full_fee'         => 'required|numeric|min:0',
 
-            'installment_1'    => 'nullable|numeric|min:0',
-            'installment_2'    => 'nullable|numeric|min:0',
-            'installment_3'    => 'nullable|numeric|min:0',
-            'referral_type' => $request->referral_type,
+            'installment_count' => 'nullable|in:2,3',
+            'installment_1'     => 'nullable|numeric|min:0',
+            'installment_2'     => 'nullable|numeric|min:0',
+            'installment_3'     => 'nullable|numeric|min:0',
+            'apply_additional_charges' => 'nullable',
 
+            'referral_type' => 'nullable|in:ads,referral,other',
+            'calculated_total' => 'nullable|numeric|min:0',
         ]);
 
+        // Validate installments in installment mode (dynamic)
         if ($request->payment_type === 'installment') {
-            $expected = $request->full_fee + 3000;
-            $actual = ($request->installment_1 ?? 0) + ($request->installment_2 ?? 0) + ($request->installment_3 ?? 0);
-            if ($actual !== $expected) {
-                return back()->withInput()->withErrors(['installment_1' => 'Installments must total to ' . $expected]);
+            $count = (int) $request->input('installment_count', 3);
+            if (!in_array($count, [2, 3], true)) $count = 3;
+
+            $base = (int) $request->input('full_fee', 0);
+            $applyExtra = $request->boolean('apply_additional_charges');
+            $extra = $applyExtra ? (1000 * $count) : 0;
+
+            $inst1 = (int) $request->input('installment_1', 0);
+            $inst2 = (int) $request->input('installment_2', 0);
+            $inst3 = $count === 3 ? (int) $request->input('installment_3', 0) : 0;
+
+            $sum = $inst1 + $inst2 + $inst3;
+            $expected = $base + $extra;
+
+            if ($sum !== $expected) {
+                return back()->withInput()->withErrors([
+                    'installment_1' => "Installments must total to {$expected} (full fee + applicable extras)."
+                ]);
+            }
+        } else {
+            // Full payment mode -> installments should be empty/zero
+            $anyInst =
+                ($request->filled('installment_1') && (int)$request->installment_1 > 0) ||
+                ($request->filled('installment_2') && (int)$request->installment_2 > 0) ||
+                ($request->filled('installment_3') && (int)$request->installment_3 > 0);
+
+            if ($anyInst) {
+                return back()->withInput()->withErrors([
+                    'payment_type' => 'Installments should not be filled when Full Payment is selected.'
+                ]);
             }
         }
 
+        // Image (replace existing if new uploaded)
         if ($request->hasFile('image')) {
             if ($admission->image && file_exists(public_path($admission->image))) {
-                unlink(public_path($admission->image));
+                @unlink(public_path($admission->image));
             }
-
             $image = $request->file('image');
             $name = time() . '_' . $image->getClientOriginalName();
             $image->move(public_path('assets/admin/images/code/admission/'), $name);
@@ -255,14 +309,19 @@ class AdmissionController extends Controller
             'qualification'    => $request->qualification,
             'last_institute'   => $request->last_institute,
             'referral_source'  => $request->referral_source,
-            'referral_source_contact'  => $request->referral_source_contact,
-            'referral_source_commission'  => $request->referral_source_commission,
+            'referral_source_contact'   => $request->referral_source_contact,
+            'referral_source_commission' => $request->referral_source_commission,
             'address'          => $request->address,
+
             'payment_type'     => $request->payment_type,
-            'full_fee'         => $request->full_fee,
-            'installment_1'    => $request->installment_1,
-            'installment_2'    => $request->installment_2,
-            'installment_3'    => $request->installment_3,
+            'full_fee'         => (int) $request->full_fee,
+            'installment_1'    => (int) $request->installment_1,
+            'installment_2'    => (int) $request->installment_2,
+            'installment_3'    => (int) ($request->input('installment_count') == 3 ? $request->installment_3 : 0),
+            'referral_type'    => $request->referral_type,
+
+            // If you store it:
+            // 'calculated_total' => (int) $request->input('calculated_total', $request->full_fee),
         ]);
 
         return redirect()->route('admission.index')->with('update', 'Admission updated successfully.');
@@ -274,12 +333,16 @@ class AdmissionController extends Controller
      */
     public function destroy(string $id)
     {
-        $admission = Admission::find($id);
-        $imagePath = public_path($admission->image);
-        if (file_exists($imagePath)) {
-            unlink($imagePath);
+        $admission = Admission::findOrFail($id);
+
+        if (!empty($admission->image)) {
+            // e.g., 'assets/admin/images/code/admission/foo.jpg' OR 'admissions/foo.jpg'
+            // Adjust path according to how you saved it
+            Storage::disk('public')->delete($admission->image);
         }
+
         $admission->delete();
+
         return redirect()->route('admission.index')->with('delete', 'Admission deleted successfully!');
     }
 }

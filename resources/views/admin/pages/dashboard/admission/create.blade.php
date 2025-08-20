@@ -335,7 +335,7 @@
                                                         id="apply_additional_charges" name="apply_additional_charges"
                                                         value="1"
                                                         {{ old('apply_additional_charges') ? 'checked' : '' }}>
-                                                    <small class="form-check-label" for="apply_additional_charges">
+                                                    <small class="form-check-label" for="apply_additional_charges" >
                                                         (Apply additional charges — ₨1000 per installment)
                                                     </small>
                                                 </div>
