@@ -14,17 +14,13 @@
         <header id="header" class="header">
             <div class="header-top bg-theme-color-2 sm-text-center p-0">
                 <div class="container">
-                    <div class="row">
-                        <div class="col-md-4">
+                    <div class="row" >
+                        <div class="col-md-4"  >
                             <div class="widget no-border m-0">
                                 <ul class="list-inline font-13 sm-text-center mt-5">
                                     <li>
                                         <a class="text-white" href="{{ route('faq') }}">FAQ</a>
                                     </li>
-                                    {{-- <li class="text-white">|</li>
-                                    <li>
-                                        <a class="text-white" href="#">Help Desk</a>
-                                    </li> --}}
                                     <li class="text-white">|</li>
                                     <li>
                                         <a class="text-white" href="{{ route('contact') }}">Contact</a>
@@ -32,10 +28,10 @@
                                 </ul>
                             </div>
                         </div>
-                        <div class="col-md-8">
-                            <div class="widget m-0 pull-right sm-pull-none sm-text-center">
+                        <div class="col-md-8" style="margin-right: -20px !important;"  >
+                            {{-- <div class="widget m-0 pull-right sm-pull-none sm-text-center">
                                 <ul class="list-inline pull-right">
-                                    {{-- <li class="mb-0 pb-0">
+                                    <li class="mb-0 pb-0">
                                         <div class="top-dropdown-outer pt-5 pb-10">
                                             <a class="top-cart-link has-dropdown text-white text-hover-theme-colored"><i
                                                     class="fa fa-shopping-cart font-13"></i> (12)</a>
@@ -96,7 +92,7 @@
                                                 </li>
                                             </ul>
                                         </div>
-                                    </li> --}}
+                                    </li>
                                     <li class="mb-0 pb-0">
                                         <div class="top-dropdown-outer pt-5 pb-10">
                                             <a class="top-search-box has-dropdown text-white text-hover-theme-colored"><i
@@ -119,7 +115,7 @@
                                         </div>
                                     </li>
                                 </ul>
-                            </div>
+                            </div> --}}
                             <div class="widget no-border m-0 mr-15 pull-right flip sm-pull-none sm-text-center">
                                 <ul
                                     class="styled-icons icon-circled icon-sm pull-right flip sm-pull-none sm-text-center mt-sm-15">
@@ -139,7 +135,7 @@
                     </div>
                 </div>
             </div>
-            <div class="header-middle p-0 bg-lightest xs-text-center">
+            {{-- <div class="header-middle p-0 bg-lightest xs-text-center">
                 <div class="container pt-0 pb-0">
                     <div class="row">
                         <div class="col-xs-12 col-sm-4 col-md-5">
@@ -177,11 +173,19 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> --}}
             <div class="header-nav">
                 <div class="header-nav-wrapper navbar-scrolltofixed bg-theme-colored border-bottom-theme-color-2-1px">
                     <div class="container">
                         <nav id="menuzord" class="menuzord bg-theme-colored pull-left flip menuzord-responsive">
+
+                            <!-- BRAND / LOGO ON LEFT -->
+                            <a class="menuzord-brand" href="{{ route('home') }}"
+                                style="display:flex;align-items:center; margin-top: 13px; ">
+                                <img src="{{ asset('assets/website/images/logo/black-logo.png') }}" alt="Skillverse"
+                                    style="height:46px; width:auto;">
+                            </a>
+
                             <ul class="menuzord-menu">
                                 <li class="{{ request()->routeIs('home') ? 'active' : '' }}">
                                     <a href="{{ route('home') }}">Home</a>
@@ -440,8 +444,8 @@
                             <div id="top-search-bar" class="collapse">
                                 <div class="container">
                                     <form role="search" action="#" class="search_form_top" method="get">
-                                        <input type="text" placeholder="Type text and press Enter..."
-                                            name="s" class="form-control" autocomplete="off">
+                                        <input type="text" placeholder="Type text and press Enter..." name="s"
+                                            class="form-control" autocomplete="off">
                                         <span class="search-close"><i class="fa fa-search"></i></span>
                                     </form>
                                 </div>

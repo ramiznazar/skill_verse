@@ -47,7 +47,6 @@
                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </ul>
 
-
                                     <div id="myTabContent" class="tab-content">
                                         <?php $__currentLoopData = $courseOutlines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $outline): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <div class="tab-pane fade <?php echo e($index === 0 ? 'in active' : ''); ?>"

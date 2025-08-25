@@ -51,7 +51,6 @@
                                         @endforeach
                                     </ul>
 
-
                                     <div id="myTabContent" class="tab-content">
                                         @foreach ($courseOutlines as $index => $outline)
                                             <div class="tab-pane fade {{ $index === 0 ? 'in active' : '' }}"

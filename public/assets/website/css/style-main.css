@@ -1171,6 +1171,7 @@ section>.container-fluid {
 
 .menuzord-brand img {
     max-height: 58px;
+    margin-left: -10px;
 }
 
 /* -------- Custom theme style ---------- */
@@ -2230,6 +2231,9 @@ form .error {
 
 .side-push-panel.has-side-panel .menuzord .showhide {
     float: left;
+}
+.showhide{
+    margin-top: 10px;
 }
 
 /* -------- Body Overlay ---------- */
@@ -7764,4 +7768,22 @@ blockquote p {
     padding: 8px 8px;       /* smaller padding */
     font-size: 13px;        /* shrink font a bit */
     white-space: nowrap;    /* prevent breaking Week 10 */
+}
+
+/* course detail weaks */
+/* Make nav tabs responsive */
+#myTab.nav-tabs {
+  display: flex;
+  flex-wrap: wrap; /* allow wrapping on smaller screens */
+}
+
+#myTab.nav-tabs li {
+  flex: 1 0 auto; /* items shrink/grow nicely */
+  text-align: center;
+  margin-bottom: 5px; /* spacing between rows */
+}
+
+#myTab.nav-tabs li a {
+  display: block;
+  white-space: nowrap; /* keep text from breaking weirdly */
 }
