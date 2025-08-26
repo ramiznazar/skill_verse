@@ -253,3 +253,12 @@
         font-size: 35%;
     }
 }
+
+@media screen and (max-width: 375px) {
+    .responsive-mobile{
+        font-size: 10px;
+    }
+}
+
+
+

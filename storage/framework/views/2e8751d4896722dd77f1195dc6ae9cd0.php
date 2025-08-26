@@ -32,7 +32,7 @@
                                     data-mask_in="x:0px;y:0px;s:inherit;e:inherit;"
                                     data-mask_out="x:inherit;y:inherit;s:inherit;e:inherit;" data-start="1000"
                                     data-splitin="none" data-splitout="none" data-responsive_offset="on"
-                                    style="z-index: 7; white-space: nowrap; font-weight:700;">Learn & Grow
+                                    style="z-index: 7; white-space: nowrap; font-weight:700;"><span style="font-size: 90px;">Learn & Grow</span>
                                 </div>
 
                                 <!-- LAYER NR. 2 -->
@@ -106,7 +106,7 @@
                                 <!-- LAYER NR. 2 -->
                                 <div class="tp-caption tp-resizeme text-uppercase bg-theme-colored-transparent text-white font-raleway pl-30 pr-30"
                                     id="rs-2-layer-2" data-x="['center']" data-hoffset="['0']" data-y="['middle']"
-                                    data-voffset="['-20']" data-fontsize="['48']" data-lineheight="['70']"
+                                    data-voffset="['-20']" data-fontsize="['46']" data-lineheight="['70']"
                                     data-width="none" data-height="none" data-whitespace="nowrap"
                                     data-transform_idle="o:1;s:500" data-transform_in="y:100;scaleX:1;scaleY:1;opacity:0;"
                                     data-transform_out="x:left(R);s:1000;e:Power3.easeIn;s:1000;e:Power3.easeIn;"
