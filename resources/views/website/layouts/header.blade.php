@@ -14,8 +14,8 @@
         <header id="header" class="header">
             <div class="header-top bg-theme-color-2 sm-text-center p-0">
                 <div class="container">
-                    <div class="row" >
-                        <div class="col-md-4"  >
+                    <div class="row">
+                        <div class="col-md-4">
                             <div class="widget no-border m-0">
                                 <ul class="list-inline font-13 sm-text-center mt-5">
                                     <li>
@@ -28,7 +28,7 @@
                                 </ul>
                             </div>
                         </div>
-                        <div class="col-md-8" style="margin-right: -20px !important;"  >
+                        <div class="col-md-8" style="margin-right: -20px !important;">
                             {{-- <div class="widget m-0 pull-right sm-pull-none sm-text-center">
                                 <ul class="list-inline pull-right">
                                     <li class="mb-0 pb-0">
@@ -119,7 +119,16 @@
                             <div class="widget no-border m-0 mr-15 pull-right flip sm-pull-none sm-text-center">
                                 <ul
                                     class="styled-icons icon-circled icon-sm pull-right flip sm-pull-none sm-text-center mt-sm-15">
-                                    c
+                                    <li><a href="https://www.facebook.com/share/16BQnwqP9D/" target="_blank"><i
+                                                class="fab fa-facebook text-white"></i></a></li>
+                                    <li><a href="https://youtube.com/@skillverse-01?si=hu_gZaGGSAcZmDOY"
+                                            target="_blank"><i class="fab fa-youtube text-white"></i></a></li>
+                                    <li><a href="https://www.instagram.com/skill_verse3946/" target="_blank"><i
+                                                class="fab fa-instagram text-white"></i></a></li>
+                                    <li><a href="https://www.tiktok.com/@skill.verse4?_t=ZS-8yw3xcafirN&_r=1"
+                                            target="_blank"><i class="fab fa-tiktok text-white"></i></a></li>
+                                    <li><a href="https://www.linkedin.com/company/108634627" target="_blank"><i
+                                                class="fab fa-linkedin text-white"></i></a></li>
                                 </ul>
                             </div>
                         </div>
