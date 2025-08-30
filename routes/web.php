@@ -114,9 +114,11 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
             Route::get('/history/{partner_id}', [PartnerProfitController::class, 'history'])->name('history');
             Route::get('/balances', [PartnerProfitController::class, 'balanceIndex'])->name('partner_balances.index');
         });
-
-        Route::get('/referral-commission', [ReferralCommissionController::class, 'index'])->name('referrals.index');
     });
+    Route::get('/referral-commission', [ReferralCommissionController::class, 'index'])->name('referral-commission.index');
+    Route::put('/referral-commission/paid', [ReferralCommissionController::class, 'paid'])->name('referral-commission.paid');
+    Route::get('/referral-commission/history/{name}/{contact?}', [ReferralCommissionController::class, 'history']) ->name('referral-commission.history');
+
 
     // All Admin Resource Controllers
     Route::resources([
@@ -147,7 +149,7 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
     Route::put('/teacher-salary/{id}/balance', [TeacherSalaryController::class, 'StatusBalance'])->name('teacher-salary.status-balance');
     Route::get('/teacher-balance', [TeacherBalanceController::class, 'balance'])->name('teacher.balance');
     Route::put('/teacher-balance/{id}/paid', [TeacherBalanceController::class, 'StatusPaid'])->name('teacher-balance.status-paid');
-
+    Route::get('/teacher/{teacherId}/salary-history', [TeacherSalaryController::class, 'historyByTeacher'])->name('teacher-salary.history');
     // Fee Submission
     Route::get('/fee-submission', [FeeSubmissionController::class, 'index'])->name('fee-submission.index');
     Route::get('/fee-submission/{id}', [FeeSubmissionController::class, 'create'])->name('fee-submission.create');

@@ -17,5 +17,15 @@ class ReferralCommission extends Model
     {
         return $this->belongsTo(FeeSubmission::class, 'fee_submission_id');
     }
-    
+    public function histories()
+    {
+        return $this->hasMany(ReferralCommissionHistory::class);
+    }
+    public function lastPaidHistory()
+    {
+        return $this->hasOne(\App\Models\ReferralCommissionHistory::class, 'referral_commission_id')
+            ->ofMany(['performed_at' => 'max'], function ($q) {
+                $q->where('status', 'paid');
+            });
+    }
 }

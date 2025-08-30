@@ -42,7 +42,7 @@
                                             <input type="number" name="amount" class="form-control"
                                                 value="{{ old('amount', $expense->amount) }}" required>
                                             @error('amount')
-                                            <small class="text-danger">{{ $message }}</small>
+                                                <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>
                                     </div>
@@ -59,6 +59,28 @@
                                             @enderror
                                         </div>
                                     </div>
+
+                                    {{-- Expense Type --}}
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Expense Type</label>
+                                            <select name="type" id="expenseTypeSelect" class="form-control">
+                                                <option value="">-- Select Type --</option>
+                                                <option value="essential"
+                                                    {{ old('type', $expense->type) == 'essential' ? 'selected' : '' }}>
+                                                    Essential
+                                                </option>
+                                                <option value="non-essential"
+                                                    {{ old('type', $expense->type) == 'non-essential' ? 'selected' : '' }}>
+                                                    Non-Essential
+                                                </option>
+                                            </select>
+                                            @error('type')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+
                                 </div>
 
                                 {{-- Purpose --}}

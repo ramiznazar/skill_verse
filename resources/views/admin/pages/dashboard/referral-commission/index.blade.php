@@ -8,10 +8,11 @@
                 </div>
                 <div class="col-md-6 col-sm-12 text-right">
                     {{-- <a href="{{ route('batch.create') }}" class="btn btn-sm btn-primary" title="">Create New</a> --}}
-                    <form action="{{ route('admin.dashboard.profit.calculate') }}" method="POST" style="display: inline-block;">
+                    {{-- <form action="{{ route('admin.dashboard.profit.calculate') }}" method="POST"
+                        style="display: inline-block;">
                         @csrf
                         <button type="submit" class="btn btn-success btn-sm">Calculate This Month Profit</button>
-                    </form>
+                    </form> --}}
                 </div>
             </div>
         </div>
@@ -63,25 +64,64 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Referral Name</th>
-                                            <th>Referred Student</th>
                                             <th>Contact</th>
-                                            <th>Commission (%)</th>
-                                            <th>Commission Amount</th>
+                                            <th>Students</th>
+                                            <th>Total Fee</th>
+                                            <th>Avg %</th>
+                                            <th>Total Amount</th>
+                                            <th>Paid</th>
+                                            <th>Unpaid</th>
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @foreach ($commissions as $commission)
+                                        @forelse ($referrers as $i => $ref)
                                             <tr>
-                                                <td>{{ $loop->iteration }}</td>
-                                                <td>{{ $commission->referral_name }}</td>
-                                                <td>{{ $commission->admission->name }} <span
-                                                        class="text-primary">({{ $commission->admission->course->title ?? 'N/A' }})</span>
+                                                <td>{{ $i + 1 }}</td>
+                                                <td>{{ $ref->referral_name ?? 'N/A' }}</td>
+                                                <td>{{ $ref->referral_contact ?? 'N/A' }}</td>
+                                                <td>{{ $ref->total_students }}</td>
+
+                                                <td><strong>{{ number_format((float) $ref->total_student_fee) }}</strong></td>
+
+                                                <td>{{ rtrim(rtrim(number_format((float) $ref->avg_pct, 2), '0'), '.') }}%</td>
+
+                                                {{-- NEW: contractual total based on full_fee and each student’s own % --}}
+                                                <td><strong>{{ number_format((float) $ref->total_amount) }}</strong>
                                                 </td>
-                                                <td>{{ $commission->referral_contact }}</td>
-                                                <td>{{ $commission->commission_percentage }}%</td>
-                                                <td>{{ number_format($commission->commission_amount) }} PKR</td>
+
+                                                {{-- Paid/Unpaid stay the same sources --}}
+                                                <td class="text-success">{{ number_format((float) $ref->paid_total, 2) }}
+                                                    PKR</td>
+                                                <td class="text-danger">{{ number_format((float) $ref->unpaid_total, 2) }}
+                                                    PKR</td>
+
+
+                                                <td>
+                                                    {{-- ONE Paid method: bulk for this referrer (no UI disabling) --}}
+                                                    <form method="POST" action="{{ route('referral-commission.paid') }}"
+                                                        style="display:inline-block;">
+                                                        @csrf
+                                                        @method('PUT')
+                                                        <input type="hidden" name="referral_name"
+                                                            value="{{ $ref->referral_name }}">
+                                                        <input type="hidden" name="referral_contact"
+                                                            value="{{ $ref->referral_contact }}">
+                                                        <button type="submit" class="btn btn-sm btn-success">Paid</button>
+                                                    </form>
+
+                                                    {{-- History: per-referrer (shows each student's percentage) --}}
+                                                    <a href="{{ route('referral-commission.history', [$ref->referral_name, $ref->referral_contact]) }}"
+                                                        class="btn btn-sm btn-info">
+                                                        History
+                                                    </a>
+                                                </td>
                                             </tr>
-                                        @endforeach
+                                        @empty
+                                            <tr>
+                                                <td colspan="9" class="text-center">No referral commissions found.</td>
+                                            </tr>
+                                        @endforelse
                                     </tbody>
                                 </table>
                             </div>

@@ -12,7 +12,7 @@
                 </div>
             </div>
         </div>
-         
+        
         <?php if(session('paid')): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 <?php echo e(session('paid')); ?>
@@ -84,11 +84,10 @@
                                             <th>#</th>
                                             <th>Name</th>
                                             <th>Month</th>
-                                            <th>Year</th>
-                                            <th>Total Students</th>
-                                            <th>Total Fee Collected</th>
-                                            <th>Percentage</th>
-                                            <th>Salary Amount</th>
+                                            <th>Students</th>
+                                            <th>Collected</th>
+                                            <th>% / Rate</th>
+                                            <th>Salary</th>
                                             <th>Status</th>
                                             <th>Action</th>
                                         </tr>
@@ -98,8 +97,8 @@
                                             <tr>
                                                 <td><?php echo e($loop->iteration); ?></td>
                                                 <td><?php echo e($salary->teacher->name ?? 'N/A'); ?></td>
-                                                <td><?php echo e(\Carbon\Carbon::create()->month($salary->month)->format('F')); ?></td>
-                                                <td><?php echo e($salary->year); ?></td>
+                                                    <td><?php echo e(\Carbon\Carbon::create()->month($salary->month)->format('F')); ?> <?php echo e($salary->year); ?></td>
+
                                                 <td><?php echo e($salary->total_students); ?></td>
                                                 <td><?php echo e(number_format($salary->total_fee_collected)); ?> PKR</td>
                                                 <td><?php echo e($salary->percentage); ?>%</td>
@@ -114,30 +113,39 @@
 
                                                     </span>
                                                 </td>
-                                                
                                                 <td>
+                                                    
                                                     <form method="POST"
                                                         action="<?php echo e(route('teacher-salary.status-paid', $salary->id)); ?>"
-                                                        style="display: inline-block;">
-                                                        <?php echo csrf_field(); ?>
-                                                        <?php echo method_field('PUT'); ?>
+                                                        style="display:inline-block;">
+                                                        <?php echo csrf_field(); ?> <?php echo method_field('PUT'); ?>
                                                         <button type="submit" class="btn btn-sm btn-success"
-                                                           <?php echo e(in_array(strtolower($salary->status), ['paid', 'balance']) ? 'disabled' : ''); ?>>
+                                                            >
                                                             Paid
                                                         </button>
                                                     </form>
 
+                                                    
                                                     <form method="POST"
                                                         action="<?php echo e(route('teacher-salary.status-balance', $salary->id)); ?>"
-                                                        style="display: inline-block;">
-                                                        <?php echo csrf_field(); ?>
-                                                        <?php echo method_field('PUT'); ?>
+                                                        style="display:inline-block;">
+                                                        <?php echo csrf_field(); ?> <?php echo method_field('PUT'); ?>
                                                         <button type="submit" class="btn btn-sm btn-warning"
-                                                           <?php echo e(in_array(strtolower($salary->status), ['paid', 'balance']) ? 'disabled' : ''); ?>>
+                                                            >
                                                             Balance
                                                         </button>
                                                     </form>
+
+                                                    
+                                                    <a href="<?php echo e(route('teacher-salary.history', $salary->teacher_id)); ?>"
+                                                        class="btn btn-sm btn-info">
+                                                        History
+                                                    </a>
+
+                                                    
+                                                    
                                                 </td>
+
                                             </tr>
                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </tbody>
@@ -151,4 +159,4 @@
     </div>
 <?php $__env->stopSection(); ?>
 
-<?php echo $__env->make( 'admin.layouts.main', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH E:\projects\codezy\zain-changes\codezy\resources\views/admin/pages/dashboard/teacher/salary/salary.blade.php ENDPATH**/ ?>
+<?php echo $__env->make('admin.layouts.main', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH E:\projects\codezy\zain-changes\codezy\resources\views/admin/pages/dashboard/teacher/salary/salary.blade.php ENDPATH**/ ?>

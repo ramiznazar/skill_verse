@@ -31,9 +31,10 @@ class ExpenseController extends Controller
     public function store(Request $request)
     {
           $data = $request->validate([
-            'title'   => 'nullable|string|max:255',
-            'amount'  => 'nullable|numeric|min:0',
+            'title'   => 'required|string|max:255',
+            'amount'  => 'required|numeric|min:0',
             'purpose' => 'nullable|string',
+            'type'    => 'required|string',
             'date'    => 'nullable|date',
         ]);
 
@@ -65,9 +66,10 @@ class ExpenseController extends Controller
     public function update(Request $request, string $id)
     {
         $data = $request->validate([
-            'title'   => 'nullable|string|max:255',
-            'amount'  => 'nullable|numeric|min:0',
+            'title'   => 'required|string|max:255',
+            'amount'  => 'required|numeric|min:0',
             'purpose' => 'nullable|string',
+            'type'    => 'required|string',
             'date'    => 'nullable|date',
         ]);
 

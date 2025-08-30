@@ -22,27 +22,33 @@
                         <div class="body">
                             <form action="<?php echo e(route('expense.store')); ?>" method="POST">
                                 <?php echo csrf_field(); ?>
-                                <div class="form-group">
 
+                                <div class="row">
                                     
-                                    <label>Title</label>
-                                    <input type="text" name="title" class="form-control" value="<?php echo e(old('title')); ?>"
-                                        required>
-                                    <?php $__errorArgs = ['title'];
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Title</label>
+                                            <input type="text" name="title" class="form-control"
+                                                value="<?php echo e(old('title')); ?>" required>
+                                            <?php $__errorArgs = ['title'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-                                        <small class="text-danger"><?php echo e($message); ?></small>
-                                    <?php unset($message);
+                                                <small class="text-danger"><?php echo e($message); ?></small>
+                                            <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
+                                        </div>
+                                    </div>
                                 </div>
+
+
 
                                 <div class="row">
                                     
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Amount (PKR)</label>
                                             <input type="number" name="amount" class="form-control"
@@ -60,13 +66,39 @@ unset($__errorArgs, $__bag); ?>
                                         </div>
                                     </div>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         
                                         <div class="form-group">
                                             <label>Date</label>
                                             <input type="date" name="date" class="form-control"
-                                                value="<?php echo e(old('date', date('Y-m-d'))); ?>" required>
+                                                value="<?php echo e(old('date', date('Y-m-d'))); ?>">
                                             <?php $__errorArgs = ['date'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                                <small class="text-danger"><?php echo e($message); ?></small>
+                                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                                        </div>
+                                    </div>
+
+                                    
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Expense Type</label>
+                                            <select name="type" id="expenseTypeSelect" class="form-control" required>
+                                                <option value="">-- Select Type --</option>
+                                                <option value="essential"
+                                                    <?php echo e(old('type') == 'essential' ? 'selected' : ''); ?>>
+                                                    Essential</option>
+                                                <option value="non-essential"
+                                                    <?php echo e(old('type') == 'non-essential' ? 'selected' : ''); ?>>Non-Essential
+                                                </option>
+                                            </select>
+                                            <?php $__errorArgs = ['type'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -83,7 +115,7 @@ unset($__errorArgs, $__bag); ?>
                                 
                                 <div class="form-group">
                                     <label>Purpose</label>
-                                    <textarea name="purpose" class="form-control" rows="3" required><?php echo e(old('purpose')); ?></textarea>
+                                    <textarea name="purpose" class="form-control" rows="3"><?php echo e(old('purpose')); ?></textarea>
                                     <?php $__errorArgs = ['purpose'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :

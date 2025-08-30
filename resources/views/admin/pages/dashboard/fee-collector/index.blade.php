@@ -37,11 +37,9 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Student</th>
-                                            <th>Course</th>
-                                            <th>Amount</th>
-                                            <th>Payment Type</th>
                                             <th>Method</th>
+                                            <th>No Of Students</th>
+                                            <th>Amount</th>
                                             <th>Collector</th>
                                             <th>History</th>
                                         </tr>
@@ -51,24 +49,24 @@
                                             @php
                                                 $first = $group->first();
                                                 $totalAmount = $group->sum('amount');
+                                                $studentCount = $group->pluck('admission_id')->filter()->unique()->count();
                                             @endphp
                                             <tr data-status="{{ $first->payment_method }}">
                                                 <td>{{ $loop->iteration }}</td>
-                                                <td>{{ $first->admission->name ?? 'N/A' }}</td>
-                                                <td>{{ $first->admission->course->title ?? 'N/A' }}</td>
-                                                <td>{{ number_format($totalAmount) }} PKR</td>
-                                                <td>{{ ucfirst(str_replace('_', ' ', $first->payment_type)) }}</td>
                                                 <td>
                                                     <span
                                                         class="badge badge-{{ $first->payment_method === 'hand' ? 'success' : 'info' }}">
                                                         {{ ucfirst($first->payment_method) }}
                                                     </span>
                                                 </td>
+                                                <td>{{ $studentCount }}</td>
+                                                <td>{{ number_format($totalAmount) }} PKR</td>
                                                 <td>
                                                     @if ($first->payment_method === 'hand')
                                                         <strong>Collected By:</strong> {{ $first->user->name ?? 'N/A' }}
                                                     @elseif ($first->payment_method === 'account')
-                                                        <strong>Account:</strong> {{ $first->account->name ?? 'N/A' }}<br>
+                                                        <strong>Type:</strong> {{ $first->account->type ?? 'N/A' }}<br>
+                                                        <strong>Name:</strong> {{ $first->account->name ?? 'N/A' }}<br>
                                                         <strong>Number:</strong> {{ $first->account->number ?? 'N/A' }}
                                                     @endif
                                                 </td>

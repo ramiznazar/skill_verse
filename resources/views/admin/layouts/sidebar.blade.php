@@ -279,7 +279,7 @@
                         <li> <a href="{{ route('admin.dashboard.profit.index') }}">
                                 <i class="fas fa-chart-line"></i><span>Profit Calculation</span></a></li>
 
-                        <li> <a href="{{ route('admin.dashboard.referrals.index') }}">
+                        <li> <a href="{{ route('referral-commission.index') }}">
                                 <i class="fas fa-handshake"></i><span>Referral Commission</span></a></li>
 
                         <li>

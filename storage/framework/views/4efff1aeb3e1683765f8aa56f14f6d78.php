@@ -4,10 +4,10 @@
         <div class="block-header">
             <div class="row clearfix">
                 <div class="col-md-6 col-sm-12">
-                    <h2>Teachers</h2>
+                    <h2>Teachers Balance</h2>
                 </div>
                 <div class="col-md-6 col-sm-12 text-right">
-                    <a href="<?php echo e(route('teacher.create')); ?>" class="btn btn-sm btn-primary" title="">Create New</a>
+                    <a href="<?php echo e(route('teacher-salary.index')); ?>" class="btn btn-sm btn-primary" title="">Back to Teachers</a>
                 </div>
             </div>
         </div>
@@ -47,7 +47,7 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="header">
-                            <h2>All Teachers</h2>
+                            <h2>Balances</h2>
                             <ul class="header-dropdown dropdown dropdown-animated scale-left">
                                 <li> <a href="javascript:void(0);" data-toggle="cardloading" data-loading-effect="pulse"><i
                                             class="icon-refresh"></i></a></li>
@@ -92,8 +92,7 @@
                                                         method="POST">
                                                         <?php echo csrf_field(); ?>
                                                         <?php echo method_field('PUT'); ?>
-                                                        <button class="btn btn-sm btn-success"
-                                                        <?php echo e($balance->status === 'paid' ? 'disabled' : ''); ?>>
+                                                        <button class="btn btn-sm btn-success">
                                                         Mark as Paid</button>
                                                     </form>
                                                 </td>

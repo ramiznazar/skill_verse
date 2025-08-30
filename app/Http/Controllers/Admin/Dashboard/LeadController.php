@@ -33,7 +33,7 @@ class LeadController extends Controller
             'guardian_name' => 'nullable|string|max:255',
             'guardian_contact' => 'nullable|string|max:20',
             'cnic' => 'nullable|string|max:20',
-            'dob' => 'required|string|max:50',
+            'dob' => 'nullable|string|max:50',
             'email' => 'nullable|email|max:255',
             'phone' => 'nullable|string|max:20',
             'gender' => 'nullable|in:male,female',

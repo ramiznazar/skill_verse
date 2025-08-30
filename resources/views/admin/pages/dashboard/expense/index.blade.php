@@ -53,15 +53,16 @@
                             </ul>
                         </div>
                         <div class="body">
-                           <div class="table-responsive">
+                            <div class="table-responsive">
                                 <table class="table m-b-0">
-                                    <thead class="">
+                                    <thead>
                                         <tr>
                                             <th>#</th>
                                             <th>Title</th>
                                             <th>Amount (PKR)</th>
-                                            <th>Purpose</th>
+                                            <th>Type</th>
                                             <th>Date</th>
+                                            <th>Purpose</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -69,29 +70,55 @@
                                         @forelse($expenses as $expense)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
-                                                <td>{{ $expense->title }}</td>
-                                                <td>{{ number_format($expense->amount) }}</td>
-                                                <td>{{ $expense->purpose }}</td>
-                                                <td>{{ \Carbon\Carbon::parse($expense->date)->format('d-M-Y') }}</td>
-                                               <td class="actions">
-                                                    <div class="d-flex align-items-center" style="column-gap: 5px;">
 
-                                                        <!-- Edit Button -->
+                                                {{-- Title --}}
+                                                <td>
+                                                    {{ $expense->title }}
+                                                    @if ($expense->ref_type && $expense->ref_id)
+                                                        <small class="text-muted d-block">
+                                                            Linked: {{ ucfirst($expense->ref_type) }}
+                                                            #{{ $expense->ref_id }}
+                                                        </small>
+                                                    @endif
+                                                </td>
+
+                                                {{-- Amount --}}
+                                                <td>{{ number_format((float) $expense->amount) }}</td>
+
+                                                {{-- Type --}}
+                                                <td>
+                                                    @if ($expense->type === 'essential')
+                                                        <span class="badge badge-success">Essential</span>
+                                                    @else
+                                                        <span class="badge badge-danger">Non-Essential</span>
+                                                    @endif
+                                                </td>
+
+                                                {{-- Date --}}
+                                                <td>{{ \Carbon\Carbon::parse($expense->date)->format('d-M-Y') }}</td>
+
+                                                {{-- Purpose --}}
+                                                <td>{{ $expense->purpose }}</td>
+
+                                                {{-- Actions --}}
+                                                <td class="actions">
+                                                    <div class="d-flex align-items-center" style="column-gap: 5px;">
+                                                        <!-- Edit -->
                                                         <a href="{{ route('expense.edit', $expense->id) }}"
                                                             class="btn btn-sm btn-icon btn-pure btn-default on-default button-edit"
-                                                            data-toggle="tooltip" data-original-title="Edit">
+                                                            data-toggle="tooltip" title="Edit">
                                                             <i class="icon-pencil" aria-hidden="true"></i>
                                                         </a>
 
-                                                        <!-- Delete Button -->
+                                                        <!-- Delete -->
                                                         <form action="{{ route('expense.destroy', $expense->id) }}"
                                                             method="POST"
-                                                            onsubmit="return confirm('Are you sure you want to delete this account?')">
+                                                            onsubmit="return confirm('Are you sure you want to delete this expense?')">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit"
                                                                 class="btn btn-sm btn-icon btn-pure btn-default on-default button-remove"
-                                                                data-toggle="tooltip" data-original-title="Remove">
+                                                                data-toggle="tooltip" title="Remove">
                                                                 <i class="icon-trash" aria-hidden="true"></i>
                                                             </button>
                                                         </form>
@@ -100,11 +127,12 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="6" class="text-center">No expenses found.</td>
+                                                <td colspan="7" class="text-center">No expenses found.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
                                 </table>
+
 
                             </div>
                         </div>

@@ -1,4 +1,4 @@
-@extends( 'admin.layouts.main')
+@extends('admin.layouts.main')
 
 @section('content')
     <div id="main-content">
@@ -12,7 +12,7 @@
                 </div>
             </div>
         </div>
-         {{-- Paid --}}
+        {{-- Paid --}}
         @if (session('paid'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
                 {{ session('paid') }}
@@ -81,11 +81,10 @@
                                             <th>#</th>
                                             <th>Name</th>
                                             <th>Month</th>
-                                            <th>Year</th>
-                                            <th>Total Students</th>
-                                            <th>Total Fee Collected</th>
-                                            <th>Percentage</th>
-                                            <th>Salary Amount</th>
+                                            <th>Students</th>
+                                            <th>Collected</th>
+                                            <th>% / Rate</th>
+                                            <th>Salary</th>
                                             <th>Status</th>
                                             <th>Action</th>
                                         </tr>
@@ -95,8 +94,8 @@
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $salary->teacher->name ?? 'N/A' }}</td>
-                                                <td>{{ \Carbon\Carbon::create()->month($salary->month)->format('F') }}</td>
-                                                <td>{{ $salary->year }}</td>
+                                                    <td>{{ \Carbon\Carbon::create()->month($salary->month)->format('F') }} {{ $salary->year }}</td>
+
                                                 <td>{{ $salary->total_students }}</td>
                                                 <td>{{ number_format($salary->total_fee_collected) }} PKR</td>
                                                 <td>{{ $salary->percentage }}%</td>
@@ -110,30 +109,39 @@
                                                         {{ ucfirst($salary->status) }}
                                                     </span>
                                                 </td>
-                                                
                                                 <td>
+                                                    {{-- Paid --}}
                                                     <form method="POST"
                                                         action="{{ route('teacher-salary.status-paid', $salary->id) }}"
-                                                        style="display: inline-block;">
-                                                        @csrf
-                                                        @method('PUT')
+                                                        style="display:inline-block;">
+                                                        @csrf @method('PUT')
                                                         <button type="submit" class="btn btn-sm btn-success"
-                                                           {{ in_array(strtolower($salary->status), ['paid', 'balance']) ? 'disabled' : '' }}>
+                                                            {{-- {{ in_array(strtolower($salary->status), ['paid', 'balance']) ? 'disabled' : '' }} --}}>
                                                             Paid
                                                         </button>
                                                     </form>
 
+                                                    {{-- Balance --}}
                                                     <form method="POST"
                                                         action="{{ route('teacher-salary.status-balance', $salary->id) }}"
-                                                        style="display: inline-block;">
-                                                        @csrf
-                                                        @method('PUT')
+                                                        style="display:inline-block;">
+                                                        @csrf @method('PUT')
                                                         <button type="submit" class="btn btn-sm btn-warning"
-                                                           {{ in_array(strtolower($salary->status), ['paid', 'balance']) ? 'disabled' : '' }}>
+                                                            {{-- {{ in_array(strtolower($salary->status), ['paid', 'balance']) ? 'disabled' : '' }} --}}>
                                                             Balance
                                                         </button>
                                                     </form>
+
+                                                    {{-- View History for this teacher --}}
+                                                    <a href="{{ route('teacher-salary.history', $salary->teacher_id) }}"
+                                                        class="btn btn-sm btn-info">
+                                                        History
+                                                    </a>
+
+                                                    {{-- Existing Teacher Balances page (aap ne diya hua button header me bhi hai) --}}
+                                                    {{-- <a href="{{ route('teacher.balance') }}" class="btn btn-sm btn-primary">Balances</a> --}}
                                                 </td>
+
                                             </tr>
                                         @endforeach
                                     </tbody>

@@ -56,15 +56,16 @@
                             </ul>
                         </div>
                         <div class="body">
-                           <div class="table-responsive">
+                            <div class="table-responsive">
                                 <table class="table m-b-0">
-                                    <thead class="">
+                                    <thead>
                                         <tr>
                                             <th>#</th>
                                             <th>Title</th>
                                             <th>Amount (PKR)</th>
-                                            <th>Purpose</th>
+                                            <th>Type</th>
                                             <th>Date</th>
+                                            <th>Purpose</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -72,29 +73,58 @@
                                         <?php $__empty_1 = true; $__currentLoopData = $expenses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $expense): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                             <tr>
                                                 <td><?php echo e($loop->iteration); ?></td>
-                                                <td><?php echo e($expense->title); ?></td>
-                                                <td><?php echo e(number_format($expense->amount)); ?></td>
-                                                <td><?php echo e($expense->purpose); ?></td>
-                                                <td><?php echo e(\Carbon\Carbon::parse($expense->date)->format('d-M-Y')); ?></td>
-                                               <td class="actions">
-                                                    <div class="d-flex align-items-center" style="column-gap: 5px;">
 
-                                                        <!-- Edit Button -->
+                                                
+                                                <td>
+                                                    <?php echo e($expense->title); ?>
+
+                                                    <?php if($expense->ref_type && $expense->ref_id): ?>
+                                                        <small class="text-muted d-block">
+                                                            Linked: <?php echo e(ucfirst($expense->ref_type)); ?>
+
+                                                            #<?php echo e($expense->ref_id); ?>
+
+                                                        </small>
+                                                    <?php endif; ?>
+                                                </td>
+
+                                                
+                                                <td><?php echo e(number_format((float) $expense->amount)); ?></td>
+
+                                                
+                                                <td>
+                                                    <?php if($expense->type === 'essential'): ?>
+                                                        <span class="badge badge-success">Essential</span>
+                                                    <?php else: ?>
+                                                        <span class="badge badge-danger">Non-Essential</span>
+                                                    <?php endif; ?>
+                                                </td>
+
+                                                
+                                                <td><?php echo e(\Carbon\Carbon::parse($expense->date)->format('d-M-Y')); ?></td>
+
+                                                
+                                                <td><?php echo e($expense->purpose); ?></td>
+
+                                                
+                                                <td class="actions">
+                                                    <div class="d-flex align-items-center" style="column-gap: 5px;">
+                                                        <!-- Edit -->
                                                         <a href="<?php echo e(route('expense.edit', $expense->id)); ?>"
                                                             class="btn btn-sm btn-icon btn-pure btn-default on-default button-edit"
-                                                            data-toggle="tooltip" data-original-title="Edit">
+                                                            data-toggle="tooltip" title="Edit">
                                                             <i class="icon-pencil" aria-hidden="true"></i>
                                                         </a>
 
-                                                        <!-- Delete Button -->
+                                                        <!-- Delete -->
                                                         <form action="<?php echo e(route('expense.destroy', $expense->id)); ?>"
                                                             method="POST"
-                                                            onsubmit="return confirm('Are you sure you want to delete this account?')">
+                                                            onsubmit="return confirm('Are you sure you want to delete this expense?')">
                                                             <?php echo csrf_field(); ?>
                                                             <?php echo method_field('DELETE'); ?>
                                                             <button type="submit"
                                                                 class="btn btn-sm btn-icon btn-pure btn-default on-default button-remove"
-                                                                data-toggle="tooltip" data-original-title="Remove">
+                                                                data-toggle="tooltip" title="Remove">
                                                                 <i class="icon-trash" aria-hidden="true"></i>
                                                             </button>
                                                         </form>
@@ -103,11 +133,12 @@
                                             </tr>
                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                             <tr>
-                                                <td colspan="6" class="text-center">No expenses found.</td>
+                                                <td colspan="7" class="text-center">No expenses found.</td>
                                             </tr>
                                         <?php endif; ?>
                                     </tbody>
                                 </table>
+
 
                             </div>
                         </div>

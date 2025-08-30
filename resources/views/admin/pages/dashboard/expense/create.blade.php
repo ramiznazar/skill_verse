@@ -22,20 +22,26 @@
                         <div class="body">
                             <form action="{{ route('expense.store') }}" method="POST">
                                 @csrf
-                                <div class="form-group">
 
+                                <div class="row">
                                     {{-- Title --}}
-                                    <label>Title</label>
-                                    <input type="text" name="title" class="form-control" value="{{ old('title') }}"
-                                        required>
-                                    @error('title')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Title</label>
+                                            <input type="text" name="title" class="form-control"
+                                                value="{{ old('title') }}" required>
+                                            @error('title')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
                                 </div>
+
+
 
                                 <div class="row">
                                     {{-- Amount --}}
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Amount (PKR)</label>
                                             <input type="number" name="amount" class="form-control"
@@ -46,13 +52,32 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         {{-- Date --}}
                                         <div class="form-group">
                                             <label>Date</label>
                                             <input type="date" name="date" class="form-control"
-                                                value="{{ old('date', date('Y-m-d')) }}" required>
+                                                value="{{ old('date', date('Y-m-d')) }}">
                                             @error('date')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    {{-- Expense Type --}}
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Expense Type</label>
+                                            <select name="type" id="expenseTypeSelect" class="form-control" required>
+                                                <option value="">-- Select Type --</option>
+                                                <option value="essential"
+                                                    {{ old('type') == 'essential' ? 'selected' : '' }}>
+                                                    Essential</option>
+                                                <option value="non-essential"
+                                                    {{ old('type') == 'non-essential' ? 'selected' : '' }}>Non-Essential
+                                                </option>
+                                            </select>
+                                            @error('type')
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>
@@ -62,7 +87,7 @@
                                 {{-- Purpose --}}
                                 <div class="form-group">
                                     <label>Purpose</label>
-                                    <textarea name="purpose" class="form-control" rows="3" required>{{ old('purpose') }}</textarea>
+                                    <textarea name="purpose" class="form-control" rows="3">{{ old('purpose') }}</textarea>
                                     @error('purpose')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror

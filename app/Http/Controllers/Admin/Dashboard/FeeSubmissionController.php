@@ -109,10 +109,10 @@ class FeeSubmissionController extends Controller
         $batch = Batch::find($admission->batch_id);
         if ($batch && $batch->teacher_id && $totalAmountThisSubmission > 0) {
             $teacher = $batch->teacher;
-            $percentage = floatval($teacher->salary ?? 0);  // ✅ fix here
+            $percentage = floatval($teacher->salary ?? 0);
 
             $month = now()->month;
-            $year = now()->year;
+            $year  = now()->year;
 
             $teacherSalary = TeacherSalary::firstOrNew([
                 'teacher_id' => $teacher->id,
@@ -120,14 +120,25 @@ class FeeSubmissionController extends Controller
                 'year'       => $year,
             ]);
 
+            // 🔁 If the previous cycle was closed (paid/balance), reopen a fresh unpaid cycle
+            if (in_array(strtolower($teacherSalary->status ?? 'unpaid'), ['paid', 'balance'], true)) {
+                $teacherSalary->status = 'unpaid';
+                $teacherSalary->total_fee_collected = 0;
+                $teacherSalary->total_students = 0;
+                $teacherSalary->salary_amount = 0;
+            }
+
+            // ➕ Add current submission
             $teacherSalary->total_fee_collected = ($teacherSalary->total_fee_collected ?? 0) + $totalAmountThisSubmission;
             $teacherSalary->percentage = $percentage;
-            $teacherSalary->salary_amount = intval($teacherSalary->total_fee_collected * ($percentage / 100));
+            $teacherSalary->salary_amount = (int) ($teacherSalary->total_fee_collected * ($percentage / 100));
 
+            // Distinct students this month for this batch
             $teacherSalary->total_students = FeeSubmission::whereHas('admission', function ($q) use ($batch) {
                 $q->where('batch_id', $batch->id);
-            })->whereMonth('submission_date', now()->month)
-                ->whereYear('submission_date', now()->year)
+            })
+                ->whereMonth('submission_date', $month)
+                ->whereYear('submission_date', $year)
                 ->distinct('admission_id')
                 ->count('admission_id');
 
