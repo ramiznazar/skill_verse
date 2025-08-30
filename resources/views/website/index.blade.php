@@ -465,8 +465,8 @@
                                                 <div class="styled-select">
                                                     <select id="person_select" name="course_id" class="form-control"
                                                         required="">
+                                                        <option value="">Choose Course</option>
                                                         @foreach ($courses as $course)
-                                                            <option value="">Choose Course</option>
                                                             <option value="{{ $course->id }}">{{ $course->title }}
                                                             </option>
                                                         @endforeach
