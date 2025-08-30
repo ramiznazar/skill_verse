@@ -59,8 +59,9 @@
                                         <tr>
                                             <th>#</th>
                                             <th>Title</th>
-                                            <th>Amount (PKR)</th>
+                                            <th>Amount</th>
                                             <th>Type</th>
+                                            <th>Category</th> <!-- 👈 yahan ref_type show hoga -->
                                             <th>Date</th>
                                             <th>Purpose</th>
                                             <th>Actions</th>
@@ -70,22 +71,8 @@
                                         @forelse($expenses as $expense)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
-
-                                                {{-- Title --}}
-                                                <td>
-                                                    {{ $expense->title }}
-                                                    @if ($expense->ref_type && $expense->ref_id)
-                                                        <small class="text-muted d-block">
-                                                            Linked: {{ ucfirst($expense->ref_type) }}
-                                                            #{{ $expense->ref_id }}
-                                                        </small>
-                                                    @endif
-                                                </td>
-
-                                                {{-- Amount --}}
+                                                <td>{{ $expense->title }}</td>
                                                 <td>{{ number_format((float) $expense->amount) }}</td>
-
-                                                {{-- Type --}}
                                                 <td>
                                                     @if ($expense->type === 'essential')
                                                         <span class="badge badge-success">Essential</span>
@@ -93,24 +80,23 @@
                                                         <span class="badge badge-danger">Non-Essential</span>
                                                     @endif
                                                 </td>
-
-                                                {{-- Date --}}
+                                                <td>
+                                                    @if ($expense->ref_type)
+                                                        <span
+                                                            class="badge badge-info">{{ ucfirst($expense->ref_type) }}</span>
+                                                    @else
+                                                        <span class=" badge badge-warning">None</span>
+                                                    @endif
+                                                </td>
                                                 <td>{{ \Carbon\Carbon::parse($expense->date)->format('d-M-Y') }}</td>
-
-                                                {{-- Purpose --}}
                                                 <td>{{ $expense->purpose }}</td>
-
-                                                {{-- Actions --}}
                                                 <td class="actions">
                                                     <div class="d-flex align-items-center" style="column-gap: 5px;">
-                                                        <!-- Edit -->
                                                         <a href="{{ route('expense.edit', $expense->id) }}"
                                                             class="btn btn-sm btn-icon btn-pure btn-default on-default button-edit"
                                                             data-toggle="tooltip" title="Edit">
                                                             <i class="icon-pencil" aria-hidden="true"></i>
                                                         </a>
-
-                                                        <!-- Delete -->
                                                         <form action="{{ route('expense.destroy', $expense->id) }}"
                                                             method="POST"
                                                             onsubmit="return confirm('Are you sure you want to delete this expense?')">
@@ -127,13 +113,11 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="7" class="text-center">No expenses found.</td>
+                                                <td colspan="8" class="text-center">No expenses found.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
                                 </table>
-
-
                             </div>
                         </div>
                     </div>

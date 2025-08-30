@@ -25,12 +25,24 @@
 
                                 <div class="row">
                                     {{-- Title --}}
-                                    <div class="col-md-12">
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Title</label>
                                             <input type="text" name="title" class="form-control"
                                                 value="{{ old('title') }}" required>
                                             @error('title')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    {{-- ref type --}}
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Type</label>
+                                            <input type="text" name="ref_type" class="form-control"
+                                                value="{{ old('ref_type') }}">
+                                            @error('ref_type')
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>

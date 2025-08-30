@@ -24,14 +24,29 @@
                                 @csrf
                                 @method('PUT')
 
-                                {{-- Title --}}
-                                <div class="form-group">
-                                    <label>Title</label>
-                                    <input type="text" name="title" class="form-control"
-                                        value="{{ old('title', $expense->title) }}" required>
-                                    @error('title')
-                                        <small class="text-danger">{{ $message }}</small>
-                                    @enderror
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        {{-- Title --}}
+                                        <div class="form-group">
+                                            <label>Title</label>
+                                            <input type="text" name="title" class="form-control"
+                                                value="{{ old('title', $expense->title) }}" required>
+                                            @error('title')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    {{-- Type --}}
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Type</label>
+                                            <input type="text" name="ref_type" class="form-control"
+                                                value="{{ old('ref_type', $expense->ref_type) }}">
+                                            @error('ref_type')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="row">

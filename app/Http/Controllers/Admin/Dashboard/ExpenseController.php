@@ -32,6 +32,7 @@ class ExpenseController extends Controller
     {
           $data = $request->validate([
             'title'   => 'required|string|max:255',
+            'ref_type'=> 'nullable|string|max:255',
             'amount'  => 'required|numeric|min:0',
             'purpose' => 'nullable|string',
             'type'    => 'required|string',
@@ -67,6 +68,7 @@ class ExpenseController extends Controller
     {
         $data = $request->validate([
             'title'   => 'required|string|max:255',
+            'ref_type'=> 'nullable|string|max:255',
             'amount'  => 'required|numeric|min:0',
             'purpose' => 'nullable|string',
             'type'    => 'required|string',
