@@ -465,8 +465,8 @@
                                                 <div class="styled-select">
                                                     <select id="person_select" name="course_id" class="form-control"
                                                         required="">
+                                                        <option value="">Choose Course</option>
                                                         <?php $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                            <option value="">Choose Course</option>
                                                             <option value="<?php echo e($course->id); ?>"><?php echo e($course->title); ?>
 
                                                             </option>

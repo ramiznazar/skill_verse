@@ -43,7 +43,7 @@ unset($__errorArgs, $__bag); ?>
 
                                 <div class="row">
                                     
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Amount (PKR)</label>
                                             <input type="number" name="amount" class="form-control"
@@ -53,7 +53,7 @@ $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
 $message = $__bag->first($__errorArgs[0]); ?>
-                                            <small class="text-danger"><?php echo e($message); ?></small>
+                                                <small class="text-danger"><?php echo e($message); ?></small>
                                             <?php unset($message);
 if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
@@ -61,7 +61,7 @@ unset($__errorArgs, $__bag); ?>
                                         </div>
                                     </div>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         
                                         <div class="form-group">
                                             <label>Date</label>
@@ -80,6 +80,35 @@ endif;
 unset($__errorArgs, $__bag); ?>
                                         </div>
                                     </div>
+
+                                    
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Expense Type</label>
+                                            <select name="type" id="expenseTypeSelect" class="form-control">
+                                                <option value="">-- Select Type --</option>
+                                                <option value="essential"
+                                                    <?php echo e(old('type', $expense->type) == 'essential' ? 'selected' : ''); ?>>
+                                                    Essential
+                                                </option>
+                                                <option value="non-essential"
+                                                    <?php echo e(old('type', $expense->type) == 'non-essential' ? 'selected' : ''); ?>>
+                                                    Non-Essential
+                                                </option>
+                                            </select>
+                                            <?php $__errorArgs = ['type'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                                <small class="text-danger"><?php echo e($message); ?></small>
+                                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                                        </div>
+                                    </div>
+
                                 </div>
 
                                 

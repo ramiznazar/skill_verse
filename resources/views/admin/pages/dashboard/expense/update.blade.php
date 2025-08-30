@@ -36,7 +36,7 @@
 
                                 <div class="row">
                                     {{-- Amount --}}
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Amount (PKR)</label>
                                             <input type="number" name="amount" class="form-control"
@@ -47,7 +47,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         {{-- Date --}}
                                         <div class="form-group">
                                             <label>Date</label>
