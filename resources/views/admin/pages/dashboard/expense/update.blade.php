@@ -25,7 +25,7 @@
                                 @method('PUT')
 
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         {{-- Title --}}
                                         <div class="form-group">
                                             <label>Title</label>
@@ -37,7 +37,7 @@
                                         </div>
                                     </div>
                                     {{-- Type --}}
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Type</label>
                                             <input type="text" name="ref_type" class="form-control"

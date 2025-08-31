@@ -61,7 +61,7 @@
                                             <th>Title</th>
                                             <th>Amount</th>
                                             <th>Type</th>
-                                            <th>Category</th> <!-- 👈 yahan ref_type show hoga -->
+                                            <th>Category</th>
                                             <th>Date</th>
                                             <th>Purpose</th>
                                             <th>Actions</th>

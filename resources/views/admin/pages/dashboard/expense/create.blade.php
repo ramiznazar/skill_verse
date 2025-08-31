@@ -49,8 +49,6 @@
                                     </div>
                                 </div>
 
-
-
                                 <div class="row">
                                     {{-- Amount --}}
                                     <div class="col-md-4">
