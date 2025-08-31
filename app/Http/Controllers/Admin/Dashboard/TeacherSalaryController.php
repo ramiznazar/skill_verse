@@ -65,7 +65,7 @@ class TeacherSalaryController extends Controller
             if ($amount > 0) {
                 Expense::firstOrCreate(
                     [
-                        'ref_type' => 'teacher_salary',
+                        'ref_type' => 'salary',
                         'ref_id'   => $salary->id,
                     ],
                     [

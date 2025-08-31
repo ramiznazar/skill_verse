@@ -121,14 +121,14 @@ class ReferralCommissionController extends Controller
                 if ($amount > 0) {
                     Expense::firstOrCreate(
                         [
-                            'ref_type' => 'referral_commission',
+                            'ref_type' => 'commission',
                             'ref_id'   => $commission->id,
                         ],
                         [
                             'title'   => 'Referral Commission',
                             'amount'  => (string) $amount,
                             'date'    => now()->toDateString(),
-                            'purpose' => "Referral payout to {$referrerName}",
+                            'purpose' => "Referral Commission payout to {$referrerName}",
                             'type'    => 'essential',
                         ]
                     );
