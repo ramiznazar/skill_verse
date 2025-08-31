@@ -84,13 +84,19 @@
 
                                                 <td class="text-nowrap">
                                                     <div class="d-flex align-items-center" style="column-gap: 5px;">
+                                                        
+                                                        <a href="<?php echo e(route('lead-followups.index', $lead->id)); ?>"
+                                                            class="btn btn-sm btn-icon btn-pure btn-info"
+                                                            title="Follow-ups">
+                                                            <i class="fas fa-comments"></i>
+                                                        </a>
                                                         <!-- Move to Admission -->
                                                         <a href="<?php echo e(route('admission.create', ['lead_id' => $lead->id])); ?>"
                                                             class="btn btn-sm btn-icon btn-pure btn-success"
                                                             data-toggle="tooltip" title="Convert to Admission">
                                                             <i class="fas fa-user-plus"></i>
                                                         </a>
-                                                        
+
                                                         <!-- Edit Button -->
                                                         <a href="<?php echo e(route('lead.edit', $lead->id)); ?>"
                                                             class="btn btn-sm btn-icon btn-pure btn-default on-default button-edit"
@@ -119,7 +125,6 @@
                                         <?php endif; ?>
                                     </tbody>
                                 </table>
-
                             </div>
                         </div>
                     </div>

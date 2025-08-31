@@ -81,13 +81,19 @@
 
                                                 <td class="text-nowrap">
                                                     <div class="d-flex align-items-center" style="column-gap: 5px;">
+                                                        {{-- Follow Up --}}
+                                                        <a href="{{ route('lead-followups.index', $lead->id) }}"
+                                                            class="btn btn-sm btn-icon btn-pure btn-info"
+                                                            title="Follow-ups">
+                                                            <i class="fas fa-comments"></i>
+                                                        </a>
                                                         <!-- Move to Admission -->
                                                         <a href="{{ route('admission.create', ['lead_id' => $lead->id]) }}"
                                                             class="btn btn-sm btn-icon btn-pure btn-success"
                                                             data-toggle="tooltip" title="Convert to Admission">
                                                             <i class="fas fa-user-plus"></i>
                                                         </a>
-                                                        
+
                                                         <!-- Edit Button -->
                                                         <a href="{{ route('lead.edit', $lead->id) }}"
                                                             class="btn btn-sm btn-icon btn-pure btn-default on-default button-edit"
@@ -116,7 +122,6 @@
                                         @endforelse
                                     </tbody>
                                 </table>
-
                             </div>
                         </div>
                     </div>

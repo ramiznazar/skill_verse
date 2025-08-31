@@ -19,6 +19,7 @@ use App\Http\Controllers\Admin\Dashboard\{
     AuthController,
     UserController,
     LeadController,
+    LeadFollowUpController,
     PartnerController,
     PartnerProfitController,
     BatchController,
@@ -117,7 +118,7 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
     });
     Route::get('/referral-commission', [ReferralCommissionController::class, 'index'])->name('referral-commission.index');
     Route::put('/referral-commission/paid', [ReferralCommissionController::class, 'paid'])->name('referral-commission.paid');
-    Route::get('/referral-commission/history/{name}/{contact?}', [ReferralCommissionController::class, 'history']) ->name('referral-commission.history');
+    Route::get('/referral-commission/history/{name}/{contact?}', [ReferralCommissionController::class, 'history'])->name('referral-commission.history');
 
 
     // All Admin Resource Controllers
@@ -135,6 +136,7 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
         'teacher' => TeacherController::class,
         'batch' => BatchController::class,
         'lead' => LeadController::class,
+        // 'follow-up' => LeadFollowUpController::class,
         'admission' => AdmissionController::class,
         'account' => AccountController::class,
         'expense' => ExpenseController::class,
@@ -156,12 +158,17 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
     Route::post('/fee-submission/store/{id}', [FeeSubmissionController::class, 'store'])->name('fee-submission.store');
     Route::get('/fee-submissions/{id}/receipt', [FeeSubmissionController::class, 'receipt'])->name('fee-submissions.receipt');
     Route::get('/fee-submissions/{id}/download-pdf', [FeeSubmissionController::class, 'downloadReceipt'])->name('fee-submission.download-receipt');
-
+    // Lead Follow Up
+    Route::get('/lead-followups/{lead}', [LeadFollowUpController::class, 'index'])->name('lead-followups.index');
+    Route::get('/lead-followups/{lead}/create', [LeadFollowUpController::class, 'create'])->name('lead-followups.create');
+    Route::post('/lead-followups/{lead}/store', [LeadFollowUpController::class, 'store'])->name('lead-followups.store');
+    Route::get('/lead-followups/{lead}/{followup}/edit', [LeadFollowUpController::class, 'edit'])->name('lead-followups.edit');
+    Route::put('/lead-followups/{lead}/{followup}', [LeadFollowUpController::class, 'update'])->name('lead-followups.update');
+    Route::delete('/lead-followups/{lead}/{followUp}', [LeadFollowUpController::class, 'destroy'])->name('lead-followups.destroy');
     //Fee Collector
     Route::get('/fee-collector', [FeeCollectorController::class, 'index'])->name('fee-collector.index');
     Route::get('/collector-history/{user}', [FeeCollectorController::class, 'collectorHistory'])->name('collector.history');
     Route::get('/account-history/{account}', [FeeCollectorController::class, 'accountHistory'])->name('account.history');
-
 
     // Course Outlines
     Route::prefix('admin')->name('course-outline.')->group(function () {
