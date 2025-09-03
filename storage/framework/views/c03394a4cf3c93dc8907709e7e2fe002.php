@@ -56,11 +56,15 @@
                                 <h5 class="widget-title line-bottom">Search <span class="text-theme-color-2">Courses</span>
                                 </h5>
                                 <div class="search-form">
-                                    <form>
+                                    
+                                    <form method="GET" action="<?php echo e(route('course')); ?>">
+                                        <?php if(!empty($categoryId)): ?>
+                                            <input type="hidden" name="category" value="<?php echo e($categoryId); ?>">
+                                        <?php endif; ?>
                                         <div class="input-group">
-                                            <input type="text" id="course-search" placeholder="Click to Search"
+                                            <input type="text" id="course-search" name="q" value="<?php echo e($q ?? ''); ?>"
+                                                placeholder="Click to Search"
                                                 class="form-control search-input">
-
                                             <span class="input-group-btn">
                                                 <button type="submit" class="btn search-button"><i
                                                         class="fa fa-search"></i></button>
@@ -74,10 +78,20 @@
                                         class="text-theme-color-2">Categories</span></h5>
                                 <div class="categories">
                                     <ul class="list list-border angle-double-right">
+                                        
+                                        <li>
+                                            <a href="<?php echo e(route('course', array_filter(['q' => $q ?? null]))); ?>"
+                                               class="<?php echo e(empty($categoryId) ? 'active-category' : ''); ?>">
+                                                All
+                                                <span>(<?php echo e($categories->sum('course_count')); ?>)</span>
+                                            </a>
+                                        </li>
 
                                         <?php $__currentLoopData = $categories; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <li>
-                                                <a href="#" class="category-filter" data-id="<?php echo e($category->id); ?>">
+                                                
+                                                <a href="<?php echo e(route('course', array_filter(['category' => $category->id, 'q' => $q ?? null]))); ?>"
+                                                   class="<?php echo e(isset($categoryId) && (int) $categoryId === (int) $category->id ? 'active-category' : ''); ?>">
                                                     <?php echo e($category->name); ?>
 
                                                     <span>(<?php echo e($category->course_count); ?>)</span>
@@ -91,54 +105,7 @@
                             <div class="widget">
                                 <h5 class="widget-title line-bottom">Popular<span class="text-theme-color-2">Courses</span>
                                 </h5>
-                                <div class="latest-posts">
-
-                                    
-                                    <article class="post media-post clearfix pb-0 mb-10">
-                                        <a class="post-thumb" href="<?php echo e(route('course.detail', $generativeAi->id)); ?>"><img
-                                                src="<?php echo e($generativeAi->image); ?>" alt="" height="70"
-                                                width="70"></a>
-                                        <div class="post-right">
-                                            <h5 class="post-title mt-0"><a
-                                                    href="<?php echo e(route('course.detail', $generativeAi->id)); ?>"><?php echo e($generativeAi->title); ?></a>
-                                            </h5>
-                                            <p style="font-size: 10px; margin-top: -10px ">
-                                                <?php echo e(\Illuminate\Support\Str::words($generativeAi->short_description, 14, '...')); ?>
-
-                                            </p>
-                                        </div>
-                                    </article>
-                                    <article class="post media-post clearfix pb-0 mb-10">
-                                        <a class="post-thumb" href="<?php echo e(route('course.detail', $freelancing->id)); ?>"><img
-                                                src="<?php echo e($freelancing->image); ?>" alt="" height="70"
-                                                width="70"></a>
-                                        <div class="post-right">
-                                            <h5 class="post-title mt-0"><a
-                                                    href="<?php echo e(route('course.detail', $freelancing->id)); ?>"><?php echo e($freelancing->title); ?></a>
-                                            </h5>
-                                            <p style="font-size: 10px; margin-top: -10px ">
-                                                <?php echo e(\Illuminate\Support\Str::words($freelancing->short_description, 14, '...')); ?>
-
-                                            </p>
-                                        </div>
-                                    </article>
-                                    <article class="post media-post clearfix pb-0 mb-10">
-                                        <a class="post-thumb" href="<?php echo e(route('course.detail', $development->id)); ?>"><img
-                                                src="<?php echo e($development->image); ?>" alt="" height="70"
-                                                width="70"></a>
-                                        <div class="post-right">
-                                            <h5 class="post-title mt-0"><a
-                                                    href="<?php echo e(route('course.detail', $development->id)); ?>"><?php echo e($development->title); ?></a>
-                                            </h5>
-                                            <p style="font-size: 10px; margin-top: -10px ">
-                                                <?php echo e(\Illuminate\Support\Str::words($development->short_description, 14, '...')); ?>
-
-                                            </p>
-                                        </div>
-                                    </article>
-                                    
-
-                                </div>
+                                
                             </div>
                             
                         </div>
@@ -147,6 +114,7 @@
                 <div class="row">
                     <div class="col-sm-12">
                         <div class="col-md-12 text-left">
+                            
                             <?php echo e($courses->links('pagination::bootstrap-4')); ?>
 
                         </div>
@@ -156,35 +124,10 @@
         </section>
     </div>
 <?php $__env->stopSection(); ?>
+
 <?php $__env->startSection('additional-javascript'); ?>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const categoryLinks = document.querySelectorAll(".category-filter");
-            const courses = document.querySelectorAll(".course-card");
-
-            categoryLinks.forEach(link => {
-                link.addEventListener("click", function(e) {
-                    e.preventDefault();
-                    const selectedCategoryId = this.getAttribute("data-id");
-
-                    courses.forEach(course => {
-                        const courseCategoryId = course.getAttribute("data-category-id");
-
-                        if (selectedCategoryId === "all" || selectedCategoryId ===
-                            courseCategoryId) {
-                            course.style.display = "block";
-                        } else {
-                            course.style.display = "none";
-                        }
-                    });
-
-                    // Optional: Highlight active category
-                    categoryLinks.forEach(link => link.classList.remove("active-category"));
-                    this.classList.add("active-category");
-                });
-            });
-        });
-    </script>
+    
+    
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('course-search');

@@ -12,16 +12,52 @@ use App\Models\PopularCourse;
 
 class CourseController extends Controller
 {
-    public function course()
+    public function course(Request $request)
     {
-        $courses = Course::with('courseCategory')->latest()->paginate(6);
-        $categories = CourseCategory::withCount('course')->get();
+        // NEW: read query params for server-side filtering
+        $categoryId = $request->query('category'); // e.g. ?category=3
+        $q          = $request->query('q');        // e.g. ?q=react
+
+        // Base query
+        $coursesQuery = Course::with('courseCategory');
+
+        if (!empty($categoryId)) {
+            $coursesQuery->where('course_category_id', $categoryId);
+        }
+
+        if (!empty($q)) {
+            $coursesQuery->where(function ($sub) use ($q) {
+                $sub->where('title', 'like', "%{$q}%")
+                    ->orWhere('short_description', 'like', "%{$q}%");
+            });
+        }
+
+        // Keep filters in pagination links
+        $courses = $coursesQuery->latest()->paginate(6)->withQueryString();
+
+        // Keep your existing "withCount('course')" naming to match $category->course_count in Blade
+        // (Optionally filter counts by search text, but NOT by category so user sees total per category for that search)
+        $categories = CourseCategory::withCount(['course' => function ($q2) use ($q) {
+            if (!empty($q)) {
+                $q2->where(function ($sub) use ($q) {
+                    $sub->where('title', 'like', "%{$q}%")
+                        ->orWhere('short_description', 'like', "%{$q}%");
+                });
+            }
+        }])->get();
+
         $popularCourses = PopularCourse::all();
-        $generativeAi = Course::where('title', 'Generative Ai')->first();
-        $freelancing = Course::where('title', 'Freelancing')->first();
-        $development = Course::where('title', 'Web Development')->first();
-        return view('website.pages.course.course', compact('courses', 'categories', 'popularCourses', 'generativeAi', 'freelancing', 'development'));
+        $generativeAi   = Course::where('title', 'Generative Ai')->first();
+        $freelancing    = Course::where('title', 'Freelancing')->first();
+        $development    = Course::where('title', 'Web Development')->first();
+
+        // Pass current filters to view for active state + preserving on search
+        return view(
+            'website.pages.course.course',
+            compact('courses', 'categories', 'popularCourses', 'generativeAi', 'freelancing', 'development', 'categoryId', 'q')
+        );
     }
+
     public function courseDetail($id)
     {
         $popularCourses = PopularCourse::all();
@@ -32,6 +68,7 @@ class CourseController extends Controller
         $lmsCourses = CourseLms::where('course_id', $id)->get();
         return view('website.pages.course.course-detail', compact('popularCourses', 'course', 'courses', 'categories', 'courseOutlines', 'lmsCourses'));
     }
+
     public function ajaxSearch(Request $request)
     {
         $query = $request->input('query');

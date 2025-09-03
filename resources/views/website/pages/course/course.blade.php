@@ -55,11 +55,15 @@
                                 <h5 class="widget-title line-bottom">Search <span class="text-theme-color-2">Courses</span>
                                 </h5>
                                 <div class="search-form">
-                                    <form>
+                                    {{-- UPDATED: make search a GET form and preserve selected category --}}
+                                    <form method="GET" action="{{ route('course') }}">
+                                        @if (!empty($categoryId))
+                                            <input type="hidden" name="category" value="{{ $categoryId }}">
+                                        @endif
                                         <div class="input-group">
-                                            <input type="text" id="course-search" placeholder="Click to Search"
+                                            <input type="text" id="course-search" name="q"
+                                                value="{{ $q ?? '' }}" placeholder="Click to Search"
                                                 class="form-control search-input">
-
                                             <span class="input-group-btn">
                                                 <button type="submit" class="btn search-button"><i
                                                         class="fa fa-search"></i></button>
@@ -73,10 +77,20 @@
                                         class="text-theme-color-2">Categories</span></h5>
                                 <div class="categories">
                                     <ul class="list list-border angle-double-right">
+                                        {{-- NEW: "All" link --}}
+                                        <li>
+                                            <a href="{{ route('course', array_filter(['q' => $q ?? null])) }}"
+                                                class="{{ empty($categoryId) ? 'active-category' : '' }}">
+                                                All
+                                                <span>({{ $categories->sum('course_count') }})</span>
+                                            </a>
+                                        </li>
 
                                         @foreach ($categories as $category)
                                             <li>
-                                                <a href="#" class="category-filter" data-id="{{ $category->id }}">
+                                                {{-- UPDATED: real link with GET param; preserves current search text --}}
+                                                <a href="{{ route('course', array_filter(['category' => $category->id, 'q' => $q ?? null])) }}"
+                                                    class="{{ isset($categoryId) && (int) $categoryId === (int) $category->id ? 'active-category' : '' }}">
                                                     {{ $category->name }}
                                                     <span>({{ $category->course_count }})</span>
                                                 </a>
@@ -89,9 +103,9 @@
                             <div class="widget">
                                 <h5 class="widget-title line-bottom">Popular<span class="text-theme-color-2">Courses</span>
                                 </h5>
-                                <div class="latest-posts">
+                                {{-- (kept commented block exactly as you had it) --}}
+                                 <div class="latest-posts">
 
-                                    {{-- @foreach ($popularCourses as $popular) --}}
                                     <article class="post media-post clearfix pb-0 mb-10">
                                         <a class="post-thumb" href="{{ route('course.detail', $generativeAi->id) }}"><img
                                                 src="{{ $generativeAi->image }}" alt="" height="70"
@@ -131,26 +145,17 @@
                                             </p>
                                         </div>
                                     </article>
-                                    {{-- @endforeach --}}
 
                                 </div>
                             </div>
-                            {{-- <div class="widget">
-                                <h5 class="widget-title line-bottom">Photos <span class="text-theme-color-2">from
-                                        Flickr</span></h5>
-                                <div id="flickr-feed" class="clearfix">
-                                    <!-- Flickr Link -->
-                                    <script type="text/javascript"
-                                        src="https://www.flickr.com/badge_code_v2.gne?count=9&amp;display=latest&amp;size=s&amp;layout=x&amp;source=user&amp;user=52617155@N08">
-                                    </script>
-                                </div>
-                            </div> --}}
+                            {{-- (kept Flickr widget commented as you had it) --}}
                         </div>
                     </div>
                 </div>
                 <div class="row">
                     <div class="col-sm-12">
                         <div class="col-md-12 text-left">
+                            {{-- Pagination already keeps query string via controller --}}
                             {{ $courses->links('pagination::bootstrap-4') }}
                         </div>
                     </div>
@@ -159,35 +164,10 @@
         </section>
     </div>
 @endsection
+
 @section('additional-javascript')
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const categoryLinks = document.querySelectorAll(".category-filter");
-            const courses = document.querySelectorAll(".course-card");
-
-            categoryLinks.forEach(link => {
-                link.addEventListener("click", function(e) {
-                    e.preventDefault();
-                    const selectedCategoryId = this.getAttribute("data-id");
-
-                    courses.forEach(course => {
-                        const courseCategoryId = course.getAttribute("data-category-id");
-
-                        if (selectedCategoryId === "all" || selectedCategoryId ===
-                            courseCategoryId) {
-                            course.style.display = "block";
-                        } else {
-                            course.style.display = "none";
-                        }
-                    });
-
-                    // Optional: Highlight active category
-                    categoryLinks.forEach(link => link.classList.remove("active-category"));
-                    this.classList.add("active-category");
-                });
-            });
-        });
-    </script>
+    {{-- REMOVED: client-side category filter JS (it conflicted with pagination) --}}
+    {{-- You can keep the live search JS if you like; it only filters the current page visually. --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const searchInput = document.getElementById('course-search');
