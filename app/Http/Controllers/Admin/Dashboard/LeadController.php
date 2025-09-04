@@ -40,6 +40,7 @@ class LeadController extends Controller
             'qualification' => 'nullable|string|max:50',
             'last_institute' => 'nullable|string|max:255',
             'address' => 'nullable|string',
+            'referral_type' => 'required',
             'referral_source' => 'nullable|string|max:255',
             'referral_source_contact' => 'nullable|string|max:20',
 
@@ -73,6 +74,7 @@ class LeadController extends Controller
             'qualification' => 'nullable|string|max:50',
             'last_institute' => 'nullable|string|max:255',
             'address' => 'nullable|string',
+            'referral_type' => 'required',
             'referral_source' => 'nullable|string|max:255',
             'referral_source_contact' => 'nullable|string|max:20',
         ]);

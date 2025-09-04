@@ -62,8 +62,8 @@
                                             <input type="hidden" name="category" value="<?php echo e($categoryId); ?>">
                                         <?php endif; ?>
                                         <div class="input-group">
-                                            <input type="text" id="course-search" name="q" value="<?php echo e($q ?? ''); ?>"
-                                                placeholder="Click to Search"
+                                            <input type="text" id="course-search" name="q"
+                                                value="<?php echo e($q ?? ''); ?>" placeholder="Click to Search"
                                                 class="form-control search-input">
                                             <span class="input-group-btn">
                                                 <button type="submit" class="btn search-button"><i
@@ -81,7 +81,7 @@
                                         
                                         <li>
                                             <a href="<?php echo e(route('course', array_filter(['q' => $q ?? null]))); ?>"
-                                               class="<?php echo e(empty($categoryId) ? 'active-category' : ''); ?>">
+                                                class="<?php echo e(empty($categoryId) ? 'active-category' : ''); ?>">
                                                 All
                                                 <span>(<?php echo e($categories->sum('course_count')); ?>)</span>
                                             </a>
@@ -91,7 +91,7 @@
                                             <li>
                                                 
                                                 <a href="<?php echo e(route('course', array_filter(['category' => $category->id, 'q' => $q ?? null]))); ?>"
-                                                   class="<?php echo e(isset($categoryId) && (int) $categoryId === (int) $category->id ? 'active-category' : ''); ?>">
+                                                    class="<?php echo e(isset($categoryId) && (int) $categoryId === (int) $category->id ? 'active-category' : ''); ?>">
                                                     <?php echo e($category->name); ?>
 
                                                     <span>(<?php echo e($category->course_count); ?>)</span>
@@ -105,6 +105,7 @@
                             <div class="widget">
                                 <h5 class="widget-title line-bottom">Popular<span class="text-theme-color-2">Courses</span>
                                 </h5>
+                                
                                 
                             </div>
                             

@@ -63,7 +63,7 @@
                                             <th>Course</th>
                                             <th>Lead Type</th>
                                             <th>Phone</th>
-                                            <th>Email</th>
+                                            <th>Referral Type</th>
                                             <th>Address</th>
                                             <th>Options</th>
                                         </tr>
@@ -76,7 +76,7 @@
                                                 <td>{{ $lead->course->title ?? '-' }}</td>
                                                 <td>{{ $lead->lead_type }}</td>
                                                 <td>{{ $lead->phone }}</td>
-                                                <td>{{ $lead->email }}</td>
+                                                <td>{{ $lead->referral_type }}</td>
                                                 <td>{{ $lead->address }}</td>
 
                                                 <td class="text-nowrap">

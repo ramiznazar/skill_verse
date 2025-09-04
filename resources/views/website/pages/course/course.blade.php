@@ -104,7 +104,7 @@
                                 <h5 class="widget-title line-bottom">Popular<span class="text-theme-color-2">Courses</span>
                                 </h5>
                                 {{-- (kept commented block exactly as you had it) --}}
-                                 <div class="latest-posts">
+                                {{-- <div class="latest-posts">
 
                                     <article class="post media-post clearfix pb-0 mb-10">
                                         <a class="post-thumb" href="{{ route('course.detail', $generativeAi->id) }}"><img
@@ -146,7 +146,7 @@
                                         </div>
                                     </article>
 
-                                </div>
+                                </div> --}}
                             </div>
                             {{-- (kept Flickr widget commented as you had it) --}}
                         </div>
