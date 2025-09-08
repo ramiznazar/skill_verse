@@ -6,9 +6,12 @@
                 <div class="col-md-6 col-sm-12">
                     <h2>All Users</h2>
                 </div>
-                <div class="col-md-6 col-sm-12 text-right">
-                    <a href="" class="btn btn-sm btn-primary" title="">Create New</a>
-                </div>
+                @if (Auth::user()->role === 'admin')
+                    <div class="col-md-6 col-sm-12 text-right">
+                        <a href="" class="btn btn-sm btn-primary" title="">Create New</a>
+                    </div>
+                @endif
+
             </div>
         </div>
         {{-- Store --}}
@@ -93,22 +96,25 @@
                                                     <div class="d-flex align-items-center" style="column-gap: 5px;">
 
                                                         <!-- Edit Button -->
-                                                        <a href="{{ route('user.edit',$user->id) }}"
+                                                        <a href="{{ route('user.edit', $user->id) }}"
                                                             class="btn btn-sm btn-icon btn-pure btn-default on-default button-edit"
                                                             data-toggle="tooltip" data-original-title="Edit">
                                                             <i class="icon-pencil" aria-hidden="true"></i>
                                                         </a>
 
                                                         <!-- Delete Button -->
-                                                        <form action="{{ route('user.destroy', $user->id) }}" method="POST"
-                                                            onsubmit="return confirm('Are you sure you want to delete this user?')">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-sm btn-danger"
-                                                                data-toggle="tooltip" title="Delete">
-                                                                <i class="icon-trash" aria-hidden="true"></i>
-                                                            </button>
-                                                        </form>
+                                                        @if (Auth::user()->role === 'admin')
+                                                            <form action="{{ route('user.destroy', $user->id) }}"
+                                                                method="POST"
+                                                                onsubmit="return confirm('Are you sure you want to delete this user?')">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit" class="btn btn-sm btn-danger"
+                                                                    data-toggle="tooltip" title="Delete">
+                                                                    <i class="icon-trash" aria-hidden="true"></i>
+                                                                </button>
+                                                            </form>
+                                                        @endif
 
                                                     </div>
                                                 </td>

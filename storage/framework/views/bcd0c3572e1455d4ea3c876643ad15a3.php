@@ -74,7 +74,8 @@
                                     <tbody>
                                         <?php $__empty_1 = true; $__currentLoopData = $leads; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $lead): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                             <tr>
-                                                <td><?php echo e($loop->iteration); ?></td>
+                                                                                                <td><?php echo e($loop->remaining + 1); ?></td>
+
                                                 <td><?php echo e($lead->name); ?></td>
                                                 <td><?php echo e($lead->course->title ?? '-'); ?></td>
                                                 <td><?php echo e($lead->lead_type); ?></td>

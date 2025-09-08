@@ -7,7 +7,7 @@
                     <h2>Teachers</h2>
                 </div>
                 <div class="col-md-6 col-sm-12 text-right">
-                    <a href="{{ route('teacher.index') }}" class="btn btn-sm btn-primary" title="">All Teachers</a>
+                    <a href="{{ route('user.index') }}" class="btn btn-sm btn-primary" title="">Back</a>
                 </div>
             </div>
         </div>
@@ -20,7 +20,8 @@
                             <h2>Add New Teachers</h2>
                         </div>
                         <div class="body">
-                            <form id="basic-form" action="{{ route('user.update',$user->id) }}" method="POST" enctype="multipart/form-data" novalidate>
+                            <form id="basic-form" action="{{ route('user.update', $user->id) }}" method="POST"
+                                enctype="multipart/form-data" novalidate>
                                 @csrf
                                 @method('PUT')
 
@@ -38,8 +39,9 @@
                                 </div> --}}
 
                                 {{-- Name + Username --}}
+                                {{-- Name + Username + Email --}}
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-{{ Auth::user()->role === 'admin' ? '4' : '6' }}">
                                         <div class="form-group">
                                             <label>Full Name</label>
                                             <input type="text" name="name" class="form-control"
@@ -50,7 +52,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-4">
+                                    <div class="col-md-{{ Auth::user()->role === 'admin' ? '4' : '6' }}">
                                         <div class="form-group">
                                             <label>Username</label>
                                             <input type="text" name="username" class="form-control"
@@ -61,20 +63,29 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <label>Email</label>
-                                            <input type="email" name="email" class="form-control"
-                                                value="{{ old('email', $user->email) }}">
-                                            @error('email')
-                                                <small class="text-danger">{{ $message }}</small>
-                                            @enderror
+                                    @if (Auth::user()->role === 'admin')
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label>Email</label>
+                                                <input type="email" name="email" class="form-control"
+                                                    value="{{ old('email', $user->email) }}">
+                                                @error('email')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
+                                            </div>
                                         </div>
-                                    </div>
-                                </div>
-
-                                {{-- Email + Phone --}}
-                                <div class="row">
+                                    @else
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Email</label>
+                                                <input type="email" name="email" class="form-control"
+                                                    value="{{ old('email', $user->email) }}">
+                                                @error('email')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    @endif
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Phone</label>
@@ -85,33 +96,32 @@
                                             @enderror
                                         </div>
                                     </div>
-
-                                    <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Role</label>
-                                            <select name="role" class="form-control">
-                                                <option value="">-- Select Role --</option>
-                                                <option value="admin"
-                                                    {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin
-                                                </option>
-                                                <option value="partner"
-                                                    {{ old('role', $user->role) == 'partner' ? 'selected' : '' }}>Partner
-                                                </option>
-                                                <option value="administrator"
-                                                    {{ old('role', $user->role) == 'administrator' ? 'selected' : '' }}>
-                                                    Administrator</option>
-                                            </select>
-                                            @error('role')
-                                                <small class="text-danger">{{ $message }}</small>
-                                            @enderror
+                                     @if (Auth::user()->role === 'admin')
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Role</label>
+                                                <select name="role" class="form-control">
+                                                    <option value="">-- Select Role --</option>
+                                                    <option value="admin"
+                                                        {{ old('role', $user->role) == 'admin' ? 'selected' : '' }}>Admin
+                                                    </option>
+                                                    <option value="partner"
+                                                        {{ old('role', $user->role) == 'partner' ? 'selected' : '' }}>
+                                                        Partner</option>
+                                                    <option value="administrator"
+                                                        {{ old('role', $user->role) == 'administrator' ? 'selected' : '' }}>
+                                                        Administrator</option>
+                                                </select>
+                                                @error('role')
+                                                    <small class="text-danger">{{ $message }}</small>
+                                                @enderror
+                                            </div>
                                         </div>
-                                    </div>
+                                    @endif
                                 </div>
 
                                 {{-- Role + Optional Password --}}
                                 <div class="row">
-
-
                                     <div class="col-md-12">
                                         <div class="form-group">
                                             <label>New Password (leave empty to keep current)</label>

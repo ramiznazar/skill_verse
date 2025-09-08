@@ -13,7 +13,12 @@ class UserController extends Controller
 {
     public function index()
     {
-        $users = User::all();
+        if (Auth::user()->role === 'admin') {
+            $users = User::all();
+        } else {
+            $users = User::where('id', Auth::id())->get();
+        }
+
         return view('admin.pages.dashboard.user.index', compact('users'));
     }
     public function create()

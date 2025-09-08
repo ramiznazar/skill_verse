@@ -225,9 +225,9 @@
                         <li>
                             <a href="#" class="has-arrow"><i class="fas fa-coins"></i><span>My Profits</span></a>
                             <ul>
-                                <li><a href="<?php echo e(route('admin.dashboard.partner_profits.index')); ?>">Partner Profits</a>
+                                <li><a href="<?php echo e(route('admin.partner_profits.index')); ?>">Partner Profits</a>
                                 </li>
-                                <li><a href="<?php echo e(route('admin.dashboard.partner_profits.partner_balances.index')); ?>">My
+                                <li><a href="<?php echo e(route('admin.partner_profits.partner_balances.index')); ?>">My
                                         Balance</a></li>
                             </ul>
                         </li>
@@ -238,12 +238,11 @@
                                 <span>Partners</span>
                             </a>
                             <ul>
-                                <li><a href="<?php echo e(route('admin.dashboard.partners.index')); ?>">All Partners</a></li>
-                                <li><a href="<?php echo e(route('admin.dashboard.partner_profits.index')); ?>">All Profits</a></li>
-                                <li><a href="<?php echo e(route('admin.dashboard.partner_profits.partner_balances.index')); ?>">All
+                                <li><a href="<?php echo e(route('admin.partners.index')); ?>">All Partners</a></li>
+                                <li><a href="<?php echo e(route('admin.partner_profits.index')); ?>">All Profits</a></li>
+                                <li><a href="<?php echo e(route('admin.partner_profits.partner_balances.index')); ?>">All
                                         Balances</a></li>
-                                <li><a href="<?php echo e(route('admin.dashboard.partner_profits.history', ['partner_id' => 1])); ?>">Profit
-                                        History</a></li>
+                                <li><a href="<?php echo e(route('admin.partner_profits.full_history')); ?>">Profit History</a></li>
                             </ul>
                         </li>
 
@@ -276,8 +275,7 @@
                         <li><a href="<?php echo e(route('fee-submission.index')); ?>"><i class="fas fa-money-check-alt"></i><span>Fee
                                     Submission</span></a></li>
 
-                        <li> <a href="<?php echo e(route('admin.dashboard.profit.index')); ?>">
-                                <i class="fas fa-chart-line"></i><span>Profit Calculation</span></a></li>
+                        
 
                         <li> <a href="<?php echo e(route('referral-commission.index')); ?>">
                                 <i class="fas fa-handshake"></i><span>Referral Commission</span></a></li>
@@ -290,7 +288,7 @@
                                 <li><a href="<?php echo e(route('account.create')); ?>">Add New Account</a></li>
                             </ul>
                         </li>
-                            <li> <a href="<?php echo e(route('fee-collector.index')); ?>">
+                        <li> <a href="<?php echo e(route('fee-collector.index')); ?>">
                                 <i class="fas fa-money-bill-wave"></i><span>Fee Collector</span></a></li>
                         <li>
                             <a href="#uiElements" class="has-arrow"><i
@@ -300,8 +298,9 @@
                                 <li><a href="<?php echo e(route('expense.create')); ?>">Add New Expense</a></li>
                             </ul>
                         </li>
-                         <li>
-                            <a href="#uiElements" class="has-arrow"><i class="icon-user-following"></i><span>Users</span></a>
+                        <li>
+                            <a href="#uiElements" class="has-arrow"><i
+                                    class="icon-user-following"></i><span>Users</span></a>
                             <ul>
                                 <li><a href="<?php echo e(route('user.index')); ?>">All Users</a></li>
                                 <li><a href="<?php echo e(route('user.create')); ?>">Add New User</a></li>
@@ -347,7 +346,8 @@
                             </ul>
                         </li>
                         <li>
-                            <a href="#uiElements" class="has-arrow"><i class="fas fa-images"></i><span>Gallary Images</span></a>
+                            <a href="#uiElements" class="has-arrow"><i class="fas fa-images"></i><span>Gallary
+                                    Images</span></a>
                             <ul>
                                 <li><a href="<?php echo e(route('gallary-category.index')); ?>">All Image Category</a></li>
                                 <li><a href="<?php echo e(route('gallary-image.index')); ?>">All Images</a></li>
@@ -398,11 +398,79 @@
 
                     
                     <?php if(Auth::user()->role === 'partner'): ?>
+                        <li class=""><a href="<?php echo e(route('admin')); ?>"><i
+                                    class="icon-home"></i><span>Dashboard</span></a> </li>
+                        <li>
+                        <li>
+                            <a href="#" class="has-arrow"><i class="fas fa-coins"></i><span>My Profits</span></a>
+                            <ul>
+                                <li><a href="<?php echo e(route('admin.partner_profits.index')); ?>">Partner Profits</a></li>
+                                <li><a href="<?php echo e(route('admin.partner_profits.partner_balances.index')); ?>">My Balance</a>
+                                </li>
+                                <li><a href="<?php echo e(route('admin.partner_profits.full_history')); ?>">Profit History</a></li>
+                            </ul>
+                        </li>
+                        <li class=""><a href="<?php echo e(route('expense.index')); ?>"><i
+                                    class="fas fa-receipt"></i><span>All Expenses</span></a> </li>
+                        <li>
+                        <li class=""><a href="<?php echo e(route('user.index')); ?>"><i
+                                    class="icon-user-following"></i><span>User</span></a> </li>
+                        <li>
                     <?php endif; ?>
 
                     
                     <?php if(Auth::user()->role === 'administrator'): ?>
+                        <li><a href="<?php echo e(route('admin')); ?>"><i class="icon-home"></i><span>Dashboard</span></a></li>
+                        <li>
+                            <a href="#" class="has-arrow"><i class="fas fa-user-tie"></i><span>Teachers</span></a>
+                            <ul>
+                                <li><a href="<?php echo e(route('teacher.index')); ?>">All Teacher</a></li>
+                                <li><a href="<?php echo e(route('teacher.create')); ?>">Add New Teacher</a></li>
+                                <li><a href="<?php echo e(route('teacher-salary.index')); ?>">Teachers Salary</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#" class="has-arrow"><i class="fas fa-users"></i><span>Batches</span></a>
+                            <ul>
+                                <li><a href="<?php echo e(route('batch.index')); ?>">All Batches</a></li>
+                                <li><a href="<?php echo e(route('batch.create')); ?>">Add New Batch</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#" class="has-arrow"><i class="fas fa-user-plus"></i><span>Leads</span></a>
+                            <ul>
+                                <li><a href="<?php echo e(route('lead.index')); ?>">All Leads</a></li>
+                                <li><a href="<?php echo e(route('lead.create')); ?>">Add New Lead</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#" class="has-arrow"><i
+                                    class="fas fa-file-signature"></i><span>Admissions</span></a>
+                            <ul>
+                                <li><a href="<?php echo e(route('admission.index')); ?>">All Admissions</a></li>
+                                <li><a href="<?php echo e(route('admission.create')); ?>">Add New Admission</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="<?php echo e(route('fee-submission.index')); ?>"><i class="fas fa-money-check-alt"></i><span>Fee
+                                    Submission</span></a></li>
+                        <li><a href="<?php echo e(route('message.index')); ?>"><i class="icon-bubbles"></i><span>Messages</span></a>
+                        </li>
+                        
+                        <li class="menu-title">Websites Changes</li>
+                        <li><a href="<?php echo e(route('banner.index')); ?>"><i class="bi bi-image"></i><span>Banners</span></a>
+                        </li>
+                        <li><a href="<?php echo e(route('course.index')); ?>"><i
+                                    class="fas fa-chalkboard-teacher"></i><span>Courses</span></a></li>
+                        <li><a href="<?php echo e(route('event.index')); ?>"><i
+                                    class="fas fa-calendar-alt"></i><span>Events</span></a></li>
+                        <li><a href="<?php echo e(route('gallary-image.index')); ?>"><i
+                                    class="fas fa-images"></i><span>Gallery</span></a></li>
+                        <li><a href="<?php echo e(route('blog.index')); ?>"><i class="fas fa-newspaper"></i><span>Blog</span></a>
+                        </li>
+                        <li><a href="<?php echo e(route('testimonial.index')); ?>"><i
+                                    class="fas fa-comments"></i><span>Feedback</span></a></li>
                     <?php endif; ?>
+
 
                     
                     

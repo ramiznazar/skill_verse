@@ -2,200 +2,325 @@
 
 namespace App\Http\Controllers\Admin\Dashboard;
 
-use App\Http\Controllers\Controller;
-
+use Carbon\Carbon;
+use App\Models\Expense;
 use App\Models\Partner;
 use Illuminate\Http\Request;
 
+use App\Models\FeeSubmission;
 use App\Models\PartnerProfit;
-use App\Models\ProfitCalculation;
 use App\Models\PartnerBalance;
-use App\Models\PartnerProfitHistory;
 use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
+use App\Http\Controllers\Controller;
+use App\Models\PartnerProfitHistory;
 use Illuminate\Support\Facades\Auth;
-
-
 
 class PartnerProfitController extends Controller
 {
     /**
-     * Show recent profits (last 10 minutes).
+     * List partner profits with month/year filters + show derived "settled" and "due".
+     * Also compute month summary: total fees, expenses, net.
      */
     public function index(Request $request)
     {
-        $query = PartnerProfit::with(['partner', 'calculation'])
-            ->where('created_at', '>=', now()->subMinutes(10));
+        $month = (int) ($request->input('month') ?: now()->month);
+        $year  = (int) ($request->input('year')  ?: now()->year);
 
-        if ($request->month) {
-            $query->whereHas('calculation', fn($q) => $q->where('month', $request->month));
+        $start = Carbon::create($year, $month, 1)->startOfDay();
+        $end   = (clone $start)->endOfMonth()->endOfDay();
+
+        // Month summary (optional)
+        $totalFees = (float) FeeSubmission::whereBetween('created_at', [$start, $end])->sum('amount');
+        $totalExpenses = (float) Expense::whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->sum(DB::raw('CAST(amount AS DECIMAL(12,2))'));
+        $netProfit = $totalFees - $totalExpenses;
+
+        // base query
+        $query = PartnerProfit::with('partner')
+            ->where('month', $month)
+            ->where('year',  $year);
+
+        // ✅ Restrict to only logged-in partner
+        if (Auth::user()->role === 'partner') {
+            $query->whereHas('partner', function ($q) {
+                $q->where('email', Auth::user()->email);
+            });
         }
 
-        if ($request->year) {
-            $query->whereHas('calculation', fn($q) => $q->where('year', $request->year));
-        }
+        $profits = $query->orderBy('partner_id')
+            ->get()
+            ->map(function ($p) {
+                // Settled = PAID only (NOT balance)
+                $paid = (float) PartnerProfitHistory::where('partner_id', $p->partner_id)
+                    ->where('month', $p->month)
+                    ->where('year',  $p->year)
+                    ->where('status', 'paid')
+                    ->sum('amount');
 
-        $profits = $query->orderByDesc('created_at')->get();
+                // Balance amount (unpaid carry-forward)
+                $balanceAmt = (float) PartnerBalance::where('partner_id', $p->partner_id)
+                    ->where('month', $p->month)
+                    ->where('year',  $p->year)
+                    ->sum('amount');
+
+                $p->settled = $paid;
+                $p->balance_amount = $balanceAmt;
+                $p->due = max(0, (float)$p->amount - $paid - $balanceAmt);
+
+                // Derived status
+                if ($p->due > 0) {
+                    $p->derived_status = 'unpaid';
+                } elseif ($balanceAmt > 0) {
+                    $p->derived_status = 'balance';
+                } else {
+                    $p->derived_status = 'paid';
+                }
+
+                return $p;
+            });
 
         return view('admin.pages.dashboard.partners.partner_profits.index', [
-            'profits' => $profits,
-            'selectedMonth' => $request->month,
-            'selectedYear' => $request->year,
+            'profits'       => $profits,
+            'selectedMonth' => $month,
+            'selectedYear'  => $year,
+            'summary'       => [
+                'fees'      => $totalFees,
+                'expenses'  => $totalExpenses,
+                'netProfit' => $netProfit,
+            ],
         ]);
     }
 
-    /**
-     * Generate or update monthly profits.
-     */
-    public function generateMonthlyProfit()
+
+    public function generateMonthlyProfit(Request $request)
     {
-        $month = now()->month;
-        $year = now()->year;
+        $month = (int) ($request->input('month') ?: now()->month);
+        $year  = (int) ($request->input('year')  ?: now()->year);
 
-        $calculation = ProfitCalculation::where('month', $month)
-            ->where('year', $year)
-            ->first();
+        $start = Carbon::create($year, $month, 1)->startOfDay();
+        $end   = (clone $start)->endOfMonth()->endOfDay();
 
-        if (!$calculation) {
-            return back()->with('error', 'First calculate the monthly profit.');
-        }
+        $totalFees = (float) FeeSubmission::whereBetween('created_at', [$start, $end])->sum('amount');
 
-        DB::transaction(function () use ($calculation) {
+        $totalExpenses = (float) Expense::whereBetween('date', [$start->toDateString(), $end->toDateString()])
+            ->sum(DB::raw('CAST(amount AS DECIMAL(12,2))'));
+
+        $netProfit = $totalFees - $totalExpenses; // allow negative
+
+        DB::transaction(function () use ($month, $year, $netProfit) {
             $partners = Partner::all();
 
             foreach ($partners as $partner) {
-                $existing = PartnerProfit::where('partner_id', $partner->id)
-                    ->where('profit_calculation_id', $calculation->id)
-                    ->first();
+                $newAmount = round(($partner->percentage / 100) * $netProfit, 2);
 
-                $profitAmount = ($partner->percentage / 100) * $calculation->net_profit;
+                $profit = PartnerProfit::firstOrNew([
+                    'partner_id' => $partner->id,
+                    'month'      => $month,
+                    'year'       => $year,
+                ]);
 
-                if ($existing) {
-                    $existing->update([
-                        'amount' => $profitAmount,
-                        'status' => 'unpaid',
-                        'created_at' => now(), // 👈 Refresh timestamp for 10-min window
-                    ]);
+                $oldAmount = (float) ($profit->exists ? $profit->amount : 0);
+                $profit->amount = $newAmount; // store total share (can be negative)
+                // don't change status here
+                $profit->save();
 
-                    PartnerProfitHistory::create([
-                        'partner_profit_id' => $existing->id,
-                        'action' => 'updated',
-                        'amount' => $profitAmount,
-                        'note' => 'Profit updated for existing entry.',
-                    ]);
-                } else {
-                    $partnerProfit = PartnerProfit::create([
-                        'partner_id' => $partner->id,
-                        'profit_calculation_id' => $calculation->id,
-                        'amount' => $profitAmount,
-                        'status' => 'unpaid',
-                        'created_at' => now(),
-                    ]);
+                // Optional history to record recalculation
+                $status = ($profit->wasRecentlyCreated) ? 'calculated'
+                    : (($newAmount > $oldAmount) ? 'increment' : (($newAmount < $oldAmount) ? 'decrement' : 'unchanged'));
 
-                    PartnerProfitHistory::create([
-                        'partner_profit_id' => $partnerProfit->id,
-                        'action' => 'calculated',
-                        'amount' => $profitAmount,
-                        'note' => 'Monthly profit calculated.',
-                    ]);
-                }
+                PartnerProfitHistory::create([
+                    'partner_profit_id' => $profit->id,
+                    'partner_id'        => $partner->id,
+                    'month'             => $month,
+                    'year'              => $year,
+                    'status'            => $status,
+                    'amount'            => abs($newAmount - $oldAmount),
+                    'note'              => 'Generate monthly: total share updated to ' . $newAmount,
+                    'performed_by'      => auth()->id(),
+                    'performed_at'      => now(),
+                ]);
             }
         });
 
-        return back()->with('store', 'Monthly partner profits generated/updated successfully.');
+        return back()->with('store', "Profits recalculated for {$start->format('F')} {$year}.");
     }
 
     /**
-     * Mark profit as paid.
+     * Mark current DUE as paid (computed on-the-fly). If no due, show info message.
      */
     public function markAsPaid($id)
     {
-        $profit = PartnerProfit::findOrFail($id);
-        $profit->update(['status' => 'paid']);
+        $profit = PartnerProfit::with('partner')->findOrFail($id);
 
-        PartnerProfitHistory::create([
-            'partner_profit_id' => $profit->id,
-            'action' => 'marked_paid',
-            'amount' => $profit->amount,
-            'note' => 'Marked as paid manually.',
-        ]);
+        // Compute current due from histories
+        $settled = (float) PartnerProfitHistory::where('partner_id', $profit->partner_id)
+            ->where('month', $profit->month)
+            ->where('year',  $profit->year)
+            ->whereIn('status', ['paid', 'balance'])
+            ->sum('amount');
 
-        return redirect()->back()->with('success', 'Profit marked as paid successfully.');
+        $due = max(0, (float)$profit->amount - $settled);
+
+        if ($due <= 0) {
+            return back()->with('info', 'Nothing due for this partner in this month.');
+        }
+
+        DB::transaction(function () use ($profit, $due) {
+            // Create expense (no dedupe so multiple payments possible; to dedupe, use history id after create)
+            Expense::create([
+                'title'   => 'Partner Profit Payout',
+                'amount'  => (string) $due,
+                'date'    => now()->toDateString(),
+                'purpose' => 'Payout for ' . $profit->partner->name,
+                'type'    => 'essential',
+                'ref_type' => 'partner_profit_payment',
+                'ref_id'  => $profit->id, // optional
+            ]);
+
+            // History as the source of truth for "settled"
+            PartnerProfitHistory::create([
+                'partner_profit_id' => $profit->id,
+                'partner_id'        => $profit->partner_id,
+                'month'             => $profit->month,
+                'year'              => $profit->year,
+                'status'            => 'paid',
+                'amount'            => $due,
+                'note'              => 'Paid against current due.',
+                'performed_by'      => auth()->id(),
+                'performed_at'      => now(),
+            ]);
+
+            // Optional: set stored status (UI derives status anyway)
+            $profit->status = 'paid';
+            $profit->save();
+        });
+
+        return back()->with('success', 'Profit marked as paid.');
     }
 
     /**
-     * Move profit to partner balance.
+     * Move current DUE to balance. If no due, show info message.
      */
     public function moveToBalance($id)
     {
-        DB::transaction(function () use ($id) {
-            $profit = PartnerProfit::findOrFail($id);
+        $profit = PartnerProfit::findOrFail($id);
 
-            if ($profit->status !== 'unpaid') {
-                throw new \Exception('Only unpaid profits can be moved to balance.');
-            }
+        // How much is already PAID this cycle? (paid-only)
+        $paid = (float) PartnerProfitHistory::where('partner_id', $profit->partner_id)
+            ->where('month', $profit->month)
+            ->where('year',  $profit->year)
+            ->where('status', 'paid')
+            ->sum('amount');
 
-            $partner = $profit->partner;
+        // How much is already moved to BALANCE this cycle?
+        $balanced = (float) PartnerBalance::where('partner_id', $profit->partner_id)
+            ->where('month', $profit->month)
+            ->where('year',  $profit->year)
+            ->sum('amount');
 
-            $balance = PartnerBalance::firstOrCreate(
-                ['partner_id' => $partner->id],
-                ['total_balance' => 0]
-            );
+        // Current due = total share - paid - balanced
+        $due = max(0, (float) $profit->amount - $paid - $balanced);
 
-            $balance->increment('total_balance', $profit->amount);
-            $profit->update(['status' => 'balance']);
+        if ($due <= 0) {
+            return back()->with('info', 'Nothing to move to balance for this partner in this month.');
+        }
 
-            PartnerProfitHistory::create([
-                'partner_profit_id' => $profit->id,
-                'action' => 'moved_to_balance',
-                'amount' => $profit->amount,
-                'note' => 'Profit moved to balance.',
+        DB::transaction(function () use ($profit, $due) {
+            // Upsert per-cycle balance (NO history here)
+            $balance = PartnerBalance::firstOrNew([
+                'partner_id' => $profit->partner_id,
+                'month'      => $profit->month,
+                'year'       => $profit->year,
             ]);
+            $balance->amount = (float) ($balance->amount ?? 0) + $due;
+            $balance->status = 'balance';
+            $balance->save();
+
+            // Update profit row state (optional; UI derives from balance amount anyway)
+            $profit->status = 'balance';
+            $profit->save();
         });
 
-        return back()->with('store', 'Profit successfully moved to partner balance.');
+        return back()->with('store', 'Amount moved to partner balance.');
     }
 
-    /**
-     * Show history for specific profit.
-     */
-public function fullHistory()
-{
-    $histories = PartnerProfitHistory::with(['profit.partner', 'profit.calculation'])
-        ->when(request('month'), fn($q) => $q->whereHas('profit.calculation', fn($q) => $q->where('month', request('month'))))
-        ->when(request('year'), fn($q) => $q->whereHas('profit.calculation', fn($q) => $q->where('year', request('year'))))
-        ->when(request('search'), fn($q) => $q->whereHas('profit.partner', fn($q) => $q->where('name', 'like', '%'.request('search').'%')))
-        ->latest()
-        ->paginate(10);
-
-    return view('admin.pages.dashboard.partners.partner_profits.full_history', compact('histories'));
-}
-
-
-public function history($partner_id)
-{
-    $histories = PartnerProfitHistory::with(['profit.partner', 'profit.calculation'])
-        ->whereHas('profit', function ($query) use ($partner_id) {
-            $query->where('partner_id', $partner_id);
-        })
-        ->orderByDesc('created_at')
-        ->get();
-
-    $partner = Partner::find($partner_id);
-    $partnerName = $partner ? $partner->name : 'Partner';
-
-    return view('admin.pages.dashboard.partners.partner_profits.history', compact('histories', 'partnerName'));
-}
-
 
 
     /**
-     * Show all partner balances.
+     * Balances index (unchanged from earlier).
      */
     public function balanceIndex()
     {
-        $balances = PartnerBalance::with('partner')->orderByDesc('updated_at')->get();
-        return view('admin.pages.dashboard.partners.partner_profits.partner_balances', compact('balances'));
+        $query = PartnerBalance::with('partner')->orderByDesc('updated_at');
+
+        if (Auth::user()->role === 'partner') {
+            $query->whereHas('partner', function ($q) {
+                $q->where('email', Auth::user()->email);
+            });
+        }
+
+        $balances = $query->get();
+
+        return view('admin.pages.dashboard.partners.partner_profits.balance', compact('balances'));
+    }
+
+
+    public function history(Request $request, $partner_id)
+    {
+        // Optional filters
+        $month = $request->input('month');
+        $year  = $request->input('year');
+
+        $partner = Partner::find($partner_id);
+
+        $histories = PartnerProfitHistory::with([
+            'profit.partner',
+            'performedBy' // make sure relation exists on the model
+        ])
+            ->where('partner_id', $partner_id)
+            ->when($month, fn($q) => $q->where('month', (int)$month))
+            ->when($year,  fn($q) => $q->where('year',  (int)$year))
+            // prefer performed_at if present; then created_at
+            ->orderByDesc(DB::raw('COALESCE(performed_at, created_at)'))
+            ->get();
+
+        return view('admin.pages.dashboard.partners.partner_profits.history', [
+            'histories'   => $histories,
+            'partnerName' => $partner?->name ?? 'Partner',
+            'selectedMonth' => $month,
+            'selectedYear'  => $year,
+        ]);
+    }
+    // PartnerProfitController.php
+    public function fullHistory(Request $request)
+    {
+        $month  = $request->input('month');
+        $year   = $request->input('year');
+        $search = $request->input('search');
+
+        $query = PartnerProfitHistory::with(['profit.partner', 'performedBy'])
+            ->when($month, fn($q) => $q->where('month', (int) $month))
+            ->when($year,  fn($q) => $q->where('year',  (int) $year))
+            ->when($search, function ($q) use ($search) {
+                // search within partner name
+                $q->whereHas('profit.partner', function ($p) use ($search) {
+                    $p->where('name', 'like', '%' . $search . '%');
+                });
+            })
+            ->whereIn('status', ['paid', 'balance'])
+            ->orderByDesc(DB::raw('COALESCE(performed_at, created_at)'));
+
+        // ✅ If the logged-in user is a partner, only show THEIR history
+        if (Auth::user()->role === 'partner') {
+            $query->whereHas('profit.partner', function ($p) {
+                $p->where('email', Auth::user()->email);
+            });
+        }
+
+        $histories = $query
+            ->paginate(15)
+            ->appends($request->query());
+
+        return view('admin.pages.dashboard.partners.partner_profits.full_history', compact('histories'));
     }
 }
-

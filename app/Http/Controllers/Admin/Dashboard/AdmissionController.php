@@ -17,7 +17,7 @@ class AdmissionController extends Controller
      */
     public function index()
     {
-        $admissions = Admission::with(['course', 'batch'])->get();
+        $admissions = Admission::with(['course', 'batch'])->orderBy('joining_date', 'desc')->get();
         $totalStudents = $admissions->count();
 
         // Count active students
@@ -157,7 +157,6 @@ class AdmissionController extends Controller
 
         return redirect()->route('admission.index')->with('store', 'Admission created successfully.');
     }
-
 
     /**
      * Display the specified resource.

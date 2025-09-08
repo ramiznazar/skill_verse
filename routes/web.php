@@ -18,10 +18,12 @@ use App\Http\Controllers\Website\{
 use App\Http\Controllers\Admin\Dashboard\{
     AuthController,
     UserController,
+    ProfileController,
     LeadController,
     LeadFollowUpController,
     PartnerController,
     PartnerProfitController,
+    PartnerBalanceController,
     BatchController,
     AccountController,
     ExpenseController,
@@ -98,22 +100,24 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
     Route::get('/user/edit/{id}', [UserController::class, 'edit'])->name('user.edit');
     Route::put('/user/update/{id}', [UserController::class, 'update'])->name('user.update');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('user.destroy');
+    //Profile
+    Route::get('/profile',[ProfileController::class,'index'])->name('profile.index');
 
     // Admin Resources
-    Route::prefix('dashboard')->name('admin.dashboard.')->group(function () {
+    Route::prefix('dashboard')->name('admin.')->group(function () {
         Route::resource('partners', PartnerController::class);
-        Route::get('/profit', [ProfitCalculationController::class, 'index'])->name('profit.index');
-        Route::post('/profit/calculate', [ProfitCalculationController::class, 'calculateThisMonth'])->name('profit.calculate');
-        Route::get('/profit/daily', [ProfitCalculationController::class, 'showDailyProfit'])->name('profit.daily');
 
         Route::prefix('partner_profits')->name('partner_profits.')->group(function () {
             Route::get('/', [PartnerProfitController::class, 'index'])->name('index');
             Route::post('/generate', [PartnerProfitController::class, 'generateMonthlyProfit'])->name('generate_monthly');
-            Route::get('/mark-as-paid/{id}', [PartnerProfitController::class, 'markAsPaid'])->name('mark_as_paid');
-            Route::get('/move-to-balance/{id}', [PartnerProfitController::class, 'moveToBalance'])->name('move_to_balance');
+            Route::put('/{id}/paid', [PartnerProfitController::class, 'markAsPaid'])->name('mark_as_paid');
+            Route::put('/{id}/balance', [PartnerProfitController::class, 'moveToBalance'])->name('move_to_balance');
             Route::get('/full-history', [PartnerProfitController::class, 'fullHistory'])->name('full_history');
             Route::get('/history/{partner_id}', [PartnerProfitController::class, 'history'])->name('history');
             Route::get('/balances', [PartnerProfitController::class, 'balanceIndex'])->name('partner_balances.index');
+            // routes/web.php
+            Route::put('/partner-balances/{id}/status-paid', [PartnerBalanceController::class, 'statusPaid'])
+                ->name('partner_balances.status_paid');
         });
     });
     Route::get('/referral-commission', [ReferralCommissionController::class, 'index'])->name('referral-commission.index');

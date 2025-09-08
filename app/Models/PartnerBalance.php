@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class PartnerBalance extends Model
 {
     use HasFactory;
-     protected $fillable = ['partner_id', 'total_balance'];
+     protected $guarded = [];
 
     public function partner()
     {

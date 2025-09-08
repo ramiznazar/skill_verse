@@ -7,7 +7,7 @@
                     <h2>Users</h2>
                 </div>
                 <div class="col-md-6 col-sm-12 text-right">
-                    <a href="{{ route('teacher.index') }}" class="btn btn-sm btn-primary" title="">All Teachers</a>
+                    <a href="{{ route('user.index') }}" class="btn btn-sm btn-primary" title="">Back</a>
                 </div>
             </div>
         </div>

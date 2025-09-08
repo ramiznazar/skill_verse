@@ -70,9 +70,11 @@
                                         </tr>
                                     </thead>
                                     <tbody>
+                                        
                                         @forelse($admissions as $admission)
                                             <tr>
-                                                <td>{{ $loop->iteration }}</td>
+                                                <td>{{ $loop->remaining + 1 }}</td>
+
 
                                                 {{-- Image --}}
                                                 <td>

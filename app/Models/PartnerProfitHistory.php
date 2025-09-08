@@ -8,9 +8,10 @@ use Illuminate\Database\Eloquent\Model;
 class PartnerProfitHistory extends Model
 {
     use HasFactory;
-    protected $fillable = ['partner_profit_id', 'partner_id', 'amount', 'status', 'paid_at'];
-    
-
+    protected $guarded = [];
+    protected $casts = [
+        'performed_at' => 'datetime',
+    ];
 
 
     public function profit()
@@ -20,5 +21,9 @@ class PartnerProfitHistory extends Model
     public function partner()
     {
         return $this->belongsTo(Partner::class, 'partner_id');
+    }
+    public function performedBy()
+    {
+        return $this->belongsTo(User::class, 'performed_by');
     }
 }

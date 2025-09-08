@@ -22,7 +22,7 @@ class FeeSubmissionController extends Controller
 {
     public function index()
     {
-        $admissions = Admission::with(['course', 'batch'])->get();
+        $admissions = Admission::with(['course', 'batch'])->orderBy('joining_date', 'desc')->get();
         return view('admin.pages.dashboard.fee-submission.index', compact('admissions'));
     }
     public function create($id)

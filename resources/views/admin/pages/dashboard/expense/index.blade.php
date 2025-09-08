@@ -7,8 +7,11 @@
                     <h2>Expenses</h2>
                 </div>
                 <div class="col-md-6 col-sm-12 text-right">
-                    <a href="{{ route('expense.create') }}" class="btn btn-sm btn-primary" title="">Create New</a>
+                    @if (Auth::user()->role !== 'partner')
+                        <a href="{{ route('expense.create') }}" class="btn btn-sm btn-primary" title="">Create New</a>
+                    @endif
                 </div>
+
             </div>
         </div>
         {{-- Store --}}
@@ -64,7 +67,9 @@
                                             <th>Category</th>
                                             <th>Date</th>
                                             <th>Purpose</th>
-                                            <th>Actions</th>
+                                            @if (Auth::user()->role !== 'partner')
+                                                <th>Actions</th>
+                                            @endif
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -90,26 +95,28 @@
                                                 </td>
                                                 <td>{{ \Carbon\Carbon::parse($expense->date)->format('d-M-Y') }}</td>
                                                 <td>{{ $expense->purpose }}</td>
-                                                <td class="actions">
-                                                    <div class="d-flex align-items-center" style="column-gap: 5px;">
-                                                        <a href="{{ route('expense.edit', $expense->id) }}"
-                                                            class="btn btn-sm btn-icon btn-pure btn-default on-default button-edit"
-                                                            data-toggle="tooltip" title="Edit">
-                                                            <i class="icon-pencil" aria-hidden="true"></i>
-                                                        </a>
-                                                        <form action="{{ route('expense.destroy', $expense->id) }}"
-                                                            method="POST"
-                                                            onsubmit="return confirm('Are you sure you want to delete this expense?')">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit"
-                                                                class="btn btn-sm btn-icon btn-pure btn-default on-default button-remove"
-                                                                data-toggle="tooltip" title="Remove">
-                                                                <i class="icon-trash" aria-hidden="true"></i>
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </td>
+                                                @if (Auth::user()->role !== 'partner')
+                                                    <td class="actions">
+                                                        <div class="d-flex align-items-center" style="column-gap: 5px;">
+                                                            <a href="{{ route('expense.edit', $expense->id) }}"
+                                                                class="btn btn-sm btn-icon btn-pure btn-default on-default button-edit"
+                                                                data-toggle="tooltip" title="Edit">
+                                                                <i class="icon-pencil" aria-hidden="true"></i>
+                                                            </a>
+                                                            <form action="{{ route('expense.destroy', $expense->id) }}"
+                                                                method="POST"
+                                                                onsubmit="return confirm('Are you sure you want to delete this expense?')">
+                                                                @csrf
+                                                                @method('DELETE')
+                                                                <button type="submit"
+                                                                    class="btn btn-sm btn-icon btn-pure btn-default on-default button-remove"
+                                                                    data-toggle="tooltip" title="Remove">
+                                                                    <i class="icon-trash" aria-hidden="true"></i>
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </td>
+                                                @endif
                                             </tr>
                                         @empty
                                             <tr>

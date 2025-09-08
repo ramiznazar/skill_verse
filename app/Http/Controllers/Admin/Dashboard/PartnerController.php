@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Http\Controllers\Admin\Dashboard;
 
 
@@ -31,9 +32,8 @@ class PartnerController extends Controller
         ]);
 
         $partner = Partner::create($data);
-        $partner->balance()->create(['total_balance' => 0]);
-return redirect()->route('admin.dashboard.partners.index')->with('success', 'Partner added!');
-
+        // $partner->balance()->create(['total_balance' => 0]);
+        return redirect()->route('admin.partners.index')->with('success', 'Partner added!');
     }
 
     public function edit($id)
@@ -53,8 +53,7 @@ return redirect()->route('admin.dashboard.partners.index')->with('success', 'Par
         ]);
 
         Partner::findOrFail($id)->update($data);
-       return redirect()->route('admin.dashboard.partners.index')->with('success', 'Partner updated!');
-
+        return redirect()->route('admin.partners.index')->with('success', 'Partner updated!');
     }
 
     public function destroy($id)

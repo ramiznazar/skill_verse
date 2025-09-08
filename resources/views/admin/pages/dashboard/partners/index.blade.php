@@ -8,7 +8,7 @@
                     <h2>Partners</h2>
                 </div>
                 <div class="col-md-6 col-sm-12 text-right">
-                    <a href="{{ route('admin.dashboard.partners.create') }}" class="btn btn-sm btn-primary">Create New</a>
+                    <a href="{{ route('admin.partners.create') }}" class="btn btn-sm btn-primary">Create New</a>
                 </div>
             </div>
         </div>
@@ -82,14 +82,14 @@
                                                 <td class="actions">
                                                     <div class="d-flex align-items-center" style="column-gap: 5px;">
                                                         {{-- Edit Button --}}
-                                                        <a href="{{ route('admin.dashboard.partners.edit', $partner->id) }}"
+                                                        <a href="{{ route('admin.partners.edit', $partner->id) }}"
                                                             class="btn btn-sm btn-icon btn-pure btn-default on-default button-edit"
                                                             data-toggle="tooltip" data-original-title="Edit">
                                                             <i class="icon-pencil" aria-hidden="true"></i>
                                                         </a>
 
                                                         {{-- Delete Button --}}
-                                                        <form action="{{ route('admin.dashboard.partners.destroy', $partner->id) }}"
+                                                        <form action="{{ route('admin.partners.destroy', $partner->id) }}"
                                                             method="POST"
                                                             onsubmit="return confirm('Are you sure you want to delete this partner?')">
                                                             @csrf

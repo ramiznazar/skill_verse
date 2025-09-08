@@ -51,7 +51,7 @@
                                     <tbody>
                                         @foreach ($admissions as $admission)
                                             <tr>
-                                                <td>{{ $admission->id }}</td>
+                                                <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $admission->name }}</td>
                                                 <td>{{ $admission->course->title }}</td>
                                                 <td>
@@ -62,31 +62,32 @@
                                                 </td>
                                                 <td>{{ $admission->fee_status }}</td>
                                                 <td>
-                                                    <a href="{{ route('fee-submission.create', $admission->id) }}"
-                                                        class="btn btn-sm btn-default" data-toggle="tooltip"
-                                                        title="Submit Fee">
-                                                        <i class="fas fa-money-check-alt"></i>
-                                                    </a>
-
                                                     @php
-                                                        $latestFee = $admission->feeSubmissions()->latest()->first();
+                                                        // get latest fee by submission_date if you store it, else by created_at
+                                                        $latestFee =
+                                                            $admission
+                                                                ->feeSubmissions()
+                                                                ->latest('submission_date')
+                                                                ->first() ??
+                                                            $admission->feeSubmissions()->latest()->first();
                                                     @endphp
 
+                                                    {{-- Show Submit Fee button ONLY if not complete --}}
+                                                    @if (strtolower($admission->fee_status) !== 'complete')
+                                                        <a href="{{ route('fee-submission.create', $admission->id) }}"
+                                                            class="btn btn-sm btn-default" data-toggle="tooltip"
+                                                            title="Submit Fee">
+                                                            <i class="fas fa-money-check-alt"></i>
+                                                        </a>
+                                                    @endif
+
                                                     @if ($latestFee)
-                                                        <!-- View Receipt Button -->
                                                         <button type="button" class="btn btn-sm btn-info mt-1"
                                                             data-toggle="modal"
                                                             data-target="#receiptModal{{ $admission->id }}">
                                                             View Receipt
                                                         </button>
 
-                                                        <!-- Download PDF Button -->
-                                                        {{-- <a href="{{ route('fee-submission.download-receipt', $latestFee->id) }}"
-                                                            class="btn btn-sm btn-primary mt-1">
-                                                            Download PDF
-                                                        </a> --}}
-
-                                                        <!-- Receipt Modal -->
                                                         <div class="modal fade" id="receiptModal{{ $admission->id }}"
                                                             tabindex="-1" role="dialog"
                                                             aria-labelledby="receiptModalLabel{{ $admission->id }}"
@@ -116,24 +117,21 @@
                                                                             {{ ucfirst($latestFee->payment_method ?? 'N/A') }}
                                                                         </p>
                                                                         <p><strong>Date:</strong>
-                                                                            {{ \Carbon\Carbon::parse($latestFee->submission_date)->format('d M Y') }}
+                                                                            {{ \Carbon\Carbon::parse($latestFee->submission_date ?? $latestFee->created_at)->format('d M Y') }}
                                                                         </p>
                                                                     </div>
                                                                     <div class="modal-footer">
                                                                         <a href="{{ route('fee-submission.download-receipt', $latestFee->id) }}"
-                                                                            class="btn btn-primary">
-                                                                            Download PDF
-                                                                        </a>
+                                                                            class="btn btn-primary">Download PDF</a>
                                                                         <button type="button" class="btn btn-secondary"
-                                                                            data-dismiss="modal">
-                                                                            Close
-                                                                        </button>
+                                                                            data-dismiss="modal">Close</button>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     @endif
                                                 </td>
+
                                             </tr>
                                         @endforeach
 

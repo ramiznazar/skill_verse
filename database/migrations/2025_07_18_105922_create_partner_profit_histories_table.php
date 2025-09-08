@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('partner_profit_histories', function (Blueprint $table) {
             $table->id();
-               $table->foreignId('partner_profit_id')->constrained()->onDelete('cascade');
-    $table->enum('action', ['calculated', 'marked_paid', 'moved_to_balance']);
-    $table->decimal('amount', 12, 2);
-    $table->text('note')->nullable();
+            $table->foreignId('partner_profit_id')->constrained()->onDelete('cascade');
+            $table->enum('action', ['calculated', 'marked_paid', 'moved_to_balance']);
+            $table->decimal('amount', 12, 2);
+            $table->text('note')->nullable();
             $table->timestamps();
         });
     }

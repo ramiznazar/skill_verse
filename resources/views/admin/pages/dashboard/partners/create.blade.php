@@ -8,7 +8,7 @@
                 <h2>Add New Partner</h2>
             </div>
             <div class="col-md-6 col-sm-12 text-right">
-                <a href="{{ route('admin.dashboard.partners.index') }}" class="btn btn-sm btn-secondary">Back to List</a>
+                <a href="{{ route('admin.partners.index') }}" class="btn btn-sm btn-secondary">Back to List</a>
             </div>
         </div>
     </div>
@@ -25,24 +25,24 @@
             </div>
         @endif
 
-        <form action="{{ route('admin.dashboard.partners.store') }}" method="POST">
+        <form action="{{ route('admin.partners.store') }}" method="POST">
             @csrf
             <div class="card">
                 <div class="header">
                     <h2>Partner Details</h2>
                 </div>
                 <div class="body row">
-                    <div class="form-group col-md-6">
+                    <div class="form-group col-md-4">
                         <label for="name"><strong>Name</strong></label>
                         <input type="text" name="name" class="form-control" value="{{ old('name') }}" required>
                     </div>
 
-                    <div class="form-group col-md-6">
+                    <div class="form-group col-md-4">
                         <label for="email"><strong>Email</strong></label>
                         <input type="email" name="email" class="form-control" value="{{ old('email') }}">
                     </div>
 
-                    <div class="form-group col-md-6">
+                    <div class="form-group col-md-4">
                         <label for="phone"><strong>Phone</strong></label>
                         <input type="text" name="phone" class="form-control" value="{{ old('phone') }}">
                     </div>
@@ -60,7 +60,7 @@
 
                 <div class="footer px-4 pb-4">
                     <button type="submit" class="btn btn-primary">Save Partner</button>
-                    <a href="{{ route('admin.dashboard.partners.index') }}" class="btn btn-danger">Cancel</a>
+                    <a href="{{ route('admin.partners.index') }}" class="btn btn-danger">Cancel</a>
                 </div>
             </div>
         </form>
