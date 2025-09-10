@@ -1,4 +1,5 @@
 @extends('admin.layouts.main')
+
 @section('content')
 <div id="main-content">
     <div class="block-header">
@@ -148,8 +149,22 @@
                                 </div>
                             </div>
 
-                            {{-- Referral Info --}}
-                            <div class="row mt-2">
+                            {{-- Referral Type --}}
+                            <div class="row mt-3">
+                                <div class="col-md-12">
+                                    <label for="referral_type">Referral Type</label>
+                                    <select name="referral_type" id="referral_type" class="form-control">
+                                        <option value="">Select Type</option>
+                                        <option value="ads"      {{ old('referral_type', $admission->referral_type) == 'ads' ? 'selected' : '' }}>Ads</option>
+                                        <option value="referral" {{ old('referral_type', $admission->referral_type) == 'referral' ? 'selected' : '' }}>Referral</option>
+                                        <option value="other"    {{ old('referral_type', $admission->referral_type) == 'other' ? 'selected' : '' }}>Other</option>
+                                    </select>
+                                    @error('referral_type') <small class="text-danger">{{ $message }}</small> @enderror
+                                </div>
+                            </div>
+
+                            {{-- Referral details (only when referral_type = referral) --}}
+                            <div class="row mt-3" id="referral_details_section" style="display:none;">
                                 <div class="col-md-4">
                                     <label>Referral Source</label>
                                     <input type="text" name="referral_source" value="{{ old('referral_source', $admission->referral_source) }}" class="form-control">
@@ -199,6 +214,7 @@
                                     <label>Calculated Total (after options)</label>
                                     <input type="text" id="calculated_total" class="form-control" value="0" readonly>
                                     <input type="hidden" id="calculated_total_input" name="calculated_total" value="0">
+                                    <small id="calculated_breakdown" class="text-muted d-block mt-1"></small>
                                 </div>
                             </div>
 
@@ -208,12 +224,12 @@
                                  class="mt-3">
 
                                 {{-- Additional charges checkbox --}}
-                                <div class="row mb-2" style="margin-top: -15px">
+                                <div class="row mb-2" style="margin-top:-15px">
                                     <div class="col-md-12">
                                         <div class="form-check">
                                             <input class="form-check-input" type="checkbox"
                                                 id="apply_additional_charges" name="apply_additional_charges" value="1"
-                                                {{ old('apply_additional_charges', $applyExtraDefault) ? 'checked' : '' }}>
+                                                {{ old('apply_additional_charges', $applyExtraDefault ?? false) ? 'checked' : '' }}>
                                             <small class="form-check-label" for="apply_additional_charges">
                                                 Apply additional charges — ₨1000 per installment
                                             </small>
@@ -225,8 +241,8 @@
                                     <div class="col-md-12">
                                         <label>Installment Count</label>
                                         <select id="installment_count" name="installment_count" class="form-control">
-                                            <option value="2" {{ (int) old('installment_count', $preCount) === 2 ? 'selected' : '' }}>2 Installments</option>
-                                            <option value="3" {{ (int) old('installment_count', $preCount) === 3 ? 'selected' : '' }}>3 Installments</option>
+                                            <option value="2" {{ (int) old('installment_count', $preCount ?? 3) === 2 ? 'selected' : '' }}>2 Installments</option>
+                                            <option value="3" {{ (int) old('installment_count', $preCount ?? 3) === 3 ? 'selected' : '' }}>3 Installments</option>
                                         </select>
                                     </div>
                                 </div>
@@ -265,52 +281,175 @@
 
 @section('additional-javascript')
 <script>
-    // Load batches by course
-    $('#course_id').on('change', function() {
+    // ---------- Constants ----------
+    const PER_INSTALLMENT_CHARGE = 1000;
+
+    // ---------- Helpers ----------
+    function getPaymentType() {
+        return $('input[name="payment_type"]:checked').val();
+    }
+    function getInstallmentCount() {
+        return parseInt($('#installment_count').val() || '3', 10);
+    }
+    function computeTotalParts() {
+        const isInstallment = getPaymentType() === 'installment';
+        const count = isInstallment ? getInstallmentCount() : 0;
+        const applyExtra = isInstallment && $('#apply_additional_charges').is(':checked');
+        const base = Number.isFinite(+$('#full_fee').val()) ? +$('#full_fee').val() : 0;
+        const extra = applyExtra ? (PER_INSTALLMENT_CHARGE * count) : 0;
+        const total = base + extra;
+        return { base, extra, total, count, applyExtra, isInstallment };
+    }
+    function renderTotal() {
+        const p = computeTotalParts();
+        $('#calculated_total').val(p.total);
+        $('#calculated_total_input').val(p.total);
+        if (p.applyExtra && p.isInstallment) {
+            $('#calculated_breakdown').text(`Base: ₨${p.base} + Extra: ₨${PER_INSTALLMENT_CHARGE} × ${p.count} = ₨${p.extra}`);
+        } else {
+            $('#calculated_breakdown').text(`Base: ₨${p.base}`);
+        }
+    }
+    function autoDistributeInstallments() {
+        const { total } = computeTotalParts();
+        const count = getInstallmentCount();
+        if (count === 2) {
+            const first = Math.ceil(total / 2);
+            const second = total - first;
+            $('#installment_1').val(first);
+            $('#installment_2').val(second);
+            $('#installment_3').val('');
+        } else {
+            const part = Math.floor(total / 3);
+            const third = total - (part * 2);
+            $('#installment_1').val(part);
+            $('#installment_2').val(part);
+            $('#installment_3').val(third);
+        }
+        renderTotal();
+    }
+
+    // ---------- Smart manual rebalance (fixes remaining not moving) ----------
+    let isAdjusting = false;
+    function adjustRemainingInstallments(editedId = null) {
+        if (isAdjusting) return;
+        const { total } = computeTotalParts();
+        const count = getInstallmentCount();
+
+        let i1 = Math.max(parseInt($('#installment_1').val() || '0', 10), 0);
+        let i2 = Math.max(parseInt($('#installment_2').val() || '0', 10), 0);
+        let i3 = Math.max(parseInt($('#installment_3').val() || '0', 10), 0);
+
+        isAdjusting = true;
+
+        if (count === 2) {
+            i1 = Math.min(i1, total);
+            i2 = Math.max(total - i1, 0);
+            i3 = 0;
+        } else {
+            const remainingAfterI1 = Math.max(total - i1, 0);
+
+            if (editedId === 'installment_1') {
+                if (i2 > remainingAfterI1) {
+                    i2 = remainingAfterI1;
+                    i3 = 0;
+                } else {
+                    i3 = Math.max(remainingAfterI1 - i2, 0);
+                }
+            } else if (editedId === 'installment_2') {
+                i2 = Math.min(i2, remainingAfterI1);
+                i3 = Math.max(remainingAfterI1 - i2, 0);
+            } else if (editedId === 'installment_3') {
+                i3 = Math.min(i3, remainingAfterI1);
+                i2 = Math.max(remainingAfterI1 - i3, 0);
+            } else {
+                if (i2 > remainingAfterI1) {
+                    i2 = remainingAfterI1;
+                    i3 = 0;
+                } else {
+                    i3 = Math.max(remainingAfterI1 - i2, 0);
+                }
+            }
+
+            // Safety: clamp to total
+            const sum = i1 + i2 + i3;
+            if (sum !== total) {
+                const diff = total - sum; // positive -> need to add
+                if (diff > 0) {
+                    if (i3 || editedId !== 'installment_2') i3 += diff; else i2 += diff;
+                } else if (diff < 0) {
+                    let need = -diff;
+                    const cut3 = Math.min(i3, need);
+                    i3 -= cut3; need -= cut3;
+                    if (need > 0) i2 = Math.max(i2 - need, 0);
+                }
+            }
+        }
+
+        $('#installment_1').val(i1);
+        $('#installment_2').val(i2);
+        $('#installment_3').val(count === 3 ? i3 : '');
+
+        renderTotal();
+        isAdjusting = false;
+    }
+
+    // ---------- Referral toggle ----------
+    function toggleReferralFields() {
+        const selected = ($('#referral_type').val() || '').toLowerCase();
+        const $section = $('#referral_details_section');
+        if (selected === 'referral') {
+            $section.css('display', 'flex');
+        } else {
+            $section.hide();
+            $section.find('input').val('');
+        }
+    }
+
+    // ---------- Events ----------
+    // Course -> Batches
+    $('#course_id').on('change', function () {
         let courseId = $(this).val();
         $('#batch_id').html('<option>Loading...</option>');
-        $.get(`/get-batches/${courseId}`, function(data) {
+        $.get(`{{ url('get-batches') }}/${courseId}`, function (data) {
             let html = '<option value="">Select Batch</option>';
-            data.forEach(batch => {
-                html += `<option value="${batch.id}" data-fee="${batch.course.full_fee}">${batch.title} (${batch.shift ?? ''})</option>`;
+            data.forEach(b => {
+                const fee = b.course?.full_fee ?? 0;
+                const shift = b.shift ? ` (${b.shift})` : '';
+                html += `<option value="${b.id}" data-fee="${fee}">${b.title}${shift}</option>`;
             });
             $('#batch_id').html(html);
         });
     });
 
-    let fullFee = parseInt($('#full_fee').val() || 0);
-    const PER_INSTALLMENT_CHARGE = 1000;
-
-    // Batch selection -> set fee & redistribute
-    $('#batch_id').on('change', function() {
-        let fee = $(this).find(':selected').data('fee') || 0;
-        fullFee = parseInt(fee) || 0;
-        $('#full_fee').val(fullFee);
+    // Batch sets fee -> redistribute
+    $('#batch_id').on('change', function () {
+        const fee = parseInt($(this).find(':selected').data('fee') || '0', 10);
+        $('#full_fee').val(fee);
         autoDistributeInstallments();
     });
 
     // Manual fee edit
-    $('#full_fee').on('input', function() {
-        fullFee = parseInt($(this).val() || 0);
+    $('#full_fee').on('input', function () {
         autoDistributeInstallments();
     });
 
-    // Toggle section on payment type
-    $('input[name="payment_type"]').on('change', function() {
-        if ($(this).val() === 'installment') {
+    // Payment type toggle
+    $('input[name="payment_type"]').on('change', function () {
+        if (getPaymentType() === 'installment') {
             $('#installment-section').show();
             $('#apply_additional_charges').prop('disabled', false);
             autoDistributeInstallments();
         } else {
             $('#installment-section').hide();
             $('#apply_additional_charges').prop('checked', false).prop('disabled', true);
-            renderTotal(); // for full payment
+            renderTotal();
         }
     });
 
     // Installment count change
-    $('#installment_count').on('change', function() {
-        let count = parseInt($(this).val());
+    $('#installment_count').on('change', function () {
+        const count = getInstallmentCount();
         if (count === 2) {
             $('#installment_3_wrapper').hide();
             $('#installment_3').val('');
@@ -320,84 +459,44 @@
         autoDistributeInstallments();
     });
 
-    // Additional charges toggled
-    $(document).on('change', '#apply_additional_charges', function() {
+    // Extra charges toggled
+    $(document).on('change', '#apply_additional_charges', function () {
         autoDistributeInstallments();
     });
 
-    // Manual installments edit
-    $('#installment_1, #installment_2').on('input', function() {
-        adjustRemainingInstallments();
+    // Manual edit listeners on ALL three fields
+    $('#installment_1, #installment_2, #installment_3').on('input', function () {
+        adjustRemainingInstallments(this.id);
     });
 
-    // Helpers
-    function computeTotalParts() {
-        const isInstallment = $('input[name="payment_type"]:checked').val() === 'installment';
-        const count = parseInt($('#installment_count').val()) || 0;
-        const applyExtra = $('#apply_additional_charges').is(':checked');
-        const base = parseInt(fullFee) || 0;
-        const extra = (isInstallment && applyExtra) ? (PER_INSTALLMENT_CHARGE * count) : 0;
-        const total = base + extra;
-        return { base, extra, total, count, applyExtra, isInstallment };
-    }
+    // Referral type toggle
+    $('#referral_type').on('change', toggleReferralFields);
 
-    function renderTotal() {
-        const p = computeTotalParts();
-        $('#calculated_total').val(p.total);
-        $('#calculated_total_input').val(p.total);
-    }
-
-    function autoDistributeInstallments() {
-        const count = parseInt($('#installment_count').val());
-        const total = computeTotalParts().total;
-
-        if (count === 2) {
-            const half = Math.ceil(total / 2);
-            $('#installment_1').val(half);
-            $('#installment_2').val(total - half);
-            $('#installment_3').val('');
-        } else {
-            const part = Math.floor(total / 3);
-            const remain = total - (part * 2);
-            $('#installment_1').val(part);
-            $('#installment_2').val(part);
-            $('#installment_3').val(remain);
-        }
-        renderTotal();
-    }
-
-    function adjustRemainingInstallments() {
-        const count = parseInt($('#installment_count').val());
-        const total = computeTotalParts().total;
-
-        const inst1 = parseInt($('#installment_1').val()) || 0;
-        const inst2 = parseInt($('#installment_2').val()) || 0;
-
-        if (count === 2) {
-            $('#installment_2').val(Math.max(total - inst1, 0));
-            $('#installment_3').val('');
-        } else {
-            const inst3 = total - inst1 - inst2;
-            $('#installment_3').val(inst3 > 0 ? inst3 : 0);
-        }
-        renderTotal();
-    }
-
-    // Initial state
+    // ---------- Initial state ----------
     $(document).ready(function () {
-        const count = parseInt($('#installment_count').val() || '{{ old('installment_count', $preCount) }}');
-        if (count === 2) { $('#installment_3_wrapper').hide(); }
-        fullFee = parseInt($('#full_fee').val() || 0);
+        // Installment 3 visibility
+        const count = getInstallmentCount();
+        if (count === 2) { $('#installment_3_wrapper').hide(); } else { $('#installment_3_wrapper').show(); }
 
-        const paymentType = $('input[name="payment_type"]:checked').val();
-        if (paymentType === 'installment') {
+        // Referral details visibility
+        toggleReferralFields();
+
+        // Show/hide installment panel
+        if (getPaymentType() === 'installment') {
             $('#installment-section').show();
             $('#apply_additional_charges').prop('disabled', false);
         } else {
             $('#installment-section').hide();
             $('#apply_additional_charges').prop('checked', false).prop('disabled', true);
         }
-        autoDistributeInstallments();
+
+        // If installments have values, just recompute total; else distribute
+        const hasAny = ($('#installment_1').val() || $('#installment_2').val() || $('#installment_3').val());
+        if (getPaymentType() === 'installment') {
+            if (hasAny) renderTotal(); else autoDistributeInstallments();
+        } else {
+            renderTotal();
+        }
     });
 </script>
 @endsection
