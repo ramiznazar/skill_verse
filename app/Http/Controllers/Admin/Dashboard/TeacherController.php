@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Dashboard;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Teacher;
+use App\Models\TeacherSalary;
 
 class TeacherController extends Controller
 {
@@ -99,7 +100,6 @@ class TeacherController extends Controller
     }
 
 
-
     /**
      * Display the specified resource.
      */
@@ -131,7 +131,7 @@ class TeacherController extends Controller
             'skill'         => 'required|string|max:255',
             'experience'    => 'required|string|max:255',
 
-            // NEW payout fields
+            // payout fields
             'pay_type'      => 'required|in:percentage,fixed',
             'percentage'    => 'nullable|integer|min:0|max:100',
             'fixed_salary'  => 'nullable|integer|min:0',
@@ -141,7 +141,7 @@ class TeacherController extends Controller
             'notes'         => 'nullable|string',
         ]);
 
-        // Enforce required-if manually, so `0` is allowed when intended
+        // Required-if checks (allow 0)
         if ($request->pay_type === 'percentage' && $request->percentage === null) {
             return back()->withErrors(['percentage' => 'Percentage is required when payout type is Percentage.'])->withInput();
         }
@@ -151,7 +151,7 @@ class TeacherController extends Controller
 
         $teacher = Teacher::findOrFail($id);
 
-        // Handle Image Upload
+        // Image upload
         if ($request->hasFile('image')) {
             if ($teacher->image) {
                 $oldImagePath = public_path($teacher->image);
@@ -166,15 +166,12 @@ class TeacherController extends Controller
             $teacher->image = $imagePath;
         }
 
-        // Legacy compatibility:
-        // - Your current fee submission uses $teacher->salary as %.
-        // - To avoid accidental % payout for fixed teachers BEFORE you update the fee logic,
-        //   set legacy 'salary' = percentage when mode = percentage, else 0.
+        // Legacy safety: keep old 'salary' (used as %) only for percentage mode
         $legacySalary = $request->pay_type === 'percentage'
             ? (string)(int)($request->percentage ?? 0)
             : '0';
 
-        // Update other fields
+        // Update fields
         $teacher->name          = $request->name;
         $teacher->email         = $request->email;
         $teacher->phone         = $request->phone;
@@ -182,12 +179,12 @@ class TeacherController extends Controller
         $teacher->skill         = $request->skill;
         $teacher->experience    = $request->experience;
 
-        // NEW payout fields
+        // New payout fields
         $teacher->pay_type      = $request->pay_type;
         $teacher->percentage    = $request->percentage !== null ? (int)$request->percentage : null;
         $teacher->fixed_salary  = $request->fixed_salary !== null ? (int)$request->fixed_salary : null;
 
-        // Legacy column (temporary)
+        // legacy column
         $teacher->salary        = $legacySalary;
 
         $teacher->joining_date  = $request->joining_date;
@@ -195,6 +192,55 @@ class TeacherController extends Controller
         $teacher->notes         = $request->notes;
 
         $teacher->save();
+
+        /* ------------------- SYNC CURRENT MONTH SNAPSHOT ------------------- */
+        // Create or update the current month's UNPAID salary row so the salary table reflects changes immediately
+        /* ------------------- SYNC CURRENT MONTH SNAPSHOT ------------------- */
+        $month = now()->month;
+        $year  = now()->year;
+
+        // Create or update the current month row for this teacher
+        $row = TeacherSalary::firstOrNew([
+            'teacher_id' => $teacher->id,
+            'month'      => $month,
+            'year'       => $year,
+        ]);
+
+        // If row is already closed, don't rewrite history
+        if (!in_array(strtolower($row->status ?? 'unpaid'), ['paid', 'balance'], true)) {
+
+            // Initialize if new
+            if (!$row->exists) {
+                $row->status                      = 'unpaid';
+                $row->total_fee_collected         = 0;
+                $row->total_students              = 0;
+                $row->salary_amount               = 0;
+                $row->computed_percentage_amount  = 0;
+                $row->computed_fixed_amount       = 0;
+            }
+
+            // Snapshot latest teacher settings
+            $row->pay_type   = $teacher->pay_type ?? 'percentage';
+            $row->percentage = (int) ($teacher->percentage ?? (is_numeric($teacher->salary) ? $teacher->salary : 0)); // legacy fallback
+
+            // Recompute both amounts using current totals
+            $collected          = (int) ($row->total_fee_collected ?? 0);
+            $computedPercentage = (int) round($collected * ($row->percentage / 100));
+            $computedFixed      = (int) ($teacher->fixed_salary ?? 0);
+
+            $row->computed_percentage_amount = $computedPercentage;
+            $row->computed_fixed_amount      = $computedFixed;
+
+            // Payable according to updated pay_type
+            $row->salary_amount = $row->pay_type === 'fixed'
+                ? $computedFixed
+                : $computedPercentage;
+
+            $row->save();
+        }
+        /* ----------------- END SYNC CURRENT MONTH SNAPSHOT ----------------- */
+
+        /* ----------------- END SYNC CURRENT MONTH SNAPSHOT ----------------- */
 
         return redirect()->route('teacher.index')->with('update', 'Teacher updated successfully.');
     }

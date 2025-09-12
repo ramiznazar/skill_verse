@@ -6,13 +6,13 @@
     <!-- Meta Tags -->
     <meta name="viewport" content="width=device-width,initial-scale=1.0" />
     <meta http-equiv="content-type" content="text/html; charset=UTF-8" />
-    <meta name="description" content="StudyPress | Education & Courses HTML Template" />
+    <meta name="description" content="SkillVerse offers expert-led tech short courses & training programs. Learn IT, coding, and digital skills to boost your career at our training institute." />
     <meta name="keywords" content="academy, course, education, education html theme, elearning, learning," />
     <meta name="author" content="ThemeMascot" />
 
     <!-- Page Title -->
-    <title>SkillVerse | Tech Short Courses & Training Institute</title>
-
+    <title>SkillVerse | Tech Short Courses & IT Training Institute</title>
+    <link rel="canonical" href="https://skillverse.com.pk/" />
     <!-- Favicon and Touch Icons -->
     <link href="{{ asset('assets/website/images/logo/favicon.png') }}" rel="shortcut icon" type="image/png">
     <link href="{{ asset('assets/website/images/apple-touch-icon.png') }}" rel="apple-touch-icon">
