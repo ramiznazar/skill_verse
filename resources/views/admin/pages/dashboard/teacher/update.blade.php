@@ -136,19 +136,55 @@
                                     </div>
                                 </div>
 
+                                {{-- Payout settings (NEW) --}}
                                 <div class="row">
-                                    {{-- Salary --}}
+                                    {{-- Pay Type --}}
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>Salary</label>
-                                            <input type="text" name="salary" class="form-control"
-                                                value="{{ old('salary', $teacher->salary) }}">
-                                            @error('salary')
+                                            <label>Payout Type</label>
+                                            <select name="pay_type" id="pay_type" class="form-control">
+                                                @php $currentPayType = old('pay_type', $teacher->pay_type ?? 'percentage'); @endphp
+                                                <option value="percentage"
+                                                    {{ $currentPayType === 'percentage' ? 'selected' : '' }}>Percentage
+                                                </option>
+                                                <option value="fixed" {{ $currentPayType === 'fixed' ? 'selected' : '' }}>
+                                                    Fixed</option>
+                                            </select>
+                                            @error('pay_type')
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>
                                     </div>
 
+                                    {{-- Percentage (always visible for transparency) --}}
+                                    <div class="col-md-4" id="percentage_wrap">
+                                        <div class="form-group">
+                                            <label>Percentage (%)</label>
+                                            <input type="number" name="percentage" id="percentage" min="0"
+                                                max="100" class="form-control"
+                                                value="{{ old('percentage', $teacher->percentage) }}">
+                                            <small class="text-muted">e.g., 20 means 20%</small>
+                                            @error('percentage')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    {{-- Fixed Salary (monthly) --}}
+                                    <div class="col-md-4" id="fixed_wrap">
+                                        <div class="form-group">
+                                            <label>Fixed Salary (per month)</label>
+                                            <input type="number" name="fixed_salary" id="fixed_salary" min="0"
+                                                class="form-control"
+                                                value="{{ old('fixed_salary', $teacher->fixed_salary) }}">
+                                            @error('fixed_salary')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row">
                                     {{-- Status --}}
                                     <div class="col-md-4">
                                         <div class="form-group">
@@ -196,7 +232,6 @@
                     </div>
                 </div>
             </div>
-
         </div>
     </div>
 @endsection
@@ -208,6 +243,26 @@
 
             // initialize after multiselect
             $('#basic-form').parsley();
+        });
+    </script>
+    {{-- Toggle required inputs by payout type --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const payType = document.getElementById('pay_type');
+            const pctInput = document.getElementById('percentage');
+            const fixedInput = document.getElementById('fixed_salary');
+
+            function syncRequired() {
+                if (payType.value === 'fixed') {
+                    fixedInput.required = true;
+                    pctInput.required = false;
+                } else {
+                    fixedInput.required = false;
+                    pctInput.required = true;
+                }
+            }
+            payType.addEventListener('change', syncRequired);
+            syncRequired();
         });
     </script>
 @endsection

@@ -67,13 +67,19 @@
                                             <th>Phone</th>
                                             <th>Skill</th>
                                             <th>Experience</th>
-                                            <th>Salary</th>
+                                            <th>Payout</th> 
                                             <th>Status</th>
                                             <th>Options</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php $__currentLoopData = $teachers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $teacher): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <?php
+                                                $mode = $teacher->pay_type ?? 'percentage';
+                                                $percent = $teacher->percentage; // may be null
+                                                $fixed = $teacher->fixed_salary; // may be null
+                                            ?>
+
                                             <tr>
                                                 <td><?php echo e($loop->iteration); ?></td>
 
@@ -87,7 +93,26 @@
                                                 <td><?php echo e($teacher->phone); ?></td>
                                                 <td><span class="text-info"><?php echo e($teacher->skill); ?></span></td>
                                                 <td><?php echo e($teacher->experience); ?></td>
-                                                <td><?php echo e($teacher->salary); ?></td>
+
+                                                
+                                                <td>
+                                                    <div>
+                                                        <span
+                                                            class="badge badge-<?php echo e($mode === 'fixed' ? 'primary' : 'info'); ?>">
+                                                            <?php echo e(ucfirst($mode)); ?>
+
+                                                        </span>
+                                                    </div>
+                                                    <div class="small text-muted" style="line-height:1.2; margin-top:4px;">
+                                                        <strong>%:</strong>
+                                                        <?php echo e($percent !== null ? $percent . '%' : '—'); ?>
+
+                                                        &nbsp;|&nbsp;
+                                                        <strong>Fixed:</strong>
+                                                        <?php echo e($fixed !== null ? number_format($fixed) : '—'); ?>
+
+                                                    </div>
+                                                </td>
 
                                                 <td>
                                                     <?php if($teacher->status === 'active'): ?>
@@ -99,15 +124,14 @@
 
                                                 <td class="actions">
                                                     <div class="d-flex align-items-center" style="column-gap: 5px;">
-
-                                                        <!-- Edit Button -->
+                                                        <!-- Edit -->
                                                         <a href="<?php echo e(route('teacher.edit', $teacher->id)); ?>"
                                                             class="btn btn-sm btn-icon btn-pure btn-default on-default button-edit"
                                                             data-toggle="tooltip" data-original-title="Edit">
                                                             <i class="icon-pencil" aria-hidden="true"></i>
                                                         </a>
 
-                                                        <!-- Delete Button -->
+                                                        <!-- Delete -->
                                                         <form action="<?php echo e(route('teacher.destroy', $teacher->id)); ?>"
                                                             method="POST"
                                                             onsubmit="return confirm('Are you sure you want to delete this teacher?')">

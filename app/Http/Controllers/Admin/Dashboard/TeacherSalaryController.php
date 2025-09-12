@@ -43,6 +43,21 @@ class TeacherSalaryController extends Controller
         $salary = TeacherSalary::with('teacher')->findOrFail($id);
         if ($salary->status === 'paid') return back()->with('paid', 'Already marked as paid.');
 
+        // ✅ Fixed-pay: is month me pahle hi 'paid' ya 'Balance → Paid' ho chuka?
+        $payTypeSnapshot = $salary->pay_type ?? ($salary->teacher->pay_type ?? 'percentage');
+        if ($payTypeSnapshot === 'fixed') {
+            $alreadyPaidThisMonth = TeacherSalaryHistory::where('teacher_id', $salary->teacher_id)
+                ->where('month', $salary->month)
+                ->where('year',  $salary->year)
+                ->whereIn('status', ['paid', 'Balance → Paid'])
+                ->exists();
+
+            if ($alreadyPaidThisMonth) {
+                return back()->with('paid', 'Fixed salary is already paid once for this month.');
+            }
+        }
+
+
         DB::transaction(function () use ($salary) {
             $amount = (int) $salary->salary_amount;
             $teacherName = $salary->teacher->name ?? 'Unknown';

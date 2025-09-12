@@ -83,40 +83,89 @@
                                             <th>Month</th>
                                             <th>Students</th>
                                             <th>Collected</th>
-                                            <th>% / Rate</th>
-                                            <th>Salary</th>
+                                            <th>Pay Type</th>
+                                            <th>%</th>
+                                            <th>Fixed</th>
+                                            <th>Payable</th>
                                             <th>Status</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach ($salaries as $salary)
+                                            @php
+                                                // Safe defaults + fallbacks for legacy rows
+                                                $teacher = $salary->teacher ?? null;
+                                                $collected = (int) ($salary->total_fee_collected ?? 0);
+
+                                                $payType = $salary->pay_type ?? ($teacher->pay_type ?? 'percentage'); // fallback to teacher if row missing snapshot
+
+                                                $percent = (int) ($salary->percentage ?? 0);
+                                                $pctAmount =
+                                                    (int) ($salary->computed_percentage_amount ??
+                                                        (int) round($collected * ($percent / 100)));
+
+                                                $fixedAmount =
+                                                    (int) ($salary->computed_fixed_amount ??
+                                                        (int) ($teacher->fixed_salary ?? 0));
+
+                                                // Actual payable for this row (what your flows use)
+                                                $payable =
+                                                    (int) ($salary->salary_amount ??
+                                                        ($payType === 'fixed' ? $fixedAmount : $pctAmount));
+                                            @endphp
+
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
-                                                <td>{{ $salary->teacher->name ?? 'N/A' }}</td>
-                                                    <td>{{ \Carbon\Carbon::create()->month($salary->month)->format('F') }} {{ $salary->year }}</td>
+                                                <td>{{ $teacher->name ?? 'N/A' }}</td>
+                                                <td>{{ \Carbon\Carbon::create()->month($salary->month)->format('F') }}
+                                                    {{ $salary->year }}</td>
 
                                                 <td>{{ $salary->total_students }}</td>
-                                                <td>{{ number_format($salary->total_fee_collected) }} PKR</td>
-                                                <td>{{ $salary->percentage }}%</td>
-                                                <td><strong>{{ number_format($salary->salary_amount) }} PKR</strong></td>
+                                                <td>{{ number_format($collected) }} PKR</td>
+
+                                                {{-- Pay Type --}}
                                                 <td>
                                                     <span
-                                                        class="badge 
-                                                    @if ($salary->status == 'paid') badge-success
-                                                    @elseif($salary->status == 'balance') badge-info
-                                                    @else badge-warning @endif">
+                                                        class="badge badge-{{ $payType === 'fixed' ? 'primary' : 'info' }}">
+                                                        {{ ucfirst($payType) }}
+                                                    </span>
+                                                </td>
+
+                                                {{-- Percentage column: show % and approx computed amount --}}
+                                                <td>
+                                                    {{ $percent }}%
+                                                    @if ($pctAmount > 0)
+                                                        <small class="text-muted d-block">≈ {{ number_format($pctAmount) }}
+                                                            PKR</small>
+                                                    @endif
+                                                </td>
+
+                                                {{-- Fixed column --}}
+                                                <td>
+                                                    {{ $fixedAmount > 0 ? number_format($fixedAmount) . ' PKR' : '—' }}
+                                                </td>
+
+                                                {{-- Payable (actual) --}}
+                                                <td><strong>{{ number_format($payable) }} PKR</strong></td>
+
+                                                <td>
+                                                    <span
+                                                        class="badge
+                        @if ($salary->status == 'paid') badge-success
+                        @elseif($salary->status == 'balance') badge-info
+                        @else badge-warning @endif">
                                                         {{ ucfirst($salary->status) }}
                                                     </span>
                                                 </td>
+
                                                 <td>
                                                     {{-- Paid --}}
                                                     <form method="POST"
                                                         action="{{ route('teacher-salary.status-paid', $salary->id) }}"
                                                         style="display:inline-block;">
                                                         @csrf @method('PUT')
-                                                        <button type="submit" class="btn btn-sm btn-success"
-                                                            {{-- {{ in_array(strtolower($salary->status), ['paid', 'balance']) ? 'disabled' : '' }} --}}>
+                                                        <button type="submit" class="btn btn-sm btn-success">
                                                             Paid
                                                         </button>
                                                     </form>
@@ -126,8 +175,7 @@
                                                         action="{{ route('teacher-salary.status-balance', $salary->id) }}"
                                                         style="display:inline-block;">
                                                         @csrf @method('PUT')
-                                                        <button type="submit" class="btn btn-sm btn-warning"
-                                                            {{-- {{ in_array(strtolower($salary->status), ['paid', 'balance']) ? 'disabled' : '' }} --}}>
+                                                        <button type="submit" class="btn btn-sm btn-warning">
                                                             Balance
                                                         </button>
                                                     </form>
@@ -137,11 +185,7 @@
                                                         class="btn btn-sm btn-info">
                                                         History
                                                     </a>
-
-                                                    {{-- Existing Teacher Balances page (aap ne diya hua button header me bhi hai) --}}
-                                                    {{-- <a href="{{ route('teacher.balance') }}" class="btn btn-sm btn-primary">Balances</a> --}}
                                                 </td>
-
                                             </tr>
                                         @endforeach
                                     </tbody>

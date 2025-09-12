@@ -44,7 +44,7 @@ class TeacherBalanceController extends Controller
             // 1) History entry (same table you already use)
             TeacherSalaryHistory::create([
                 'teacher_id'        => $teacherId,
-                'teacher_salary_id' => $salary?->id,   // nullable is okay
+                'teacher_salary_id' => $salary?->id,
                 'month'             => $month,
                 'year'              => $year,
                 'amount'            => $amount,

@@ -64,13 +64,19 @@
                                             <th>Phone</th>
                                             <th>Skill</th>
                                             <th>Experience</th>
-                                            <th>Salary</th>
+                                            <th>Payout</th> {{-- was: Salary --}}
                                             <th>Status</th>
                                             <th>Options</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach ($teachers as $teacher)
+                                            @php
+                                                $mode = $teacher->pay_type ?? 'percentage';
+                                                $percent = $teacher->percentage; // may be null
+                                                $fixed = $teacher->fixed_salary; // may be null
+                                            @endphp
+
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
 
@@ -84,7 +90,23 @@
                                                 <td>{{ $teacher->phone }}</td>
                                                 <td><span class="text-info">{{ $teacher->skill }}</span></td>
                                                 <td>{{ $teacher->experience }}</td>
-                                                <td>{{ $teacher->salary }}</td>
+
+                                                {{-- New payout column: shows mode + both values (you always want to see % even if paying fixed) --}}
+                                                <td>
+                                                    <div>
+                                                        <span
+                                                            class="badge badge-{{ $mode === 'fixed' ? 'primary' : 'info' }}">
+                                                            {{ ucfirst($mode) }}
+                                                        </span>
+                                                    </div>
+                                                    <div class="small text-muted" style="line-height:1.2; margin-top:4px;">
+                                                        <strong>%:</strong>
+                                                        {{ $percent !== null ? $percent . '%' : '—' }}
+                                                        &nbsp;|&nbsp;
+                                                        <strong>Fixed:</strong>
+                                                        {{ $fixed !== null ? number_format($fixed) : '—' }}
+                                                    </div>
+                                                </td>
 
                                                 <td>
                                                     @if ($teacher->status === 'active')
@@ -96,15 +118,14 @@
 
                                                 <td class="actions">
                                                     <div class="d-flex align-items-center" style="column-gap: 5px;">
-
-                                                        <!-- Edit Button -->
+                                                        <!-- Edit -->
                                                         <a href="{{ route('teacher.edit', $teacher->id) }}"
                                                             class="btn btn-sm btn-icon btn-pure btn-default on-default button-edit"
                                                             data-toggle="tooltip" data-original-title="Edit">
                                                             <i class="icon-pencil" aria-hidden="true"></i>
                                                         </a>
 
-                                                        <!-- Delete Button -->
+                                                        <!-- Delete -->
                                                         <form action="{{ route('teacher.destroy', $teacher->id) }}"
                                                             method="POST"
                                                             onsubmit="return confirm('Are you sure you want to delete this teacher?')">

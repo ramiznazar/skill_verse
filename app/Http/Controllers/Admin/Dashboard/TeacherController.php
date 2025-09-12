@@ -38,20 +38,40 @@ class TeacherController extends Controller
             'qualification' => 'nullable|string|max:255',
             'skill'         => 'required|string|max:255',
             'experience'    => 'required|string|max:255',
-            'salary'        => 'nullable|string|max:255',
+
+            // NEW payout fields
+            'pay_type'      => 'required|in:percentage,fixed',
+            'percentage'    => 'nullable|integer|min:0|max:100',   // required if pay_type=percentage (see below)
+            'fixed_salary'  => 'nullable|integer|min:0',           // required if pay_type=fixed (see below)
+
             'joining_date'  => 'nullable|date',
             'status'        => 'nullable|in:active,inactive',
             'notes'         => 'nullable|string',
         ]);
 
-        $imagePath = null;
+        // Enforce required-if rules manually (so 0 is allowed when intended)
+        if ($request->pay_type === 'percentage' && $request->percentage === null) {
+            return back()->withErrors(['percentage' => 'Percentage is required when payout type is Percentage.'])->withInput();
+        }
+        if ($request->pay_type === 'fixed' && $request->fixed_salary === null) {
+            return back()->withErrors(['fixed_salary' => 'Fixed salary is required when payout type is Fixed.'])->withInput();
+        }
 
+        $imagePath = null;
         if ($request->hasFile('image')) {
             $image = $request->file('image');
             $imageName = time() . '.' . $image->getClientOriginalExtension();
             $imagePath = 'assets/admin/images/code/teacher/' . $imageName;
             $image->move(public_path('assets/admin/images/code/teacher/'), $imageName);
         }
+
+        // Legacy compatibility:
+        // - Your current fee submission uses $teacher->salary as %.
+        // - To AVOID wrong payouts for fixed teachers before we update that logic,
+        //   we will set legacy 'salary' = percentage only for percentage mode; otherwise 0.
+        $legacySalary = $request->pay_type === 'percentage'
+            ? (string)(int)($request->percentage ?? 0)
+            : '0';
 
         Teacher::create([
             'image'         => $imagePath,
@@ -61,14 +81,23 @@ class TeacherController extends Controller
             'qualification' => $request->qualification,
             'skill'         => $request->skill,
             'experience'    => $request->experience,
-            'salary'        => $request->salary,
+
+            // NEW fields
+            'pay_type'      => $request->pay_type,
+            'percentage'    => $request->percentage !== null ? (int)$request->percentage : null,
+            'fixed_salary'  => $request->fixed_salary !== null ? (int)$request->fixed_salary : null,
+
+            // Legacy column kept for now (will remove after fee logic update)
+            'salary'        => $legacySalary,
+
             'joining_date'  => $request->joining_date,
-            'status'        => $request->status,
+            'status'        => $request->status ?? 'active',
             'notes'         => $request->notes,
         ]);
 
         return redirect()->route('teacher.index')->with('store', 'Teacher added successfully.');
     }
+
 
 
     /**
@@ -101,31 +130,49 @@ class TeacherController extends Controller
             'qualification' => 'nullable|string|max:255',
             'skill'         => 'required|string|max:255',
             'experience'    => 'required|string|max:255',
-            'salary'        => 'nullable|string|max:255',
+
+            // NEW payout fields
+            'pay_type'      => 'required|in:percentage,fixed',
+            'percentage'    => 'nullable|integer|min:0|max:100',
+            'fixed_salary'  => 'nullable|integer|min:0',
+
             'joining_date'  => 'nullable|date',
             'status'        => 'nullable|in:active,inactive',
             'notes'         => 'nullable|string',
         ]);
 
+        // Enforce required-if manually, so `0` is allowed when intended
+        if ($request->pay_type === 'percentage' && $request->percentage === null) {
+            return back()->withErrors(['percentage' => 'Percentage is required when payout type is Percentage.'])->withInput();
+        }
+        if ($request->pay_type === 'fixed' && $request->fixed_salary === null) {
+            return back()->withErrors(['fixed_salary' => 'Fixed salary is required when payout type is Fixed.'])->withInput();
+        }
+
         $teacher = Teacher::findOrFail($id);
 
         // Handle Image Upload
         if ($request->hasFile('image')) {
-            // Delete old image if exists
             if ($teacher->image) {
                 $oldImagePath = public_path($teacher->image);
                 if (file_exists($oldImagePath)) {
-                    unlink($oldImagePath);
+                    @unlink($oldImagePath);
                 }
             }
-
-            $image = $request->file('image');
-            $imageName = time() . '.' . $image->getClientOriginalExtension();
-            $imagePath = 'assets/admin/images/code/teacher/' . $imageName;
+            $image      = $request->file('image');
+            $imageName  = time() . '.' . $image->getClientOriginalExtension();
+            $imagePath  = 'assets/admin/images/code/teacher/' . $imageName;
             $image->move(public_path('assets/admin/images/code/teacher/'), $imageName);
-
             $teacher->image = $imagePath;
         }
+
+        // Legacy compatibility:
+        // - Your current fee submission uses $teacher->salary as %.
+        // - To avoid accidental % payout for fixed teachers BEFORE you update the fee logic,
+        //   set legacy 'salary' = percentage when mode = percentage, else 0.
+        $legacySalary = $request->pay_type === 'percentage'
+            ? (string)(int)($request->percentage ?? 0)
+            : '0';
 
         // Update other fields
         $teacher->name          = $request->name;
@@ -134,7 +181,15 @@ class TeacherController extends Controller
         $teacher->qualification = $request->qualification;
         $teacher->skill         = $request->skill;
         $teacher->experience    = $request->experience;
-        $teacher->salary        = $request->salary;
+
+        // NEW payout fields
+        $teacher->pay_type      = $request->pay_type;
+        $teacher->percentage    = $request->percentage !== null ? (int)$request->percentage : null;
+        $teacher->fixed_salary  = $request->fixed_salary !== null ? (int)$request->fixed_salary : null;
+
+        // Legacy column (temporary)
+        $teacher->salary        = $legacySalary;
+
         $teacher->joining_date  = $request->joining_date;
         $teacher->status        = $request->status;
         $teacher->notes         = $request->notes;
@@ -143,7 +198,6 @@ class TeacherController extends Controller
 
         return redirect()->route('teacher.index')->with('update', 'Teacher updated successfully.');
     }
-
 
     /**
      * Remove the specified resource from storage.

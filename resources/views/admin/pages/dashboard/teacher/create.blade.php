@@ -33,7 +33,7 @@
                                     @enderror
                                 </div>
 
-                                {{-- Name --}}
+                                {{-- Name / Email / Phone --}}
                                 <div class="row">
                                     <div class="col-md-4">
                                         <div class="form-group">
@@ -46,7 +46,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Email --}}
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Email</label>
@@ -58,7 +57,6 @@
                                         </div>
                                     </div>
 
-                                    {{-- Phone --}}
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Phone</label>
@@ -71,8 +69,8 @@
                                     </div>
                                 </div>
 
+                                {{-- Skill / Experience / Qualification --}}
                                 <div class="row">
-                                    {{-- Skill --}}
                                     <div class="col-md-5">
                                         <div class="form-group">
                                             <label>Skill</label>
@@ -84,20 +82,19 @@
                                         </div>
                                     </div>
 
-                                    {{-- Experience --}}
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Experience</label>
                                             <select name="experience" class="form-control">
-                                                <option value="6 month" {{ old('status') == '6 month' ? 'selected' : '' }}>
-                                                    6 Month</option>
-                                                <option value="1 year" {{ old('status') == '1 year' ? 'selected' : '' }}>
-                                                    1 Year</option>
-                                                <option value="2 year" {{ old('status') == '2 year' ? 'selected' : '' }}>
-                                                    2 Year</option>
+                                                <option value="6 month"
+                                                    {{ old('experience') == '6 month' ? 'selected' : '' }}>6 Month</option>
+                                                <option value="1 year"
+                                                    {{ old('experience') == '1 year' ? 'selected' : '' }}>1 Year</option>
+                                                <option value="2 year"
+                                                    {{ old('experience') == '2 year' ? 'selected' : '' }}>2 Year</option>
                                                 <option value="more then two year"
-                                                    {{ old('status') == 'more then two year' ? 'selected' : '' }}>
-                                                    More then two year</option>
+                                                    {{ old('experience') == 'more then two year' ? 'selected' : '' }}>More
+                                                    then two year</option>
                                             </select>
                                             @error('experience')
                                                 <small class="text-danger">{{ $message }}</small>
@@ -105,64 +102,96 @@
                                         </div>
                                     </div>
 
-                                    {{-- Qualification --}}
                                     <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Qualification</label>
                                             <select name="qualification" class="form-control">
-                                                <option value="middle" {{ old('status') == 'middle' ? 'selected' : '' }}>
-                                                    Middle</option>
-                                                <option value="metric" {{ old('status') == 'metric' ? 'selected' : '' }}>
-                                                    Metric</option>
+                                                <option value="middle"
+                                                    {{ old('qualification') == 'middle' ? 'selected' : '' }}>Middle
+                                                </option>
+                                                <option value="metric"
+                                                    {{ old('qualification') == 'metric' ? 'selected' : '' }}>Metric
+                                                </option>
                                                 <option value="intermediate"
-                                                    {{ old('status') == 'intermediate' ? 'selected' : '' }}>
+                                                    {{ old('qualification') == 'intermediate' ? 'selected' : '' }}>
                                                     Intermediate</option>
                                                 <option value="graduate"
-                                                    {{ old('status') == 'graduate' ? 'selected' : '' }}>
-                                                    Graduate</option>
-                                                <option value="m-phill" {{ old('status') == 'm-phill' ? 'selected' : '' }}>
-                                                    M Phill</option>
+                                                    {{ old('qualification') == 'graduate' ? 'selected' : '' }}>Graduate
+                                                </option>
+                                                <option value="m-phill"
+                                                    {{ old('qualification') == 'm-phill' ? 'selected' : '' }}>M Phill
+                                                </option>
                                             </select>
                                             @error('qualification')
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>
                                     </div>
-
                                 </div>
 
+                                {{-- Payout settings --}}
                                 <div class="row">
-
-                                    {{-- Salary --}}
+                                    {{-- Pay Type --}}
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label>Salary</label>
-                                            <input type="text" name="salary" class="form-control"
-                                                value="{{ old('salary') }}">
-                                            @error('salary')
+                                            <label>Payout Type</label>
+                                            <select name="pay_type" id="pay_type" class="form-control">
+                                                <option value="percentage"
+                                                    {{ old('pay_type', 'percentage') === 'percentage' ? 'selected' : '' }}>
+                                                    Percentage</option>
+                                                <option value="fixed" {{ old('pay_type') === 'fixed' ? 'selected' : '' }}>
+                                                    Fixed</option>
+                                            </select>
+                                            @error('pay_type')
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>
                                     </div>
-                                    
-                                    {{-- Status --}}
-                                    <div class="col-md-4">
+
+                                    {{-- Percentage --}}
+                                    <div class="col-md-4" id="percentage_wrap">
                                         <div class="form-group">
-                                            <label>Status</label>
-                                            <select name="status" class="form-control">
-                                                <option value="active" {{ old('status') == 'active' ? 'selected' : '' }}>
-                                                    Active</option>
-                                                    <option value="inactive"
-                                                    {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive
-                                                </option>
-                                            </select>
-                                            @error('status')
-                                            <small class="text-danger">{{ $message }}</small>
+                                            <label>Percentage (%)</label>
+                                            <input type="number" name="percentage" id="percentage" min="0"
+                                                max="100" class="form-control" value="{{ old('percentage') }}">
+                                            <small class="text-muted">e.g., 20 means 20%</small>
+                                            @error('percentage')
+                                                <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>
                                     </div>
 
-                                    {{-- Joining Date --}}
+                                    {{-- Fixed Salary --}}
+                                    <div class="col-md-4" id="fixed_wrap">
+                                        <div class="form-group">
+                                            <label>Fixed Salary (per month)</label>
+                                            <input type="number" name="fixed_salary" id="fixed_salary" min="0"
+                                                class="form-control" value="{{ old('fixed_salary') }}">
+                                            @error('fixed_salary')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {{-- Status / Joining Date --}}
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Status</label>
+                                            <select name="status" class="form-control">
+                                                <option value="active"
+                                                    {{ old('status', 'active') == 'active' ? 'selected' : '' }}>Active
+                                                </option>
+                                                <option value="inactive"
+                                                    {{ old('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                            </select>
+                                            @error('status')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+
                                     <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Joining Date</label>
@@ -202,6 +231,36 @@
 
             // initialize after multiselect
             $('#basic-form').parsley();
+        });
+    </script>
+    {{-- Simple toggle logic (vanilla JS) --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const payType = document.getElementById('pay_type');
+            const pctWrap = document.getElementById('percentage_wrap');
+            const fixedWrap = document.getElementById('fixed_wrap');
+            const pctInput = document.getElementById('percentage');
+            const fixedInput = document.getElementById('fixed_salary');
+
+            function syncVisibility() {
+                const mode = payType.value;
+                if (mode === 'fixed') {
+                    fixedWrap.style.display = '';
+                    pctWrap.style.display = '';
+                    // make fixed required; percentage optional (but still visible for transparency)
+                    fixedInput.required = true;
+                    pctInput.required = false;
+                } else {
+                    fixedWrap.style.display = '';
+                    pctWrap.style.display = '';
+                    // make percentage required; fixed optional
+                    fixedInput.required = false;
+                    pctInput.required = true;
+                }
+            }
+
+            payType.addEventListener('change', syncVisibility);
+            syncVisibility();
         });
     </script>
 @endsection

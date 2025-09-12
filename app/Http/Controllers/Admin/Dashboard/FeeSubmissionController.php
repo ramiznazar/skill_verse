@@ -105,11 +105,15 @@ class FeeSubmissionController extends Controller
         };
         $admission->save();
 
-        // ✅ Teacher Salary
+        // ✅ Teacher Salary (fixed = one payout per month)
         $batch = Batch::find($admission->batch_id);
         if ($batch && $batch->teacher_id && $totalAmountThisSubmission > 0) {
             $teacher = $batch->teacher;
-            $percentage = floatval($teacher->salary ?? 0);
+
+            // Snapshot teacher config
+            $payType  = $teacher->pay_type ?? 'percentage';
+            $percent  = (int) ($teacher->percentage ?? (is_numeric($teacher->salary) ? $teacher->salary : 0)); // legacy fallback
+            $fixed    = (int) ($teacher->fixed_salary ?? 0);
 
             $month = now()->month;
             $year  = now()->year;
@@ -120,20 +124,51 @@ class FeeSubmissionController extends Controller
                 'year'       => $year,
             ]);
 
-            // 🔁 If the previous cycle was closed (paid/balance), reopen a fresh unpaid cycle
+            // ❗ Reopen rule:
+            // Percentage: old behavior (reopen on paid/balance)
+            // Fixed: DO NOT reopen once paid/balance in same month (so no second payout)
             if (in_array(strtolower($teacherSalary->status ?? 'unpaid'), ['paid', 'balance'], true)) {
-                $teacherSalary->status = 'unpaid';
-                $teacherSalary->total_fee_collected = 0;
-                $teacherSalary->total_students = 0;
-                $teacherSalary->salary_amount = 0;
+                if ($payType === 'percentage') {
+                    // reopen cycle (same as before)
+                    $teacherSalary->status                      = 'unpaid';
+                    $teacherSalary->total_fee_collected         = 0;
+                    $teacherSalary->total_students              = 0;
+                    $teacherSalary->salary_amount               = 0;
+                    $teacherSalary->computed_percentage_amount  = 0;
+                    $teacherSalary->computed_fixed_amount       = 0;
+                } else {
+                    // fixed → don't reopen; keep status as-is (paid/balance)
+                    // (still allow totals/computed fields to update for transparency)
+                }
             }
 
-            // ➕ Add current submission
-            $teacherSalary->total_fee_collected = ($teacherSalary->total_fee_collected ?? 0) + $totalAmountThisSubmission;
-            $teacherSalary->percentage = $percentage;
-            $teacherSalary->salary_amount = (int) ($teacherSalary->total_fee_collected * ($percentage / 100));
+            // ➕ accumulate this submission
+            $teacherSalary->total_fee_collected = (int) (($teacherSalary->total_fee_collected ?? 0) + $totalAmountThisSubmission);
 
-            // Distinct students this month for this batch
+            // snapshot config
+            $teacherSalary->pay_type   = $payType;
+            $teacherSalary->percentage = $percent;
+
+            // compute both
+            $computedPercentage = (int) round($teacherSalary->total_fee_collected * ($percent / 100));
+            $computedFixed      = $fixed;
+
+            $teacherSalary->computed_percentage_amount = $computedPercentage;
+            $teacherSalary->computed_fixed_amount      = $computedFixed;
+
+            // ✅ Payable set karna:
+            if ($payType === 'fixed') {
+                // Sirf tab set karein jab cycle unpaid ho — agar paid/balance ho chuki, tou payable 0 hi rehne dein
+                if (strtolower($teacherSalary->status ?? 'unpaid') === 'unpaid') {
+                    $teacherSalary->salary_amount = $computedFixed;
+                }
+                // else (paid/balance): salary_amount ko wapas fixed par na le jaayein; 0 hi rehne dein
+            } else {
+                // percentage: normal behavior
+                $teacherSalary->salary_amount = $computedPercentage;
+            }
+
+            // distinct students
             $teacherSalary->total_students = FeeSubmission::whereHas('admission', function ($q) use ($batch) {
                 $q->where('batch_id', $batch->id);
             })
@@ -144,6 +179,7 @@ class FeeSubmissionController extends Controller
 
             $teacherSalary->save();
         }
+
         return redirect()->route('fee-submission.index')->with('success', 'Fee submitted successfully.');
     }
     public function receipt($id)

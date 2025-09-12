@@ -7,7 +7,8 @@
                     <h2>Teachers Balance</h2>
                 </div>
                 <div class="col-md-6 col-sm-12 text-right">
-                    <a href="{{ route('teacher-salary.index') }}" class="btn btn-sm btn-primary" title="">Back to Teachers</a>
+                    <a href="{{ route('teacher-salary.index') }}" class="btn btn-sm btn-primary" title="">Back to
+                        Teachers</a>
                 </div>
             </div>
         </div>
@@ -61,6 +62,9 @@
                                             <th>Teacher Name</th>
                                             <th>Month</th>
                                             <th>Year</th>
+                                            <th>Pay Type</th>
+                                            <th>%</th>
+                                            <th>Fixed</th>
                                             <th>Amount (PKR)</th>
                                             <th>Created At</th>
                                             <th>Status</th>
@@ -69,18 +73,41 @@
                                     </thead>
                                     <tbody>
                                         @foreach ($balances as $balance)
+                                            @php
+                                                $teacher = $balance->teacher ?? null;
+                                                // Use teacher's current setup (no snapshot available on balances)
+$payType = $teacher->pay_type ?? 'percentage';
+                                                $percent =
+                                                    (int) ($teacher->percentage ??
+                                                        (is_numeric($teacher->salary ?? null) ? $teacher->salary : 0)); // legacy fallback
+                                                $fixedAmt = (int) ($teacher->fixed_salary ?? 0);
+                                            @endphp
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
-                                                <td>{{ $balance->teacher->name ?? 'N/A' }}</td>
+                                                <td>{{ $teacher->name ?? 'N/A' }}</td>
                                                 <td>{{ \Carbon\Carbon::create()->month($balance->month)->format('F') }}</td>
                                                 <td>{{ $balance->year }}</td>
+
+                                                {{-- Pay Type --}}
+                                                <td>
+                                                    <span
+                                                        class="badge badge-{{ $payType === 'fixed' ? 'primary' : 'info' }}">
+                                                        {{ ucfirst($payType) }}
+                                                    </span>
+                                                </td>
+
+                                                {{-- Percentage --}}
+                                                <td>{{ $percent }}%</td>
+
+                                                {{-- Fixed --}}
+                                                <td>{{ $fixedAmt > 0 ? number_format($fixedAmt) . ' PKR' : '—' }}</td>
+
                                                 <td>{{ number_format($balance->amount, 2) }}</td>
                                                 <td>{{ $balance->created_at->format('d M Y') }}</td>
                                                 <td>
                                                     <span
-                                                        class="badge 
-                                                          {{ $balance->status === 'paid' ? 'badge-success' : 'badge-warning' }}">
-                                                        {{ $balance->status }}
+                                                        class="badge {{ $balance->status === 'paid' ? 'badge-success' : 'badge-warning' }}">
+                                                        {{ ucfirst($balance->status) }}
                                                     </span>
                                                 </td>
                                                 <td>
@@ -88,11 +115,9 @@
                                                         method="POST">
                                                         @csrf
                                                         @method('PUT')
-                                                        <button class="btn btn-sm btn-success">
-                                                        Mark as Paid</button>
+                                                        <button class="btn btn-sm btn-success">Mark as Paid</button>
                                                     </form>
                                                 </td>
-
                                             </tr>
                                         @endforeach
                                     </tbody>
