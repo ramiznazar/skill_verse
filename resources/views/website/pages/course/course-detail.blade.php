@@ -95,7 +95,7 @@
                                     <ul class="list list-border angle-double-right">
                                         @foreach ($courses as $item)
                                             <li class="{{ $item->id == $course->id ? 'active' : '' }}">
-                                                <a href="{{ route('course.detail', $item->id) }}">{{ $item->title }}</a>
+                                                <a href="{{ route('course.detail', $item->slug) }}">{{ $item->title }}</a>
                                             </li>
                                         @endforeach
                                     </ul>
