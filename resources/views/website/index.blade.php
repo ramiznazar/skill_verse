@@ -578,7 +578,7 @@
                                                 <h4 class="line-bottom mb-10">{{ $course->title }}</h4>
                                                 <p>{{ $course->short_description }}</p>
                                                 <a class="btn btn-dark btn-theme-colored btn-sm text-uppercase mt-10"
-                                                    href="{{ route('course.detail', $course->id) }}">view details</a>
+                                                    href="{{ route('course.detail', $course->slug) }}">view details</a>
                                             </div>
                                         </div>
                                     </div>
