@@ -37,7 +37,7 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Title</label>
                                             <input type="text" name="title" class="form-control"
@@ -48,7 +48,18 @@
                                         </div>
                                     </div>
 
-                                      <div class="col-md-6">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Slug</label>
+                                            <input type="text" name="slug" class="form-control"
+                                                value="{{ old('slug') }}">
+                                            @error('slug')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                      <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Duration</label>
                                             <input type="text" name="duration" class="form-control"

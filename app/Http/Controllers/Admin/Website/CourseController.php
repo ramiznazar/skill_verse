@@ -35,6 +35,7 @@ class CourseController extends Controller
         $request->validate([
             'image'    => 'nullable|image',
             'title'    => 'nullable|string|max:255',
+            'slug'     => 'required|string|max:255',
             'duration' => 'nullable|string|max:100',
             'mode'     => 'nullable',
             'level'    => 'nullable',
@@ -56,6 +57,7 @@ class CourseController extends Controller
         Course::create([
             'image' => $path,
             'title' => $request->title,
+            'slug' => $request->slug,
             'course_category_id' => $request->category_id,
             'duration' => $request->duration,
             'mode' => $request->mode,
@@ -92,53 +94,55 @@ class CourseController extends Controller
     /**
      * Update the specified resource in storage.
      */
-   public function update(Request $request, string $id)
-{
-    $request->validate([
-        'image'    => 'nullable|image',
-        'title'    => 'nullable|string|max:255',
-        'duration' => 'nullable|string|max:100',
-        'mode'     => 'nullable',
-        'level'     => 'nullable',
-        'short_description' => 'nullable',
-        'description' => 'nullable',
-        'full_fee' => 'nullable|string',
-        'discount' => 'nullable|string',
-        'min_fee' => 'nullable|string',
-    ]);
+    public function update(Request $request, string $id)
+    {
+        $request->validate([
+            'image'    => 'nullable|image',
+            'title'    => 'nullable|string|max:255',
+            'slug'    => 'required|string|max:255',
+            'duration' => 'nullable|string|max:100',
+            'mode'     => 'nullable',
+            'level'     => 'nullable',
+            'short_description' => 'nullable',
+            'description' => 'nullable',
+            'full_fee' => 'nullable|string',
+            'discount' => 'nullable|string',
+            'min_fee' => 'nullable|string',
+        ]);
 
-    $course = Course::findOrFail($id);
+        $course = Course::findOrFail($id);
 
-    if ($request->hasFile('image')) {
-        if ($course->image) {
-            $oldImagePath = public_path($course->image);
-            if (file_exists($oldImagePath)) {
-                unlink($oldImagePath);
+        if ($request->hasFile('image')) {
+            if ($course->image) {
+                $oldImagePath = public_path($course->image);
+                if (file_exists($oldImagePath)) {
+                    unlink($oldImagePath);
+                }
             }
+
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalName();
+            $path = 'assets/admin/images/course/' . $imageName;
+            $image->move(public_path('assets/admin/images/course'), $imageName);
+            $course->image = $path;
         }
 
-        $image = $request->file('image');
-        $imageName = time() . '.' . $image->getClientOriginalName();
-        $path = 'assets/admin/images/course/' . $imageName;
-        $image->move(public_path('assets/admin/images/course'), $imageName);
-        $course->image = $path;
+        $course->title = $request->title;
+        $course->slug = $request->slug;
+        $course->course_category_id = $request->category_id;
+        $course->duration = $request->duration;
+        $course->mode = $request->mode;
+        $course->level = $request->level;
+        $course->short_description = $request->short_description;
+        $course->description = $request->description;
+        $course->full_fee = $request->full_fee;
+        $course->discount = $request->discount;
+        $course->min_fee = $request->min_fee;
+
+        $course->save();
+
+        return redirect()->route('course.index')->with('update', 'Course Updated Successfully');
     }
-
-    $course->title = $request->title;
-    $course->course_category_id = $request->category_id;
-    $course->duration = $request->duration;
-    $course->mode = $request->mode;
-    $course->level = $request->level;
-    $course->short_description = $request->short_description;
-    $course->description = $request->description;
-    $course->full_fee = $request->full_fee;
-    $course->discount = $request->discount;
-    $course->min_fee = $request->min_fee;
-
-    $course->save();
-
-    return redirect()->route('course.index')->with('update', 'Course Updated Successfully');
-}
 
 
     /**

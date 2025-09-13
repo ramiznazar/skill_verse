@@ -63,6 +63,7 @@
                                             <th>#</th>
                                             <th>Image</th>
                                             <th>Title</th>
+                                            <th>Slug</th>
                                             <th>Category</th>
                                             <th>Duration</th>
                                             <th>Full Fee</th>
@@ -81,6 +82,7 @@
                                                             height="60" style="border-radius: 50%;"
                                                             alt=""></span></td>
                                                 <td><?php echo e($course->title); ?></td>
+                                                <td><?php echo e($course->slug); ?></td>
                                                 <td><span
                                                         class="text-info"><?php echo e($course->courseCategory->name ?? 'N/A'); ?></span>
                                                 </td>

@@ -60,6 +60,7 @@
                                             <th>#</th>
                                             <th>Image</th>
                                             <th>Title</th>
+                                            <th>Slug</th>
                                             <th>Category</th>
                                             <th>Duration</th>
                                             <th>Full Fee</th>
@@ -78,6 +79,7 @@
                                                             height="60" style="border-radius: 50%;"
                                                             alt=""></span></td>
                                                 <td>{{ $course->title }}</td>
+                                                <td>{{ $course->slug }}</td>
                                                 <td><span
                                                         class="text-info">{{ $course->courseCategory->name ?? 'N/A' }}</span>
                                                 </td>

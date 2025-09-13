@@ -32,7 +32,8 @@
                                     data-mask_in="x:0px;y:0px;s:inherit;e:inherit;"
                                     data-mask_out="x:inherit;y:inherit;s:inherit;e:inherit;" data-start="1000"
                                     data-splitin="none" data-splitout="none" data-responsive_offset="on"
-                                    style="z-index: 7; white-space: nowrap; font-weight:700;"><span style="font-size: 90px;">Learn & Grow</span>
+                                    style="z-index: 7; white-space: nowrap; font-weight:700;"><span
+                                        style="font-size: 90px;">Learn & Grow</span>
                                 </div>
 
                                 <!-- LAYER NR. 2 -->
@@ -342,10 +343,10 @@
                             <div class="row mb-sm-30">
                                 <div class="col-sm-6 col-md-6">
                                     <div class="icon-box p-0 mb-20">
-                                        <a class="icon bg-theme-colored icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip"
-                                            href="#">
+                                        <span
+                                            class="icon bg-theme-colored icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip">
                                             <i class="pe-7s-id text-white"></i>
-                                        </a>
+                                        </span>
                                         <div class="ml-70 ml-sm-0">
                                             <h5 class="icon-box-title mt-10 text-uppercase letter-space-2 mb-10">Expert
                                                 Instructors</h5>
@@ -356,10 +357,9 @@
                                 </div>
                                 <div class="col-sm-6 col-md-6">
                                     <div class="icon-box p-0 mb-20">
-                                        <a class="icon bg-theme-color-2 icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip"
-                                            href="#">
+                                        <span class="icon bg-theme-color-2 icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip">
                                             <i class="pe-7s-portfolio text-white"></i>
-                                        </a>
+                                    </span>
                                         <div class="ml-70 ml-sm-0">
                                             <h5 class="icon-box-title mt-10 text-uppercase letter-space-2 mb-10">Internship
                                                 Opportunities</h5>
@@ -370,10 +370,9 @@
                                 </div>
                                 <div class="col-sm-6 col-md-6">
                                     <div class="icon-box p-0 mb-20">
-                                        <a class="icon bg-theme-color-2 icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip"
-                                            href="#">
+                                        <span class="icon bg-theme-color-2 icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip">
                                             <i class="pe-7s-study text-white"></i>
-                                        </a>
+                                        </span>
                                         <div class="ml-70 ml-sm-0">
                                             <h5 class="icon-box-title mt-10 text-uppercase letter-space-2 mb-10">Short
                                                 Courses</h5>
@@ -384,10 +383,9 @@
                                 </div>
                                 <div class="col-sm-6 col-md-6">
                                     <div class="icon-box p-0 mb-20">
-                                        <a class="icon bg-theme-colored icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip"
-                                            href="#">
+                                        <span class="icon bg-theme-colored icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip">
                                             <i class="pe-7s-monitor text-white"></i>
-                                        </a>
+                                        </span>
                                         <div class="ml-70 ml-sm-0">
                                             <h5 class="icon-box-title mt-10 text-uppercase letter-space-2 mb-10">Hybrid
                                                 Learning</h5>
@@ -398,10 +396,9 @@
                                 </div>
                                 <div class="col-sm-6 col-md-6">
                                     <div class="icon-box p-0">
-                                        <a class="icon bg-theme-colored icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip"
-                                            href="#">
+                                        <span class="icon bg-theme-colored icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip">
                                             <i class="pe-7s-airplay text-white"></i>
-                                        </a>
+                                        </span>
                                         <div class="ml-70 ml-sm-0">
                                             <h5 class="icon-box-title mt-10 text-uppercase letter-space-2 mb-10">Modern
                                                 Facilities</h5>
@@ -412,10 +409,9 @@
                                 </div>
                                 <div class="col-sm-6 col-md-6">
                                     <div class="icon-box p-0">
-                                        <a class="icon bg-theme-color-2 icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip"
-                                            href="#">
+                                        <span class="icon bg-theme-color-2 icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip">
                                             <i class="pe-7s-target text-white"></i>
-                                        </a>
+                                        </span>
                                         <div class="ml-70 ml-sm-0">
                                             <h5 class="icon-box-title mt-10 text-uppercase letter-space-2 mb-10">
                                                 Career-Focused Learning</h5>
@@ -425,7 +421,6 @@
                                     </div>
                                 </div>
                             </div>
-
                         </div>
                         <div class="col-md-4">
                             <div class="p-30 mt-0 bg-theme-colored">
@@ -598,10 +593,10 @@
                             <!-- Feature 1: Online Access -->
                             <div class="col-sm-6 col-md-3 wow fadeInLeft" data-wow-duration="1s" data-wow-delay="0.3s">
                                 <div class="icon-box text-center pl-0 pr-0 mb-0">
-                                    <a href="#"
+                                    <span
                                         class="icon bg-theme-colored icon-circled icon-border-effect effect-circle icon-md">
                                         <i class="pe-7s-global text-white"></i> <!-- Changed icon -->
-                                    </a>
+                                    </span>
                                     <h5 class="icon-box-title mt-15 mb-10 letter-space-4 text-uppercase">
                                         <strong>Online Access</strong>
                                     </h5>
@@ -611,10 +606,10 @@
                             <!-- Feature 2: Expert Trainers -->
                             <div class="col-sm-6 col-md-3 wow fadeInLeft" data-wow-duration="1s" data-wow-delay="0.3s">
                                 <div class="icon-box text-center pl-0 pr-0 mb-0">
-                                    <a href="#"
+                                    <span
                                         class="icon bg-theme-color-2 icon-circled icon-border-effect effect-circle icon-md">
                                         <i class="pe-7s-id text-white"></i> <!-- Changed icon -->
-                                    </a>
+                                    </span>
                                     <h5 class="icon-box-title mt-15 mb-10 letter-space-4 text-uppercase">
                                         <strong>Expert Trainers</strong>
                                     </h5>
@@ -624,10 +619,10 @@
                             <!-- Feature 3: Certified Courses -->
                             <div class="col-sm-6 col-md-3 wow fadeInLeft" data-wow-duration="1s" data-wow-delay="0.3s">
                                 <div class="icon-box text-center pl-0 pr-0 mb-0">
-                                    <a href="#"
+                                    <span
                                         class="icon bg-theme-colored icon-circled icon-border-effect effect-circle icon-md">
                                         <i class="pe-7s-medal text-white"></i> <!-- Changed icon -->
-                                    </a>
+                                </span>
                                     <h5 class="icon-box-title mt-15 mb-10 letter-space-4 text-uppercase">
                                         <strong>Certified Courses</strong>
                                     </h5>

@@ -42,7 +42,7 @@
 
                                             </p>
                                             <a class="btn btn-dark btn-theme-colored btn-sm text-uppercase mt-10"
-                                                href="<?php echo e(route('course.detail', $course->id)); ?>">view details</a>
+                                                href="<?php echo e(route('course.detail', $course->slug)); ?>">view details</a>
                                         </div>
                                     </div>
                                 </div>

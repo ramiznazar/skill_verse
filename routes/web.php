@@ -66,7 +66,7 @@ use App\Http\Controllers\Admin\HomeController as AdminHomeController;
 
 Route::get('/', [HomeController::class, 'home'])->name('home');
 Route::get('/course', [CourseController::class, 'course'])->name('course');
-Route::get('/course/{id}', [CourseController::class, 'courseDetail'])->name('course.detail');
+Route::get('/course/{slug}', [CourseController::class, 'courseDetail'])->name('course.detail');
 Route::get('/event', [EventController::class, 'event'])->name('event');
 Route::get('/event/{id}', [EventController::class, 'eventDetail'])->name('event.detail');
 Route::get('/about', [AboutController::class, 'about'])->name('about');

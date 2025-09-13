@@ -58,14 +58,15 @@ class CourseController extends Controller
         );
     }
 
-    public function courseDetail($id)
+    public function courseDetail($slug)
     {
         $popularCourses = PopularCourse::all();
-        $course = Course::with('courseCategory')->findOrFail($id);
-        $courseOutlines = CourseOutline::where('course_id', $id)->get();
+        $course = Course::with('courseCategory')->where('slug', $slug)->firstOrFail();
+        // Use course id for relations
+        $courseOutlines = CourseOutline::where('course_id', $course->id)->get();
+        $lmsCourses = CourseLms::where('course_id', $course->id)->get();
         $courses = Course::all();
         $categories = CourseCategory::all();
-        $lmsCourses = CourseLms::where('course_id', $id)->get();
         return view('website.pages.course.course-detail', compact('popularCourses', 'course', 'courses', 'categories', 'courseOutlines', 'lmsCourses'));
     }
 
