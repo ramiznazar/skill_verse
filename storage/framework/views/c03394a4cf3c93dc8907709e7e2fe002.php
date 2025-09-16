@@ -106,7 +106,52 @@
                                 <h5 class="widget-title line-bottom">Popular<span class="text-theme-color-2">Courses</span>
                                 </h5>
                                 
-                                
+                                <div class="latest-posts">
+
+                                    <article class="post media-post clearfix pb-0 mb-10">
+                                        <a class="post-thumb" href="<?php echo e(route('course.detail', $generativeAi->id)); ?>"><img
+                                                src="<?php echo e($generativeAi->image); ?>" alt="" height="70"
+                                                width="70"></a>
+                                        <div class="post-right">
+                                            <h5 class="post-title mt-0"><a
+                                                    href="<?php echo e(route('course.detail', $generativeAi->id)); ?>"><?php echo e($generativeAi->title); ?></a>
+                                            </h5>
+                                            <p style="font-size: 10px; margin-top: -10px ">
+                                                <?php echo e(\Illuminate\Support\Str::words($generativeAi->short_description, 14, '...')); ?>
+
+                                            </p>
+                                        </div>
+                                    </article>
+                                    <article class="post media-post clearfix pb-0 mb-10">
+                                        <a class="post-thumb" href="<?php echo e(route('course.detail', $freelancing->id)); ?>"><img
+                                                src="<?php echo e($freelancing->image); ?>" alt="" height="70"
+                                                width="70"></a>
+                                        <div class="post-right">
+                                            <h5 class="post-title mt-0"><a
+                                                    href="<?php echo e(route('course.detail', $freelancing->id)); ?>"><?php echo e($freelancing->title); ?></a>
+                                            </h5>
+                                            <p style="font-size: 10px; margin-top: -10px ">
+                                                <?php echo e(\Illuminate\Support\Str::words($freelancing->short_description, 14, '...')); ?>
+
+                                            </p>
+                                        </div>
+                                    </article>
+                                    <article class="post media-post clearfix pb-0 mb-10">
+                                        <a class="post-thumb" href="<?php echo e(route('course.detail', $development->id)); ?>"><img
+                                                src="<?php echo e($development->image); ?>" alt="" height="70"
+                                                width="70"></a>
+                                        <div class="post-right">
+                                            <h5 class="post-title mt-0"><a
+                                                    href="<?php echo e(route('course.detail', $development->id)); ?>"><?php echo e($development->title); ?></a>
+                                            </h5>
+                                            <p style="font-size: 10px; margin-top: -10px ">
+                                                <?php echo e(\Illuminate\Support\Str::words($development->short_description, 14, '...')); ?>
+
+                                            </p>
+                                        </div>
+                                    </article>
+
+                                </div>
                             </div>
                             
                         </div>

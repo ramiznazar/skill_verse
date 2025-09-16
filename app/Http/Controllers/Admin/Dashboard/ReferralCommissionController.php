@@ -14,68 +14,71 @@ class ReferralCommissionController extends Controller
 {
     public function index()
     {
-        $rc = (new \App\Models\ReferralCommission)->getTable();        // referral_commissions
-        $rh = (new \App\Models\ReferralCommissionHistory)->getTable(); // referral_commission_histories
-        $ad = (new \App\Models\Admission)->getTable();                 // admissions
-
-        // A) Paid totals from history (accurate after zeroing)
+        // A) History (paid) aggregation (nullable-safe)
         $paidAgg = \App\Models\ReferralCommissionHistory::query()
-            ->selectRaw('referral_name, referral_contact, SUM(amount) AS paid_total')
+            ->selectRaw("
+            referral_name,
+            COALESCE(referral_contact, '') AS contact_key,
+            SUM(amount) AS paid_total
+        ")
             ->where('status', 'paid')
-            ->groupBy('referral_name', 'referral_contact');
+            ->groupBy('referral_name', DB::raw("COALESCE(referral_contact, '')"));
 
-        // B) Unpaid totals from live commissions
+        // B) Live commissions (unpaid) aggregation (nullable-safe)
         $unpaidAgg = \App\Models\ReferralCommission::query()
-            ->selectRaw('referral_name, referral_contact, SUM(commission_amount) AS unpaid_total')
+            ->selectRaw("
+            referral_name,
+            COALESCE(referral_contact, '') AS contact_key,
+            SUM(commission_amount) AS unpaid_total
+        ")
             ->where('status', 'unpaid')
-            ->groupBy('referral_name', 'referral_contact');
+            ->groupBy('referral_name', DB::raw("COALESCE(referral_contact, '')"));
 
-        // C) Students + fee + percentage math from admissions
-        //    - total_students
-        //    - total_student_fee (sum of full_fee once per student)
-        //    - total_amount_pct = SUM(full_fee * (referral_source_commission/100))
-        //    - avg_pct (fee-weighted) = SUM(full_fee * pct) / SUM(full_fee)
+        // C) Admissions math, nullable-safe key + keep original contact for display
         $studAgg = \App\Models\Admission::query()
             ->selectRaw("
-            referral_source           AS referral_name,
-            referral_source_contact   AS referral_contact,
-            COUNT(*)                  AS total_students,
-            SUM(full_fee)             AS total_student_fee,
-            SUM(full_fee * (COALESCE(referral_source_commission, 0) / 100.0))             AS total_amount_pct,
+            referral_source                         AS referral_name,
+            COALESCE(referral_source_contact, '')   AS contact_key,
+            MAX(referral_source_contact)            AS referral_contact,  -- for display (may be NULL)
+            COUNT(*)                                AS total_students,
+            SUM(full_fee)                           AS total_student_fee,
+            SUM(full_fee * (COALESCE(referral_source_commission, 0) / 100.0)) AS total_amount_pct,
             ROUND(
                 SUM(full_fee * COALESCE(referral_source_commission, 0)) / NULLIF(SUM(full_fee), 0),
                 2
-            )                          AS avg_pct
+            ) AS avg_pct
         ")
             ->whereNotNull('referral_source')
-            ->groupBy('referral_source', 'referral_source_contact');
+            ->groupBy('referral_source', DB::raw("COALESCE(referral_source_contact, '')"));
 
-        // Final: base on admissions (studAgg), left-join paid & unpaid aggregates
+        // Final join on (name, contact_key)
         $referrers = DB::query()
             ->fromSub($studAgg, 's')
             ->leftJoinSub($paidAgg,  'h', function ($j) {
                 $j->on('s.referral_name', '=', 'h.referral_name')
-                    ->on('s.referral_contact', '=', 'h.referral_contact');
+                    ->on('s.contact_key',   '=', 'h.contact_key');
             })
             ->leftJoinSub($unpaidAgg, 'u', function ($j) {
                 $j->on('s.referral_name', '=', 'u.referral_name')
-                    ->on('s.referral_contact', '=', 'u.referral_contact');
+                    ->on('s.contact_key',   '=', 'u.contact_key');
             })
             ->selectRaw("
             s.referral_name,
-            s.referral_contact,
+            s.referral_contact,   -- keep original for display (may be NULL)
+            s.contact_key,        -- always a string ('' when NULL)
             s.total_students,
             s.total_student_fee,
             s.avg_pct,
-            s.total_amount_pct                              AS total_amount,        -- << show this in the table
-            COALESCE(h.paid_total, 0)                       AS paid_total,
-            COALESCE(u.unpaid_total, 0)                     AS unpaid_total
+            s.total_amount_pct AS total_amount,
+            COALESCE(h.paid_total, 0)   AS paid_total,
+            COALESCE(u.unpaid_total, 0) AS unpaid_total
         ")
             ->orderByDesc('total_amount')
             ->get();
 
         return view('admin.pages.dashboard.referral-commission.index', compact('referrers'));
     }
+
 
     public function paid(Request $request)
     {

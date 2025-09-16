@@ -92,7 +92,7 @@
                                     <ul class="list list-border angle-double-right">
                                         <?php $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $item): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <li class="<?php echo e($item->id == $course->id ? 'active' : ''); ?>">
-                                                <a href="<?php echo e(route('course.detail', $item->id)); ?>"><?php echo e($item->title); ?></a>
+                                                <a href="<?php echo e(route('course.detail', $item->slug)); ?>"><?php echo e($item->title); ?></a>
                                             </li>
                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </ul>

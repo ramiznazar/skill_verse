@@ -82,36 +82,32 @@
                                                 <td>{{ $ref->referral_contact ?? 'N/A' }}</td>
                                                 <td>{{ $ref->total_students }}</td>
 
-                                                <td><strong>{{ number_format((float) $ref->total_student_fee) }}</strong></td>
-
-                                                <td>{{ rtrim(rtrim(number_format((float) $ref->avg_pct, 2), '0'), '.') }}%</td>
-
-                                                {{-- NEW: contractual total based on full_fee and each student’s own % --}}
-                                                <td><strong>{{ number_format((float) $ref->total_amount) }}</strong>
+                                                <td><strong>{{ number_format((float) $ref->total_student_fee) }}</strong>
                                                 </td>
+                                                <td>{{ rtrim(rtrim(number_format((float) $ref->avg_pct, 2), '0'), '.') }}%
+                                                </td>
+                                                <td><strong>{{ number_format((float) $ref->total_amount) }}</strong></td>
 
-                                                {{-- Paid/Unpaid stay the same sources --}}
                                                 <td class="text-success">{{ number_format((float) $ref->paid_total, 2) }}
                                                     PKR</td>
                                                 <td class="text-danger">{{ number_format((float) $ref->unpaid_total, 2) }}
                                                     PKR</td>
 
-
                                                 <td>
-                                                    {{-- ONE Paid method: bulk for this referrer (no UI disabling) --}}
+                                                    {{-- Bulk Paid for this referrer (nullable-safe key) --}}
                                                     <form method="POST" action="{{ route('referral-commission.paid') }}"
                                                         style="display:inline-block;">
                                                         @csrf
                                                         @method('PUT')
                                                         <input type="hidden" name="referral_name"
                                                             value="{{ $ref->referral_name }}">
-                                                        <input type="hidden" name="referral_contact"
-                                                            value="{{ $ref->referral_contact }}">
+                                                        <input type="hidden" name="contact_key"
+                                                            value="{{ $ref->contact_key }}"> {{-- '' when NULL --}}
                                                         <button type="submit" class="btn btn-sm btn-success">Paid</button>
                                                     </form>
 
-                                                    {{-- History: per-referrer (shows each student's percentage) --}}
-                                                    <a href="{{ route('referral-commission.history', [$ref->referral_name, $ref->referral_contact]) }}"
+                                                    {{-- History: pass key as well (make route param optional) --}}
+                                                    <a href="{{ route('referral-commission.history', [$ref->referral_name, $ref->contact_key]) }}"
                                                         class="btn btn-sm btn-info">
                                                         History
                                                     </a>
@@ -119,7 +115,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="9" class="text-center">No referral commissions found.</td>
+                                                <td colspan="10" class="text-center">No referral commissions found.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>

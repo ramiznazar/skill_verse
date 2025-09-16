@@ -81,22 +81,18 @@
                                                 <td><?php echo e($ref->referral_contact ?? 'N/A'); ?></td>
                                                 <td><?php echo e($ref->total_students); ?></td>
 
-                                                <td><strong><?php echo e(number_format((float) $ref->total_student_fee)); ?></strong></td>
-
-                                                <td><?php echo e(rtrim(rtrim(number_format((float) $ref->avg_pct, 2), '0'), '.')); ?>%</td>
-
-                                                
-                                                <td><strong><?php echo e(number_format((float) $ref->total_amount)); ?></strong>
+                                                <td><strong><?php echo e(number_format((float) $ref->total_student_fee)); ?></strong>
                                                 </td>
+                                                <td><?php echo e(rtrim(rtrim(number_format((float) $ref->avg_pct, 2), '0'), '.')); ?>%
+                                                </td>
+                                                <td><strong><?php echo e(number_format((float) $ref->total_amount)); ?></strong></td>
 
-                                                
                                                 <td class="text-success"><?php echo e(number_format((float) $ref->paid_total, 2)); ?>
 
                                                     PKR</td>
                                                 <td class="text-danger"><?php echo e(number_format((float) $ref->unpaid_total, 2)); ?>
 
                                                     PKR</td>
-
 
                                                 <td>
                                                     
@@ -106,13 +102,13 @@
                                                         <?php echo method_field('PUT'); ?>
                                                         <input type="hidden" name="referral_name"
                                                             value="<?php echo e($ref->referral_name); ?>">
-                                                        <input type="hidden" name="referral_contact"
-                                                            value="<?php echo e($ref->referral_contact); ?>">
+                                                        <input type="hidden" name="contact_key"
+                                                            value="<?php echo e($ref->contact_key); ?>"> 
                                                         <button type="submit" class="btn btn-sm btn-success">Paid</button>
                                                     </form>
 
                                                     
-                                                    <a href="<?php echo e(route('referral-commission.history', [$ref->referral_name, $ref->referral_contact])); ?>"
+                                                    <a href="<?php echo e(route('referral-commission.history', [$ref->referral_name, $ref->contact_key])); ?>"
                                                         class="btn btn-sm btn-info">
                                                         History
                                                     </a>
@@ -120,7 +116,7 @@
                                             </tr>
                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                             <tr>
-                                                <td colspan="9" class="text-center">No referral commissions found.</td>
+                                                <td colspan="10" class="text-center">No referral commissions found.</td>
                                             </tr>
                                         <?php endif; ?>
                                     </tbody>

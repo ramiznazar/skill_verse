@@ -44,7 +44,7 @@ unset($__errorArgs, $__bag); ?>
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Title</label>
                                             <input type="text" name="title" class="form-control"
@@ -62,7 +62,25 @@ unset($__errorArgs, $__bag); ?>
                                         </div>
                                     </div>
 
-                                      <div class="col-md-6">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Slug</label>
+                                            <input type="text" name="slug" class="form-control"
+                                                value="<?php echo e(old('slug')); ?>">
+                                            <?php $__errorArgs = ['slug'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                                <small class="text-danger"><?php echo e($message); ?></small>
+                                            <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                                        </div>
+                                    </div>
+
+                                      <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Duration</label>
                                             <input type="text" name="duration" class="form-control"

@@ -118,9 +118,11 @@
                                             <li><strong>Digital Marketing:</strong> Ideal for those interested in <em>social
                                                     media, SEO, and online business growth</em>.</li>
                                             <li><strong>Generative AI:</strong> Great for students who want to explore
-                                                <em>artificial intelligence and automation</em>.</li>
+                                                <em>artificial intelligence and automation</em>.
+                                            </li>
                                             <li><strong>YouTube & TikTok Automation:</strong> Best if you are interested in
-                                                <em>content creation and online income</em>.</li>
+                                                <em>content creation and online income</em>.
+                                            </li>
                                             <li><strong>Data Analytics:</strong> If you like working with <em>numbers and
                                                     insights</em>, this course is a strong choice.</li>
                                             <li><strong>Office Management:</strong> Perfect for building <em>administrative
@@ -281,4 +283,100 @@
             </div>
         </section>
     </div>
+@endsection
+@section('additional-javascript')
+    <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [{
+    "@type": "Question",
+    "name": "Q. How can I apply for admission?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "For admission, please go to the Home page and fill out the form in the Welcome to Skillverse section. Our team will contact you shortly.
+
+You can also visit our institute at Main Bakar Mandi Road, Liaquatabad, near UBL Bank, Faisalabad, or reach us on WhatsApp at 0340-3946000."
+    }
+  },{
+    "@type": "Question",
+    "name": "Q. Can I get demo classes before enrollment?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes, we provide 2–3 days of free demo classes so you can experience our teaching style and course structure.
+
+If you feel comfortable and satisfied after the demo, you can proceed with enrollment."
+    }
+  },{
+    "@type": "Question",
+    "name": "Q. Do I need any qualification to join a course?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "No, there is no qualification required to join our courses.
+
+We start from the basics — even teaching how to use a laptop — so beginners with no prior knowledge can learn comfortably."
+    }
+  },{
+    "@type": "Question",
+    "name": "Q. Which course is best for me?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "The best course depends on your interests and career goals:
+
+Designing: If you like creativity and visuals, Graphic Design is best for you.
+Development: If you enjoy coding, then Web Development or App Development are great options.
+Freelancing: If you want to work independently and earn online, our Freelancing course is perfect.
+Digital Marketing: Ideal for those interested in social media, SEO, and online business growth.
+Generative AI: Great for students who want to explore artificial intelligence and automation.
+YouTube & TikTok Automation: Best if you are interested in content creation and online income.
+Data Analytics: If you like working with numbers and insights, this course is a strong choice.
+Office Management: Perfect for building administrative and organizational skills.
+Our team can also guide you in choosing the right course based on your passion and future plans."
+    }
+  },{
+    "@type": "Question",
+    "name": "Q. Do you offer fee installments or discounts?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes, we offer special discounts during selected months and events to make our courses more affordable.
+
+We also provide an installment system where students can pay their course fee in 2 or 3 easy installments, depending on the course duration."
+    }
+  },{
+    "@type": "Question",
+    "name": "Q. Do you provide practical projects along with theory?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes, we provide practical projects along with theory so students can apply what they learn.
+
+You will also get the opportunity to view and learn from live projects developed by our software house, giving you real-world exposure and hands-on experience."
+    }
+  },{
+    "@type": "Question",
+    "name": "Q. Will I get a certificate after completing the course?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes, after successfully completing the course, you will receive an official SkillVerse Certificate that validates your learning and can be used for jobs, freelancing, and career growth."
+    }
+  },{
+    "@type": "Question",
+    "name": "Q. Will I get an internship after completing the course?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "Yes, after completing your course we connect you with our partner software house HMS Tech Solutions.
+
+Through this internship, you will work with industry experts on real-world projects, gain practical experience, and build a strong portfolio to start your professional journey."
+    }
+  },{
+    "@type": "Question",
+    "name": "Q. How can I start earning after completing a course?",
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": "First, you will complete your chosen course in about 2–3 months, where you’ll gain practical, job-ready skills. After that, you’ll join our internship program for another 2–3 months to gain real-world experience and build a strong portfolio.
+
+With skills and experience in hand, you can begin your earning journey through freelancing, remote projects, or local job opportunities. Our team also guides you on platforms like Upwork, Fiverr, and LinkedIn to help you secure clients and professional roles faster."
+    }
+  }]
+}
+</script>F
 @endsection

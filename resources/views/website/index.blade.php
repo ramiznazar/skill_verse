@@ -330,15 +330,16 @@
                                 <h2 class="text-uppercase mt-0 line-height-1">Welcome To <span
                                         class="text-theme-colored">SkillVerse</span></h2>
                                 <h6 class="text-uppercase letter-space-5 line-bottom title font-playfair text-uppercase">
-                                    Learn Practical Skills with Confidence
+                                    Best IT Short Courses in Faisalabad
                                 </h6>
-                                <p>At SkillVerse, we offer industry-focused short courses paired with real internship
-                                    opportunities to give you hands-on experience from day one.
-                                    Learn from highly experienced instructors in comfortable, air-conditioned classrooms
-                                    designed to enhance your learning.
-                                    Whether you're starting your journey, switching careers, or upgrading your skills,
-                                    SkillVerse helps you grow with flexible hybrid classes, personalized support, and a
-                                    clear path to success.</p>
+                                <p >At SkillVerse, we provide IT training in Faisalabad through a wide range of computer
+                                    short courses, software training programs, and IT diploma courses designed for today’s
+                                    learners. Our job-oriented IT courses are paired with real internship opportunities,
+                                    giving you practical hands-on training and industry-relevant skills from day one.
+                                    You’ll learn in comfortable, air-conditioned classrooms or join our onsite & online
+                                    classes in Faisalabad, guided by highly experienced instructors who bring real-world
+                                    knowledge into every lesson. SkillVerse offers flexible paths to match your goals.
+                                </p>
                             </div>
                             <div class="row mb-sm-30">
                                 <div class="col-sm-6 col-md-6">
@@ -357,9 +358,10 @@
                                 </div>
                                 <div class="col-sm-6 col-md-6">
                                     <div class="icon-box p-0 mb-20">
-                                        <span class="icon bg-theme-color-2 icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip">
+                                        <span
+                                            class="icon bg-theme-color-2 icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip">
                                             <i class="pe-7s-portfolio text-white"></i>
-                                    </span>
+                                        </span>
                                         <div class="ml-70 ml-sm-0">
                                             <h5 class="icon-box-title mt-10 text-uppercase letter-space-2 mb-10">Internship
                                                 Opportunities</h5>
@@ -370,7 +372,8 @@
                                 </div>
                                 <div class="col-sm-6 col-md-6">
                                     <div class="icon-box p-0 mb-20">
-                                        <span class="icon bg-theme-color-2 icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip">
+                                        <span
+                                            class="icon bg-theme-color-2 icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip">
                                             <i class="pe-7s-study text-white"></i>
                                         </span>
                                         <div class="ml-70 ml-sm-0">
@@ -383,7 +386,8 @@
                                 </div>
                                 <div class="col-sm-6 col-md-6">
                                     <div class="icon-box p-0 mb-20">
-                                        <span class="icon bg-theme-colored icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip">
+                                        <span
+                                            class="icon bg-theme-colored icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip">
                                             <i class="pe-7s-monitor text-white"></i>
                                         </span>
                                         <div class="ml-70 ml-sm-0">
@@ -396,7 +400,8 @@
                                 </div>
                                 <div class="col-sm-6 col-md-6">
                                     <div class="icon-box p-0">
-                                        <span class="icon bg-theme-colored icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip">
+                                        <span
+                                            class="icon bg-theme-colored icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip">
                                             <i class="pe-7s-airplay text-white"></i>
                                         </span>
                                         <div class="ml-70 ml-sm-0">
@@ -409,7 +414,8 @@
                                 </div>
                                 <div class="col-sm-6 col-md-6">
                                     <div class="icon-box p-0">
-                                        <span class="icon bg-theme-color-2 icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip">
+                                        <span
+                                            class="icon bg-theme-color-2 icon-circled icon-border-effect effect-circle icon-sm pull-left sm-pull-none flip">
                                             <i class="pe-7s-target text-white"></i>
                                         </span>
                                         <div class="ml-70 ml-sm-0">
@@ -604,9 +610,7 @@
                             <h3 class="title line-bottom mb-20 font-28 mt-0 line-height-1">Why <span
                                     class="text-theme-color-2 font-weight-400">Choose Us</span> ?</h3>
                             <p class="mb-20">
-                                We are a trusted name in tech education, offering industry-relevant courses, experienced
-                                instructors, hands-on learning, and career-focused support. Our goal is to help students
-                                build real skills and succeed in today’s digital world.
+                                We focus on hands-on learning and practical training, supported by career development programs and freelancing skills training to help you earn and grow. With flexible onsite & online classes in Faisalabad, affordable computer courses, and recognized professional certifications, SkillVerse ensures every student gains real IT skills for beginners and professionals alike. That’s why we are known as the best IT institute in Faisalabad for building your future in tech.
                             </p>
 
                             <!-- Feature 1: Online Access -->
@@ -641,7 +645,7 @@
                                     <span
                                         class="icon bg-theme-colored icon-circled icon-border-effect effect-circle icon-md">
                                         <i class="pe-7s-medal text-white"></i> <!-- Changed icon -->
-                                </span>
+                                    </span>
                                     <h5 class="icon-box-title mt-15 mb-10 letter-space-4 text-uppercase">
                                         <strong>Certified Courses</strong>
                                     </h5>

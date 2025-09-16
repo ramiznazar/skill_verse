@@ -65,11 +65,11 @@ use App\Http\Controllers\Admin\HomeController as AdminHomeController;
 */
 
 Route::get('/', [HomeController::class, 'home'])->name('home');
-Route::get('/course', [CourseController::class, 'course'])->name('course');
+Route::get('/courses', [CourseController::class, 'course'])->name('course');
 Route::get('/course/{slug}', [CourseController::class, 'courseDetail'])->name('course.detail');
-Route::get('/event', [EventController::class, 'event'])->name('event');
+Route::get('/our-events', [EventController::class, 'event'])->name('event');
 Route::get('/event/{id}', [EventController::class, 'eventDetail'])->name('event.detail');
-Route::get('/about', [AboutController::class, 'about'])->name('about');
+Route::get('/about-us', [AboutController::class, 'about'])->name('about');
 Route::get('/blog', [BlogController::class, 'blog'])->name('blog');
 Route::get('/faq', [FaqController::class, 'faq'])->name('faq');
 Route::get('/contact', [ContactController::class, 'contact'])->name('contact');
