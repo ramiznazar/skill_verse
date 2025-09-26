@@ -456,19 +456,7 @@
                         <li><a href="<?php echo e(route('message.index')); ?>"><i class="icon-bubbles"></i><span>Messages</span></a>
                         </li>
                         
-                        <li class="menu-title">Websites Changes</li>
-                        <li><a href="<?php echo e(route('banner.index')); ?>"><i class="bi bi-image"></i><span>Banners</span></a>
-                        </li>
-                        <li><a href="<?php echo e(route('course.index')); ?>"><i
-                                    class="fas fa-chalkboard-teacher"></i><span>Courses</span></a></li>
-                        <li><a href="<?php echo e(route('event.index')); ?>"><i
-                                    class="fas fa-calendar-alt"></i><span>Events</span></a></li>
-                        <li><a href="<?php echo e(route('gallary-image.index')); ?>"><i
-                                    class="fas fa-images"></i><span>Gallery</span></a></li>
-                        <li><a href="<?php echo e(route('blog.index')); ?>"><i class="fas fa-newspaper"></i><span>Blog</span></a>
-                        </li>
-                        <li><a href="<?php echo e(route('testimonial.index')); ?>"><i
-                                    class="fas fa-comments"></i><span>Feedback</span></a></li>
+                        
                     <?php endif; ?>
 
 

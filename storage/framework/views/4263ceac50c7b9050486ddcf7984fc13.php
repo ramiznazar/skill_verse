@@ -127,8 +127,8 @@
                 </div>
             </div>
 
+            <?php if(auth()->check() && auth()->user()->role !== 'administrator'): ?>
             <div class="row clearfix">
-
                 <div class="col-lg-12 col-md-12">
                     <div class="card">
                         <div class="header bline d-flex justify-content-between align-items-center">
@@ -148,14 +148,14 @@
                         </div>
                     </div>
                 </div>
-
             </div>
+            <?php endif; ?>
 
             <div class="row clearfix">
                 <div class="col-lg-6 col-md-12">
                     <div class="card">
                         <div class="header d-flex justify-content-between align-items-center">
-                            <h2>Lead Source Breakdown</h2>
+                            <h2>Student Sources</h2>
                             <ul class="header-dropdown dropdown dropdown-animated scale-left"
                                 style="display:flex; gap:5px;">
                                 <li>
@@ -175,7 +175,7 @@
                     </div>
                 </div>
 
-                <div class="col-lg-6 col-md-12">
+                <div class="col-lg-6 col-md-12" >
                     <div class="card">
                         <div class="header">
                             <h2>Top 5 Courses by Admissions</h2>

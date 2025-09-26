@@ -457,7 +457,7 @@
                         <li><a href="{{ route('message.index') }}"><i class="icon-bubbles"></i><span>Messages</span></a>
                         </li>
                         {{-- Website Changes --}}
-                        <li class="menu-title">Websites Changes</li>
+                        {{-- <li class="menu-title">Websites Changes</li>
                         <li><a href="{{ route('banner.index') }}"><i class="bi bi-image"></i><span>Banners</span></a>
                         </li>
                         <li><a href="{{ route('course.index') }}"><i
@@ -469,7 +469,7 @@
                         <li><a href="{{ route('blog.index') }}"><i class="fas fa-newspaper"></i><span>Blog</span></a>
                         </li>
                         <li><a href="{{ route('testimonial.index') }}"><i
-                                    class="fas fa-comments"></i><span>Feedback</span></a></li>
+                                    class="fas fa-comments"></i><span>Feedback</span></a></li> --}}
                     @endif
 
 

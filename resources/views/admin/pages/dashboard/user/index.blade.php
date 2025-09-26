@@ -8,7 +8,7 @@
                 </div>
                 @if (Auth::user()->role === 'admin')
                     <div class="col-md-6 col-sm-12 text-right">
-                        <a href="" class="btn btn-sm btn-primary" title="">Create New</a>
+                        <a href="{{ route('user.create') }}" class="btn btn-sm btn-primary" title="">Create New</a>
                     </div>
                 @endif
 

@@ -152,9 +152,8 @@
                 <div class="row">
 
                     <!-- Google Map HTML Codes -->
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d212.80850872480164!2d73.05542456805343!3d31.415885500000005!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x392242c25c33d4a7%3A0x924bca62d7ecd8a9!2sC384%2B975%2C%20Bakar%20Mandi%20Rd%2C%20Liaquatabad%2C%20Faisalabad%2C%20Pakistan!5e0!3m2!1sen!2s!4v1753481185590!5m2!1sen!2s"
-                     width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
-                   
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d54478.938742128405!2d72.98379012167969!3d31.415953499999997!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x66cacba5695647e1%3A0x4a5d4521356d7b54!2sSkillVerse%20Institute!5e0!3m2!1sen!2s!4v1758210168186!5m2!1sen!2s" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                    
                 </div>
             </div>
         </section>
