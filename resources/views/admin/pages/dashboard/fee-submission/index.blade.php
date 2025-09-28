@@ -61,6 +61,8 @@
                                                     </span>
                                                 </td>
                                                 <td>{{ $admission->fee_status }}</td>
+
+                                                {{-- buttons --}}
                                                 <td>
                                                     @php
                                                         // get latest fee by submission_date if you store it, else by created_at
@@ -81,12 +83,93 @@
                                                         </a>
                                                     @endif
 
+                                                    {{-- View History --}}
+                                                    <button type="button" class="btn btn-sm btn-secondary mt-1"
+                                                        data-toggle="modal" data-target="#historyModal{{ $admission->id }}"
+                                                        title="View History">
+                                                        <i class="fas fa-history"></i>
+                                                    </button>
+
+                                                    {{-- History Modal --}}
+                                                    <div class="modal fade" id="historyModal{{ $admission->id }}"
+                                                        tabindex="-1" role="dialog"
+                                                        aria-labelledby="historyModalLabel{{ $admission->id }}"
+                                                        aria-hidden="true">
+                                                        <div class="modal-dialog modal-lg" role="document">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header bg-dark text-white">
+                                                                    <h5 class="modal-title"
+                                                                        id="historyModalLabel{{ $admission->id }}">
+                                                                        Fee Submission History - {{ $admission->name }}
+                                                                    </h5>
+                                                                    <button type="button" class="close text-white"
+                                                                        data-dismiss="modal" aria-label="Close">
+                                                                        <span aria-hidden="true">&times;</span>
+                                                                    </button>
+                                                                </div>
+
+                                                                <div class="modal-body">
+                                                                    @php
+                                                                        $history = $admission
+                                                                            ->feeSubmissions()
+                                                                            ->orderBy('submission_date', 'asc')
+                                                                            ->get();
+                                                                    @endphp
+
+                                                                    @if ($history->isEmpty())
+                                                                        <p>No fee submissions yet.</p>
+                                                                    @else
+                                                                        <table class="table table-bordered table-sm">
+                                                                            <thead>
+                                                                                <tr>
+                                                                                    <th>#</th>
+                                                                                    <th>Receipt No</th>
+                                                                                    <th>Fee Type</th>
+                                                                                    <th>Amount</th>
+                                                                                    <th>Method</th>
+                                                                                    <th>Collector</th>
+                                                                                    <th>Date</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                @foreach ($history as $h)
+                                                                                    <tr>
+                                                                                        <td>{{ $loop->iteration }}</td>
+                                                                                        <td>{{ $h->receipt_no }}</td>
+                                                                                        <td>{{ ucfirst(str_replace('_', ' ', $h->payment_type)) }}
+                                                                                        </td>
+                                                                                        <td>{{ number_format($h->amount) }}
+                                                                                            PKR</td>
+                                                                                        <td>{{ ucfirst($h->payment_method) }}
+                                                                                        </td>
+                                                                                        <td>{{ $h->user->name ?? 'N/A' }}
+                                                                                        </td>
+                                                                                        <td>{{ \Carbon\Carbon::parse($h->submission_date ?? $h->created_at)->format('d M Y') }}
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                @endforeach
+                                                                            </tbody>
+                                                                        </table>
+                                                                    @endif
+                                                                </div>
+
+                                                                <div class="modal-footer">
+                                                                    <button type="button" class="btn btn-secondary"
+                                                                        data-dismiss="modal">Close</button>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    {{-- Receipt --}}
                                                     @if ($latestFee)
                                                         <button type="button" class="btn btn-sm btn-info mt-1"
                                                             data-toggle="modal"
-                                                            data-target="#receiptModal{{ $admission->id }}">
-                                                            View Receipt
+                                                            data-target="#receiptModal{{ $admission->id }}"
+                                                            title="View Receipt">
+                                                            <i class="fas fa-file-invoice"></i>
                                                         </button>
+
 
                                                         <div class="modal fade" id="receiptModal{{ $admission->id }}"
                                                             tabindex="-1" role="dialog"
@@ -137,7 +220,6 @@
 
                                     </tbody>
                                 </table>
-
                             </div>
                         </div>
                     </div>
