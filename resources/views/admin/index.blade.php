@@ -127,28 +127,117 @@
                 </div>
             </div>
 
-            @if(auth()->check() && auth()->user()->role !== 'administrator')
             <div class="row clearfix">
-                <div class="col-lg-12 col-md-12">
-                    <div class="card">
-                        <div class="header bline d-flex justify-content-between align-items-center">
-                            <h2>Financial Overview</h2>
-                            <ul class="header-dropdown dropdown dropdown-animated scale-left"
-                                style="display: flex; gap: 5px;">
-                                <li><a id="btnWeekly" class="btn btn-outline-primary btn-sm"
-                                        href="javascript:void(0);">Weekly</a></li>
-                                <li><a id="btnMonthly" class="btn btn-primary btn-sm" href="javascript:void(0);">Monthly</a>
-                                </li>
-                                <li><a id="btnYearly" class="btn btn-outline-primary btn-sm"
-                                        href="javascript:void(0);">Yearly</a></li>
-                            </ul>
-                        </div>
-                        <div class="body">
-                            <div id="User_Statistics" class="mt-2" style="height: 290px"></div>
+                <div class="col-12">
+                    <div class="card top_report">
+                        <div class="row clearfix">
+
+                            <div class="col-lg-4 col-md-6 col-sm-6">
+                                <div class="body">
+                                    <div class="clearfix">
+                                        <div class="float-left">
+                                            <i class="fa fa-user-plus fa-2x text-col-blue"></i> {{-- Icon for leads --}}
+                                        </div>
+                                        <div class="number float-right text-right">
+                                            <h6>Total Leads</h6>
+                                            <span class="font700 text-primary">{{ $totalLeads }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progress progress-xs progress-transparent custom-color-red mb-0 mt-3">
+                                        <div class="progress-bar" data-transitiongoal="{{ intval($leadProgress) }}"
+                                            style="width: 0%">
+                                            {{ intval($leadProgress) }}%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4 col-md-6 col-sm-6">
+                                <div class="body">
+                                    <div class="clearfix">
+                                        <div class="float-left">
+                                            <i class="fa fa-user-plus fa-2x text-col-yellow"></i> {{-- Icon for leads --}}
+                                        </div>
+                                        <div class="number float-right text-right">
+                                            <h6>Leads This Month</h6>
+                                            <span class="font700 text-warning">{{ $monthlyLeads }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progress progress-xs progress-transparent custom-color-yellow mb-0 mt-3">
+                                        <div class="progress-bar" data-transitiongoal="{{ intval($leadProgress) }}"
+                                            style="width: 0%">
+                                            {{ intval($leadProgress) }}%
+                                        </div>
+                                    </div>
+
+                                    <small class="text-muted" style="font-size: 10px">
+                                        @if ($leadChangeDirection === 'up')
+                                            <span class="text-dark">
+                                                ↑ (+{{ $leadDifference }} leads) compared to last month
+                                            </span>
+                                        @else
+                                            <span class="text-danger">
+                                                ↓ (−{{ abs($leadDifference) }} leads) compared to last month
+                                            </span>
+                                        @endif
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div class="col-lg-4 col-md-6 col-sm-6">
+                                <div class="body">
+                                    <div class="clearfix">
+                                        <div class="float-left">
+                                            <i class="fa fa-users fa-2x text-col-blue"></i>
+                                        </div>
+                                        <div class="number float-right text-right">
+                                            <h6>Total Students</h6>
+                                            <span class="font700 text-primary">{{ $totalStudents }}</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="progress progress-xs progress-transparent custom-color-blue mb-0 mt-3">
+                                        <div class="progress-bar" data-transitiongoal="{{ intval($studentProgress) }}"
+                                            style="width: 0%">
+                                            {{ intval($studentProgress) }}%
+                                        </div>
+                                    </div>
+                                    {{-- <small class="text-muted">Target: {{ $studentTarget }} students</small> --}}
+
+                                    {{-- <small class="text-muted">Total Enrollments</small> --}}
+                                </div>
+                            </div>
+
                         </div>
                     </div>
                 </div>
             </div>
+
+            @if (auth()->check() && auth()->user()->role !== 'administrator')
+                <div class="row clearfix">
+                    <div class="col-lg-12 col-md-12">
+                        <div class="card">
+                            <div class="header bline d-flex justify-content-between align-items-center">
+                                <h2>Financial Overview</h2>
+                                <ul class="header-dropdown dropdown dropdown-animated scale-left"
+                                    style="display: flex; gap: 5px;">
+                                    <li><a id="btnWeekly" class="btn btn-outline-primary btn-sm"
+                                            href="javascript:void(0);">Weekly</a></li>
+                                    <li><a id="btnMonthly" class="btn btn-primary btn-sm"
+                                            href="javascript:void(0);">Monthly</a>
+                                    </li>
+                                    <li><a id="btnYearly" class="btn btn-outline-primary btn-sm"
+                                            href="javascript:void(0);">Yearly</a></li>
+                                </ul>
+                            </div>
+                            <div class="body">
+                                <div id="User_Statistics" class="mt-2" style="height: 290px"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             @endif
 
             <div class="row clearfix">
@@ -175,7 +264,7 @@
                     </div>
                 </div>
 
-                <div class="col-lg-6 col-md-12" >
+                <div class="col-lg-6 col-md-12">
                     <div class="card">
                         <div class="header">
                             <h2>Top 5 Courses by Admissions</h2>
@@ -199,6 +288,7 @@
         </div>
     </div>
 @endsection
+
 @section('additional-javascript')
     <script src="https://cdn.jsdelivr.net/npm/chartist@0.11.4/dist/chartist.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>

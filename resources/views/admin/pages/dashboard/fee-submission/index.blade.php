@@ -18,26 +18,33 @@
                 <div class="col-lg-12">
                     <div class="card">
                         <div class="header">
-                            <h2>Table Tools<small>Basic example without any additional modification classes</small></h2>
+                            <h2>Fee Submission</h2>
                             <ul class="header-dropdown dropdown dropdown-animated scale-left">
-                                <li> <a href="javascript:void(0);" data-toggle="cardloading" data-loading-effect="pulse"><i
-                                            class="icon-refresh"></i></a></li>
+                                <li><a href="javascript:void(0);" data-toggle="cardloading" data-loading-effect="pulse">
+                                        <i class="icon-refresh"></i></a></li>
                                 <li><a href="javascript:void(0);" class="full-screen"><i
                                             class="icon-size-fullscreen"></i></a></li>
-                                <li class="dropdown">
-                                    <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown"
-                                        role="button" aria-haspopup="true" aria-expanded="false"></a>
-                                    <ul class="dropdown-menu">
-                                        <li><a href="javascript:void(0);">Action</a></li>
-                                        <li><a href="javascript:void(0);">Another Action</a></li>
-                                        <li><a href="javascript:void(0);">Something else</a></li>
-                                    </ul>
-                                </li>
                             </ul>
                         </div>
                         <div class="body">
+
+                            {{-- Filter Buttons --}}
+                            <button type="button" class="btn btn-sm btn-default btn-filter" data-target="all">All</button>
+                            <button type="button" class="btn btn-sm btn-success btn-filter"
+                                data-target="complete">Completed</button>
+                            <button type="button" class="btn btn-sm btn-warning btn-filter"
+                                data-target="uncomplete">Remaining</button>
+                            <button type="button" class="btn btn-sm btn-danger btn-filter"
+                                data-target="pending">Pending</button>
+
+                            {{-- Search Bar --}}
+                            <div class="mt-3 mb-3">
+                                <input type="text" id="searchInput" class="form-control" placeholder="Search student...">
+                            </div>
+
+                            {{-- Table --}}
                             <div class="table-responsive">
-                                <table class="table table-bordered table-striped table-hover dataTable js-exportable">
+                                <table class="table table-hover mb-0" id="feeTable">
                                     <thead>
                                         <tr>
                                             <th>#</th>
@@ -50,7 +57,7 @@
                                     </thead>
                                     <tbody>
                                         @foreach ($admissions as $admission)
-                                            <tr>
+                                            <tr data-status="{{ strtolower($admission->fee_status) }}">
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $admission->name }}</td>
                                                 <td>{{ $admission->course->title }}</td>
@@ -60,171 +67,59 @@
                                                         {{ ucfirst($admission->payment_type) }}
                                                     </span>
                                                 </td>
-                                                <td>{{ $admission->fee_status }}</td>
-
-                                                {{-- buttons --}}
                                                 <td>
-                                                    @php
-                                                        // get latest fee by submission_date if you store it, else by created_at
-                                                        $latestFee =
-                                                            $admission
-                                                                ->feeSubmissions()
-                                                                ->latest('submission_date')
-                                                                ->first() ??
-                                                            $admission->feeSubmissions()->latest()->first();
-                                                    @endphp
-
-                                                    {{-- Show Submit Fee button ONLY if not complete --}}
-                                                    @if (strtolower($admission->fee_status) !== 'complete')
-                                                        <a href="{{ route('fee-submission.create', $admission->id) }}"
-                                                            class="btn btn-sm btn-default" data-toggle="tooltip"
-                                                            title="Submit Fee">
-                                                            <i class="fas fa-money-check-alt"></i>
-                                                        </a>
-                                                    @endif
-
-                                                    {{-- View History --}}
-                                                    <button type="button" class="btn btn-sm btn-secondary mt-1"
-                                                        data-toggle="modal" data-target="#historyModal{{ $admission->id }}"
-                                                        title="View History">
-                                                        <i class="fas fa-history"></i>
-                                                    </button>
-
-                                                    {{-- History Modal --}}
-                                                    <div class="modal fade" id="historyModal{{ $admission->id }}"
-                                                        tabindex="-1" role="dialog"
-                                                        aria-labelledby="historyModalLabel{{ $admission->id }}"
-                                                        aria-hidden="true">
-                                                        <div class="modal-dialog modal-lg" role="document">
-                                                            <div class="modal-content">
-                                                                <div class="modal-header bg-dark text-white">
-                                                                    <h5 class="modal-title"
-                                                                        id="historyModalLabel{{ $admission->id }}">
-                                                                        Fee Submission History - {{ $admission->name }}
-                                                                    </h5>
-                                                                    <button type="button" class="close text-white"
-                                                                        data-dismiss="modal" aria-label="Close">
-                                                                        <span aria-hidden="true">&times;</span>
-                                                                    </button>
-                                                                </div>
-
-                                                                <div class="modal-body">
-                                                                    @php
-                                                                        $history = $admission
-                                                                            ->feeSubmissions()
-                                                                            ->orderBy('submission_date', 'asc')
-                                                                            ->get();
-                                                                    @endphp
-
-                                                                    @if ($history->isEmpty())
-                                                                        <p>No fee submissions yet.</p>
-                                                                    @else
-                                                                        <table class="table table-bordered table-sm">
-                                                                            <thead>
-                                                                                <tr>
-                                                                                    <th>#</th>
-                                                                                    <th>Receipt No</th>
-                                                                                    <th>Fee Type</th>
-                                                                                    <th>Amount</th>
-                                                                                    <th>Method</th>
-                                                                                    <th>Collector</th>
-                                                                                    <th>Date</th>
-                                                                                </tr>
-                                                                            </thead>
-                                                                            <tbody>
-                                                                                @foreach ($history as $h)
-                                                                                    <tr>
-                                                                                        <td>{{ $loop->iteration }}</td>
-                                                                                        <td>{{ $h->receipt_no }}</td>
-                                                                                        <td>{{ ucfirst(str_replace('_', ' ', $h->payment_type)) }}
-                                                                                        </td>
-                                                                                        <td>{{ number_format($h->amount) }}
-                                                                                            PKR</td>
-                                                                                        <td>{{ ucfirst($h->payment_method) }}
-                                                                                        </td>
-                                                                                        <td>{{ $h->user->name ?? 'N/A' }}
-                                                                                        </td>
-                                                                                        <td>{{ \Carbon\Carbon::parse($h->submission_date ?? $h->created_at)->format('d M Y') }}
-                                                                                        </td>
-                                                                                    </tr>
-                                                                                @endforeach
-                                                                            </tbody>
-                                                                        </table>
-                                                                    @endif
-                                                                </div>
-
-                                                                <div class="modal-footer">
-                                                                    <button type="button" class="btn btn-secondary"
-                                                                        data-dismiss="modal">Close</button>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    {{-- Receipt --}}
-                                                    @if ($latestFee)
-                                                        <button type="button" class="btn btn-sm btn-info mt-1"
-                                                            data-toggle="modal"
-                                                            data-target="#receiptModal{{ $admission->id }}"
-                                                            title="View Receipt">
-                                                            <i class="fas fa-file-invoice"></i>
-                                                        </button>
-
-
-                                                        <div class="modal fade" id="receiptModal{{ $admission->id }}"
-                                                            tabindex="-1" role="dialog"
-                                                            aria-labelledby="receiptModalLabel{{ $admission->id }}"
-                                                            aria-hidden="true">
-                                                            <div class="modal-dialog modal-lg" role="document">
-                                                                <div class="modal-content">
-                                                                    <div class="modal-header bg-primary text-white">
-                                                                        <h5 class="modal-title"
-                                                                            id="receiptModalLabel{{ $admission->id }}">
-                                                                            Receipt - #{{ $latestFee->receipt_no }}
-                                                                        </h5>
-                                                                        <button type="button" class="close text-white"
-                                                                            data-dismiss="modal" aria-label="Close">
-                                                                            <span aria-hidden="true">&times;</span>
-                                                                        </button>
-                                                                    </div>
-                                                                    <div class="modal-body">
-                                                                        <p><strong>Student:</strong> {{ $admission->name }}
-                                                                        </p>
-                                                                        <p><strong>Course:</strong>
-                                                                            {{ $admission->course->title ?? 'N/A' }}</p>
-                                                                        <p><strong>Fee Type:</strong>
-                                                                            {{ ucfirst($latestFee->payment_type) }}</p>
-                                                                        <p><strong>Amount Paid:</strong>
-                                                                            {{ number_format($latestFee->amount) }} PKR</p>
-                                                                        <p><strong>Payment Method:</strong>
-                                                                            {{ ucfirst($latestFee->payment_method ?? 'N/A') }}
-                                                                        </p>
-                                                                        <p><strong>Date:</strong>
-                                                                            {{ \Carbon\Carbon::parse($latestFee->submission_date ?? $latestFee->created_at)->format('d M Y') }}
-                                                                        </p>
-                                                                    </div>
-                                                                    <div class="modal-footer">
-                                                                        <a href="{{ route('fee-submission.download-receipt', $latestFee->id) }}"
-                                                                            class="btn btn-primary">Download PDF</a>
-                                                                        <button type="button" class="btn btn-secondary"
-                                                                            data-dismiss="modal">Close</button>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    @endif
+                                                    <span
+                                                        class="badge badge-{{ $admission->fee_status === 'complete' ? 'success' : ($admission->fee_status === 'pending' ? 'danger' : 'warning') }}">
+                                                        {{ ucfirst($admission->fee_status) }}
+                                                    </span>
                                                 </td>
-
+                                                <td>
+                                                    {{-- existing buttons (Submit Fee, History, Receipt) --}}
+                                                    @include('admin.pages.dashboard.fee-submission.button')
+                                                </td>
                                             </tr>
                                         @endforeach
-
                                     </tbody>
                                 </table>
                             </div>
+
+                            {{-- Pagination --}}
+                            <div class="mt-3">
+                                {{ $admissions->links('pagination::bootstrap-4') }}
+
+                            </div>
                         </div>
                     </div>
+
                 </div>
             </div>
         </div>
     </div>
+@endsection
+@section('additional-javascript')
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Search filter
+            document.getElementById("searchInput").addEventListener("keyup", function() {
+                let value = this.value.toLowerCase();
+                document.querySelectorAll("#feeTable tbody tr").forEach(function(row) {
+                    row.style.display = row.innerText.toLowerCase().includes(value) ? "" : "none";
+                });
+            });
+
+            // Status filter
+            document.querySelectorAll(".btn-filter").forEach(function(btn) {
+                btn.addEventListener("click", function() {
+                    let target = this.dataset.target;
+                    document.querySelectorAll("#feeTable tbody tr").forEach(function(row) {
+                        if (target === "all" || row.dataset.status === target) {
+                            row.style.display = "";
+                        } else {
+                            row.style.display = "none";
+                        }
+                    });
+                });
+            });
+        });
+    </script>
 @endsection

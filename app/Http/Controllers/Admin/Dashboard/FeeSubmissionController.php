@@ -20,9 +20,23 @@ use App\Mail\FeeSubmissionNotification;
 
 class FeeSubmissionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $admissions = Admission::with(['course', 'batch'])->orderBy('joining_date', 'desc')->get();
+        $query = Admission::with([
+            'course',
+            'batch',
+            'feeSubmissions.user',
+            'feeSubmissions.account'
+        ])->orderBy('joining_date', 'desc');
+
+        // Optional filter by fee_status
+        if ($request->has('status') && $request->status !== 'all') {
+            $query->where('fee_status', $request->status);
+        }
+
+        // Paginate (20 records per page)
+        $admissions = $query->paginate(15);
+
         return view('admin.pages.dashboard.fee-submission.index', compact('admissions'));
     }
     public function create($id)
@@ -47,7 +61,7 @@ class FeeSubmissionController extends Controller
 
         foreach ($request->fees as $feeType) {
             $amount = match ($feeType) {
-                'full_fee'      => $admission->full_fee,
+                'full_fee' => $admission->full_fee,
                 'installment_1' => $admission->installment_1,
                 'installment_2' => $admission->installment_2,
                 'installment_3' => $admission->installment_3,
@@ -60,13 +74,14 @@ class FeeSubmissionController extends Controller
 
             if (!$alreadySubmitted) {
                 $feeSubmission = FeeSubmission::create([
-                    'admission_id'    => $admission->id,
-                    'payment_method'  => $request->payment_method,
-                    'account_id'      => $request->payment_method === 'account' ? $request->account_id : null,
-                    'user_id'         => $request->payment_method === 'hand' ? Auth::id() : null,
-                    'payment_type'    => $feeType,
-                    'amount'          => $amount,
-                    'receipt_no'      => 'SKILLVERSE-RCPT-' . strtoupper(Str::random(5)) . '-' . time(),
+                    'admission_id' => $admission->id,
+                    'payment_method' => $request->payment_method,
+                    'account_id' => $request->payment_method === 'account' ? $request->account_id : null,
+                    // 'user_id'         => $request->payment_method === 'hand' ? Auth::id() : null,
+                    'user_id' => Auth::id(),
+                    'payment_type' => $feeType,
+                    'amount' => $amount,
+                    'receipt_no' => 'SKILLVERSE-RCPT-' . strtoupper(Str::random(5)) . '-' . time(),
                     'submission_date' => now(),
                 ]);
 
@@ -81,12 +96,12 @@ class FeeSubmissionController extends Controller
                     $commissionAmount = $amount * (floatval($admission->referral_source_commission) / 100);
 
                     ReferralCommission::create([
-                        'admission_id'          => $admission->id,
-                        'fee_submission_id'     => $feeSubmission->id,
-                        'referral_name'         => $admission->referral_source,
-                        'referral_contact'      => $admission->referral_source_contact,
+                        'admission_id' => $admission->id,
+                        'fee_submission_id' => $feeSubmission->id,
+                        'referral_name' => $admission->referral_source,
+                        'referral_contact' => $admission->referral_source_contact,
                         'commission_percentage' => $admission->referral_source_commission,
-                        'commission_amount'     => $commissionAmount,
+                        'commission_amount' => $commissionAmount,
                     ]);
                 }
             }
@@ -99,9 +114,9 @@ class FeeSubmissionController extends Controller
             : ($admission->installment_1 + $admission->installment_2 + $admission->installment_3 + $admission->installment_4);
 
         $admission->fee_status = match (true) {
-            $totalPaid == 0                   => 'pending',
-            $totalPaid < $expectedTotal       => 'uncomplete',
-            default                           => 'complete',
+            $totalPaid == 0 => 'pending',
+            $totalPaid < $expectedTotal => 'uncomplete',
+            default => 'complete',
         };
         $admission->save();
 
@@ -111,17 +126,17 @@ class FeeSubmissionController extends Controller
             $teacher = $batch->teacher;
 
             // Snapshot teacher config
-            $payType  = $teacher->pay_type ?? 'percentage';
-            $percent  = (int) ($teacher->percentage ?? (is_numeric($teacher->salary) ? $teacher->salary : 0)); // legacy fallback
-            $fixed    = (int) ($teacher->fixed_salary ?? 0);
+            $payType = $teacher->pay_type ?? 'percentage';
+            $percent = (int) ($teacher->percentage ?? (is_numeric($teacher->salary) ? $teacher->salary : 0)); // legacy fallback
+            $fixed = (int) ($teacher->fixed_salary ?? 0);
 
             $month = now()->month;
-            $year  = now()->year;
+            $year = now()->year;
 
             $teacherSalary = TeacherSalary::firstOrNew([
                 'teacher_id' => $teacher->id,
-                'month'      => $month,
-                'year'       => $year,
+                'month' => $month,
+                'year' => $year,
             ]);
 
             // ❗ Reopen rule:
@@ -130,12 +145,12 @@ class FeeSubmissionController extends Controller
             if (in_array(strtolower($teacherSalary->status ?? 'unpaid'), ['paid', 'balance'], true)) {
                 if ($payType === 'percentage') {
                     // reopen cycle (same as before)
-                    $teacherSalary->status                      = 'unpaid';
-                    $teacherSalary->total_fee_collected         = 0;
-                    $teacherSalary->total_students              = 0;
-                    $teacherSalary->salary_amount               = 0;
-                    $teacherSalary->computed_percentage_amount  = 0;
-                    $teacherSalary->computed_fixed_amount       = 0;
+                    $teacherSalary->status = 'unpaid';
+                    $teacherSalary->total_fee_collected = 0;
+                    $teacherSalary->total_students = 0;
+                    $teacherSalary->salary_amount = 0;
+                    $teacherSalary->computed_percentage_amount = 0;
+                    $teacherSalary->computed_fixed_amount = 0;
                 } else {
                     // fixed → don't reopen; keep status as-is (paid/balance)
                     // (still allow totals/computed fields to update for transparency)
@@ -146,15 +161,15 @@ class FeeSubmissionController extends Controller
             $teacherSalary->total_fee_collected = (int) (($teacherSalary->total_fee_collected ?? 0) + $totalAmountThisSubmission);
 
             // snapshot config
-            $teacherSalary->pay_type   = $payType;
+            $teacherSalary->pay_type = $payType;
             $teacherSalary->percentage = $percent;
 
             // compute both
             $computedPercentage = (int) round($teacherSalary->total_fee_collected * ($percent / 100));
-            $computedFixed      = $fixed;
+            $computedFixed = $fixed;
 
             $teacherSalary->computed_percentage_amount = $computedPercentage;
-            $teacherSalary->computed_fixed_amount      = $computedFixed;
+            $teacherSalary->computed_fixed_amount = $computedFixed;
 
             // ✅ Payable set karna:
             if ($payType === 'fixed') {
