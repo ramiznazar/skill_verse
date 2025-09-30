@@ -127,8 +127,6 @@
                 </div>
             </div>
 
-          
-
             <?php if(auth()->check() && auth()->user()->role !== 'administrator'): ?>
                 <div class="row clearfix">
                     <div class="col-lg-12 col-md-12">

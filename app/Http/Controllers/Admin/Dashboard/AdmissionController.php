@@ -15,15 +15,25 @@ class AdmissionController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $admissions = Admission::with(['course', 'batch'])->orderBy('joining_date', 'desc')->get();
-        $totalStudents = $admissions->count();
+        $query = Admission::with(['course', 'batch'])->orderBy('joining_date', 'desc');
 
-        // Count active students
-        $activeStudents = $admissions->where('student_status', 'active')->count();
+        $admissions = $query->paginate(15)->withQueryString();
 
-        return view('admin.pages.dashboard.admission.index', compact('admissions', 'totalStudents', 'activeStudents'));
+        $totalStudents = $admissions->total();
+        $activeStudents = Admission::where('student_status', 'active')->count();
+
+        $courses = Course::whereHas('admissions')->select('id', 'title')->orderBy('title')->get();
+        $batches = Batch::whereHas('admissions')->select('id', 'title')->orderBy('title')->get();
+
+        return view('admin.pages.dashboard.admission.index', compact(
+            'admissions',
+            'totalStudents',
+            'activeStudents',
+            'courses',
+            'batches'
+        ));
     }
 
     /**
@@ -48,36 +58,36 @@ class AdmissionController extends Controller
     {
         // Validate request
         $request->validate([
-            'course_id'        => 'required|exists:courses,id',
-            'batch_id'         => 'required|exists:batches,id',
-            'image'            => 'nullable|image',
-            'name'             => 'required|string|max:255',
-            'guardian_name'    => 'nullable|string|max:255',
+            'course_id' => 'required|exists:courses,id',
+            'batch_id' => 'required|exists:batches,id',
+            'image' => 'nullable|image',
+            'name' => 'required|string|max:255',
+            'guardian_name' => 'nullable|string|max:255',
             'guardian_contact' => 'nullable|string|max:20',
-            'cnic'             => 'nullable|string|max:20',
-            'dob'              => 'nullable|date',
-            'email'            => 'nullable|email|max:255',
-            'phone'            => 'nullable|string|max:20',
-            'joining_date'     => 'nullable|date',
-            'student_status'   => 'required',
-            'gender'           => 'nullable|in:male,female',
-            'qualification'    => 'nullable|string|max:100',
-            'last_institute'   => 'nullable|string|max:255',
-            'referral_source'  => 'nullable|string|max:255',
-            'referral_source_contact'   => 'nullable|string|max:255',
+            'cnic' => 'nullable|string|max:20',
+            'dob' => 'nullable|date',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:20',
+            'joining_date' => 'nullable|date',
+            'student_status' => 'required',
+            'gender' => 'nullable|in:male,female',
+            'qualification' => 'nullable|string|max:100',
+            'last_institute' => 'nullable|string|max:255',
+            'referral_source' => 'nullable|string|max:255',
+            'referral_source_contact' => 'nullable|string|max:255',
             'referral_source_commission' => 'nullable|string|max:255',
-            'address'          => 'nullable|string',
+            'address' => 'nullable|string',
 
-            'payment_type'     => 'required|in:full_fee,installment',
-            'full_fee'         => 'required|numeric|min:0',
+            'payment_type' => 'required|in:full_fee,installment',
+            'full_fee' => 'required|numeric|min:0',
 
             // Installment-related
-            'installment_count'        => 'nullable|in:2,3',
-            'installment_1'            => 'nullable|numeric|min:0',
-            'installment_2'            => 'nullable|numeric|min:0',
-            'installment_3'            => 'nullable|numeric|min:0',
+            'installment_count' => 'nullable|in:2,3',
+            'installment_1' => 'nullable|numeric|min:0',
+            'installment_2' => 'nullable|numeric|min:0',
+            'installment_3' => 'nullable|numeric|min:0',
             'apply_additional_charges' => 'nullable',
-            'referral_type'            => 'nullable|in:ads,referral,other',
+            'referral_type' => 'nullable|in:ads,referral,other',
         ]);
 
         // Handle image upload
@@ -92,7 +102,8 @@ class AdmissionController extends Controller
         if ($request->payment_type === 'installment') {
             // Dynamic validation
             $count = (int) $request->input('installment_count', 3);
-            if (!in_array($count, [2, 3], true)) $count = 3;
+            if (!in_array($count, [2, 3], true))
+                $count = 3;
 
             $base = (int) $request->input('full_fee', 0);
             $applyExtra = $request->boolean('apply_additional_charges');
@@ -113,10 +124,10 @@ class AdmissionController extends Controller
         } else {
             // Full payment: sanitize installment fields so they can't trigger errors
             $request->merge([
-                'installment_count'        => null,
-                'installment_1'            => 0,
-                'installment_2'            => 0,
-                'installment_3'            => 0,
+                'installment_count' => null,
+                'installment_1' => 0,
+                'installment_2' => 0,
+                'installment_3' => 0,
                 'apply_additional_charges' => false,
             ]);
         }
@@ -126,33 +137,33 @@ class AdmissionController extends Controller
 
         // Store admission
         Admission::create([
-            'course_id'        => $request->course_id,
-            'batch_id'         => $request->batch_id,
-            'roll_no'          => $newRollNo,
-            'image'            => $imagePath,
-            'name'             => $request->name,
-            'guardian_name'    => $request->guardian_name,
+            'course_id' => $request->course_id,
+            'batch_id' => $request->batch_id,
+            'roll_no' => $newRollNo,
+            'image' => $imagePath,
+            'name' => $request->name,
+            'guardian_name' => $request->guardian_name,
             'guardian_contact' => $request->guardian_contact,
-            'cnic'             => $request->cnic,
-            'dob'              => $request->dob,
-            'email'            => $request->email,
-            'phone'            => $request->phone,
-            'joining_date'     => $request->joining_date,
-            'student_status'   => $request->student_status,
-            'gender'           => $request->gender,
-            'qualification'    => $request->qualification,
-            'last_institute'   => $request->last_institute,
-            'referral_source'  => $request->referral_source,
-            'referral_source_contact'   => $request->referral_source_contact,
+            'cnic' => $request->cnic,
+            'dob' => $request->dob,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'joining_date' => $request->joining_date,
+            'student_status' => $request->student_status,
+            'gender' => $request->gender,
+            'qualification' => $request->qualification,
+            'last_institute' => $request->last_institute,
+            'referral_source' => $request->referral_source,
+            'referral_source_contact' => $request->referral_source_contact,
             'referral_source_commission' => $request->referral_source_commission,
-            'address'          => $request->address,
+            'address' => $request->address,
 
-            'payment_type'     => $request->payment_type,
-            'full_fee'         => (int) $request->full_fee,
-            'installment_1'    => (int) $request->installment_1,
-            'installment_2'    => (int) $request->installment_2,
-            'installment_3'    => (int) $request->installment_3,
-            'referral_type'    => $request->referral_type,
+            'payment_type' => $request->payment_type,
+            'full_fee' => (int) $request->full_fee,
+            'installment_1' => (int) $request->installment_1,
+            'installment_2' => (int) $request->installment_2,
+            'installment_3' => (int) $request->installment_3,
+            'referral_type' => $request->referral_type,
         ]);
 
         return redirect()->route('admission.index')->with('store', 'Admission created successfully.');
@@ -163,8 +174,11 @@ class AdmissionController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $admission = Admission::with(['course', 'batch'])->findOrFail($id);
+
+        return view('admin.pages.dashboard.admission.show', compact('admission'));
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -178,11 +192,11 @@ class AdmissionController extends Controller
         $preCount = ($admission->installment_3 ?? 0) > 0 ? 3 : 2;
 
         // infer whether extra charges were applied previously (1000 × count)
-        $savedFee   = (int) $admission->full_fee;
-        $inst1      = (int) $admission->installment_1;
-        $inst2      = (int) $admission->installment_2;
-        $inst3      = (int) ($preCount === 3 ? $admission->installment_3 : 0);
-        $sumInst    = $inst1 + $inst2 + $inst3;
+        $savedFee = (int) $admission->full_fee;
+        $inst1 = (int) $admission->installment_1;
+        $inst2 = (int) $admission->installment_2;
+        $inst3 = (int) ($preCount === 3 ? $admission->installment_3 : 0);
+        $sumInst = $inst1 + $inst2 + $inst3;
         $expectedIfExtra = $savedFee + (1000 * $preCount);
         $applyExtraDefault = ($sumInst === $expectedIfExtra);
 
@@ -208,53 +222,54 @@ class AdmissionController extends Controller
         $admission = Admission::findOrFail($id);
 
         $request->validate([
-            'course_id'        => 'required|exists:courses,id',
-            'batch_id'         => 'required|exists:batches,id',
-            'image'            => 'nullable|image',
-            'name'             => 'required|string|max:255',
-            'guardian_name'    => 'nullable|string|max:255',
+            'course_id' => 'required|exists:courses,id',
+            'batch_id' => 'required|exists:batches,id',
+            'image' => 'nullable|image',
+            'name' => 'required|string|max:255',
+            'guardian_name' => 'nullable|string|max:255',
             'guardian_contact' => 'nullable|string|max:20',
-            'cnic'             => 'nullable|string|max:20',
-            'dob'              => 'nullable|date',
-            'email'            => 'nullable|email|max:255',
-            'phone'            => 'nullable|string|max:20',
-            'joining_date'     => 'nullable|date',
-            'student_status'   => 'required',
-            'gender'           => 'nullable|in:male,female',
-            'qualification'    => 'nullable|string|max:100',
-            'last_institute'   => 'nullable|string|max:255',
-            'referral_source'  => 'nullable|string|max:255',
-            'referral_source_contact'   => 'nullable|string|max:255',
+            'cnic' => 'nullable|string|max:20',
+            'dob' => 'nullable|date',
+            'email' => 'nullable|email|max:255',
+            'phone' => 'nullable|string|max:20',
+            'joining_date' => 'nullable|date',
+            'student_status' => 'required',
+            'gender' => 'nullable|in:male,female',
+            'qualification' => 'nullable|string|max:100',
+            'last_institute' => 'nullable|string|max:255',
+            'referral_source' => 'nullable|string|max:255',
+            'referral_source_contact' => 'nullable|string|max:255',
             'referral_source_commission' => 'nullable|string|max:255',
-            'address'          => 'nullable|string',
+            'address' => 'nullable|string',
 
-            'payment_type'     => 'required|in:full_fee,installment',
-            'full_fee'         => 'required|numeric|min:0',
+            'payment_type' => 'required|in:full_fee,installment',
+            'full_fee' => 'required|numeric|min:0',
 
-            'installment_count'        => 'nullable|in:2,3',
-            'installment_1'            => 'nullable|numeric|min:0',
-            'installment_2'            => 'nullable|numeric|min:0',
-            'installment_3'            => 'nullable|numeric|min:0',
+            'installment_count' => 'nullable|in:2,3',
+            'installment_1' => 'nullable|numeric|min:0',
+            'installment_2' => 'nullable|numeric|min:0',
+            'installment_3' => 'nullable|numeric|min:0',
             'apply_additional_charges' => 'nullable',
 
-            'referral_type'    => 'nullable|in:ads,referral,other',
+            'referral_type' => 'nullable|in:ads,referral,other',
             'calculated_total' => 'nullable|numeric|min:0',
         ]);
 
         // --- Payment logic ---
         if ($request->payment_type === 'installment') {
             $count = (int) $request->input('installment_count', 3);
-            if (!in_array($count, [2, 3], true)) $count = 3;
+            if (!in_array($count, [2, 3], true))
+                $count = 3;
 
-            $base       = (int) $request->input('full_fee', 0);
+            $base = (int) $request->input('full_fee', 0);
             $applyExtra = $request->boolean('apply_additional_charges');
-            $extra      = $applyExtra ? (1000 * $count) : 0;
+            $extra = $applyExtra ? (1000 * $count) : 0;
 
             $inst1 = (int) $request->input('installment_1', 0);
             $inst2 = (int) $request->input('installment_2', 0);
             $inst3 = $count === 3 ? (int) $request->input('installment_3', 0) : 0;
 
-            $sum      = $inst1 + $inst2 + $inst3;
+            $sum = $inst1 + $inst2 + $inst3;
             $expected = $base + $extra;
 
             if ($sum !== $expected) {
@@ -265,10 +280,10 @@ class AdmissionController extends Controller
         } else {
             // ✅ Full payment: DO NOT error. Just clear/zero installment fields.
             $request->merge([
-                'installment_count'        => null,
-                'installment_1'            => 0,
-                'installment_2'            => 0,
-                'installment_3'            => 0,
+                'installment_count' => null,
+                'installment_1' => 0,
+                'installment_2' => 0,
+                'installment_3' => 0,
                 'apply_additional_charges' => false,
             ]);
         }
@@ -279,38 +294,38 @@ class AdmissionController extends Controller
                 @unlink(public_path($admission->image));
             }
             $image = $request->file('image');
-            $name  = time() . '_' . $image->getClientOriginalName();
+            $name = time() . '_' . $image->getClientOriginalName();
             $image->move(public_path('assets/admin/images/code/admission/'), $name);
             $admission->image = 'assets/admin/images/code/admission/' . $name;
         }
 
         // --- Save ---
         $admission->update([
-            'course_id'        => $request->course_id,
-            'batch_id'         => $request->batch_id,
-            'name'             => $request->name,
-            'guardian_name'    => $request->guardian_name,
+            'course_id' => $request->course_id,
+            'batch_id' => $request->batch_id,
+            'name' => $request->name,
+            'guardian_name' => $request->guardian_name,
             'guardian_contact' => $request->guardian_contact,
-            'cnic'             => $request->cnic,
-            'dob'              => $request->dob,
-            'email'            => $request->email,
-            'phone'            => $request->phone,
-            'joining_date'     => $request->joining_date,
-            'student_status'   => $request->student_status,
-            'gender'           => $request->gender,
-            'qualification'    => $request->qualification,
-            'last_institute'   => $request->last_institute,
-            'referral_source'  => $request->referral_source,
-            'referral_source_contact'   => $request->referral_source_contact,
+            'cnic' => $request->cnic,
+            'dob' => $request->dob,
+            'email' => $request->email,
+            'phone' => $request->phone,
+            'joining_date' => $request->joining_date,
+            'student_status' => $request->student_status,
+            'gender' => $request->gender,
+            'qualification' => $request->qualification,
+            'last_institute' => $request->last_institute,
+            'referral_source' => $request->referral_source,
+            'referral_source_contact' => $request->referral_source_contact,
             'referral_source_commission' => $request->referral_source_commission,
-            'address'          => $request->address,
+            'address' => $request->address,
 
-            'payment_type'     => $request->payment_type,
-            'full_fee'         => (int) $request->full_fee,
-            'installment_1'    => (int) $request->installment_1,
-            'installment_2'    => (int) $request->installment_2,
-            'installment_3'    => (int) $request->installment_3, // safe: merged to 0 on full payment
-            'referral_type'    => $request->referral_type,
+            'payment_type' => $request->payment_type,
+            'full_fee' => (int) $request->full_fee,
+            'installment_1' => (int) $request->installment_1,
+            'installment_2' => (int) $request->installment_2,
+            'installment_3' => (int) $request->installment_3, // safe: merged to 0 on full payment
+            'referral_type' => $request->referral_type,
             // 'calculated_total' => (int) $request->input('calculated_total', $request->full_fee),
         ]);
 

@@ -9,19 +9,28 @@ class Course extends Model
 {
     use HasFactory;
     protected $guarded = [];
-    public function courseCategory(){
+    public function courseCategory()
+    {
         return $this->belongsTo(CourseCategory::class);
     }
-    public function outline(){
+    public function outline()
+    {
         return $this->hasMany(CourseOutline::class);
     }
-    public function courseFee(){
+    public function courseFee()
+    {
         return $this->hasOne(CourseFee::class);
     }
-     public function batch(){
+    public function batch()
+    {
         return $this->hasOne(Batch::class);
     }
-    public function lead(){
+    public function lead()
+    {
         return $this->hasMany(Lead::class);
+    }
+    public function admissions()
+    {
+        return $this->hasMany(Admission::class, 'course_id');
     }
 }

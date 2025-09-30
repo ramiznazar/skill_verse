@@ -10,10 +10,18 @@ class Batch extends Model
     use HasFactory;
     protected $guarded = [];
 
-    public function course(){
+    public function course()
+    {
         return $this->belongsTo(Course::class);
     }
-    public function teacher(){
+    public function teacher()
+    {
         return $this->belongsTo(Teacher::class);
     }
+
+    public function admissions()
+    {
+        return $this->hasMany(Admission::class, 'batch_id');
+    }
+
 }

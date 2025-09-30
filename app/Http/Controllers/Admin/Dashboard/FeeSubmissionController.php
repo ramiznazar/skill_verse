@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Dashboard;
 
 use App\Models\Batch;
+use App\Models\Course;
 use App\Models\Account;
 
 use App\Models\Admission;
@@ -26,19 +27,51 @@ class FeeSubmissionController extends Controller
             'course',
             'batch',
             'feeSubmissions.user',
-            'feeSubmissions.account'
+            'feeSubmissions.account',
         ])->orderBy('joining_date', 'desc');
 
-        // Optional filter by fee_status
-        if ($request->has('status') && $request->status !== 'all') {
-            $query->where('fee_status', $request->status);
+        // read filters from query string
+        $status = $request->get('status', 'all'); 
+        $search = trim((string) $request->get('search'));
+        $courseId = $request->get('course_id'); 
+        $payment = $request->get('payment');  
+
+        // 🔎 server-side search (across ALL pages)
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhereHas('course', fn($c) => $c->where('title', 'like', "%{$search}%"))
+                    ->orWhereHas('batch', fn($b) => $b->where('title', 'like', "%{$search}%"));
+            });
         }
 
-        // Paginate (20 records per page)
-        $admissions = $query->paginate(15);
+        // 🎯 status filter
+        if ($status !== 'all') {
+            $query->where('fee_status', $status);
+        }
 
-        return view('admin.pages.dashboard.fee-submission.index', compact('admissions'));
+        // 📘 course filter (by id)
+        if (!empty($courseId)) {
+            $query->where('course_id', $courseId);
+        }
+
+        // 💳 payment type filter
+        if (!empty($payment)) {
+            $query->where('payment_type', $payment);
+        }
+
+        // keep filters in pagination links
+        $admissions = $query->paginate(15)->withQueryString();
+
+        // for the Course dropdown
+        $courses = Course::whereHas('admissions')
+            ->select('id', 'title')
+            ->orderBy('title')
+            ->get();
+
+        return view('admin.pages.dashboard.fee-submission.index', compact('admissions', 'status', 'courses'));
     }
+
     public function create($id)
     {
         $admission = Admission::findOrFail($id);
