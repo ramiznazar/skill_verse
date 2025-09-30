@@ -30,8 +30,8 @@
                         <div class="header">
                             <h2>All Admissions</h2>
                             <ul class="header-dropdown dropdown dropdown-animated scale-left">
-                                <li><a href="javascript:void(0);" data-toggle="cardloading" data-loading-effect="pulse"><i
-                                            class="icon-refresh"></i></a></li>
+                                <li><a href="javascript:void(0);" data-toggle="cardloading" data-loading-effect="pulse">
+                                        <i class="icon-refresh"></i></a></li>
                                 <li><a href="javascript:void(0);" class="full-screen"><i
                                             class="icon-size-fullscreen"></i></a></li>
                             </ul>
@@ -39,54 +39,59 @@
 
                         <div class="body">
 
-                            {{-- Search --}}
-                            <form method="GET" action="{{ route('admission.index') }}" class="mb-3">
-                                <div class="input-group">
+                            {{-- 🔎 Search + 🔽 Filters --}}
+                            <form method="GET" action="{{ route('admission.index') }}" id="filterForm" class="mb-3">
+                                <div class="input-group mb-2">
                                     <input type="text" name="search" value="{{ request('search') }}"
-                                        class="form-control" placeholder="Search student...">
-                                    {{-- <div class="input-group-append">
-                                        <button class="btn btn-primary" type="submit">Search</button>
-                                    </div> --}}
+                                           class="form-control" placeholder="Search student..." autocomplete="off">
+                                </div>
+
+                                <div class="row" style="margin-top: 15px;" >
+                                    <div class="col-md-3 mb-2">
+                                        <select name="course_id" class="form-control">
+                                            <option value="">Filter by Course</option>
+                                            @foreach ($courses as $course)
+                                                <option value="{{ $course->id }}"
+                                                    {{ (string)request('course_id') === (string)$course->id ? 'selected' : '' }}>
+                                                    {{ $course->title }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-3 mb-2">
+                                        <select name="batch_id" class="form-control">
+                                            <option value="">Filter by Batch</option>
+                                            @foreach ($batches as $batch)
+                                                <option value="{{ $batch->id }}"
+                                                    {{ (string)request('batch_id') === (string)$batch->id ? 'selected' : '' }}>
+                                                    {{ $batch->title }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-3 mb-2">
+                                        <select name="status" class="form-control">
+                                            <option value="all" {{ request('status', 'all') === 'all' ? 'selected' : '' }}>All Statuses</option>
+                                            <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
+                                            <option value="unactive" {{ request('status') === 'unactive' ? 'selected' : '' }}>Unactive</option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-3 mb-2">
+                                        <select name="payment" class="form-control">
+                                            <option value="" {{ request('payment') ? '' : 'selected' }}>All Payment Types</option>
+                                            <option value="full_fee" {{ request('payment') === 'full_fee' ? 'selected' : '' }}>Full Payment</option>
+                                            <option value="installment" {{ request('payment') === 'installment' ? 'selected' : '' }}>Installment</option>
+                                        </select>
+                                    </div>
                                 </div>
                             </form>
 
-                            {{-- Filters --}}
-                            <div class="row mb-3">
-                                <div class="col-md-3">
-                                    <select id="filter-course" class="form-control">
-                                        <option value="">Filter by Course</option>
-                                        @foreach ($courses as $course)
-                                            <option value="{{ strtolower($course->title) }}">{{ $course->title }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <select id="filter-batch" class="form-control">
-                                        <option value="">Filter by Batch</option>
-                                        @foreach ($batches as $batch)
-                                            <option value="{{ strtolower($batch->title) }}">{{ $batch->title }}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <select id="filter-status" class="form-control">
-                                        <option value="">Filter by Status</option>
-                                        <option value="active">Active</option>
-                                        <option value="unactive">Unactive</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <select id="filter-payment" class="form-control">
-                                        <option value="">Filter by Payment Type</option>
-                                        <option value="full_fee">Full Payment</option>
-                                        <option value="installment">Installment</option>
-                                    </select>
-                                </div>
-                            </div>
-
-                            {{-- Table --}}
+                            {{-- 📊 Table --}}
                             <div class="table-responsive">
-                                <table class="table table-hover mb-0" id="admissionTable">
+                                <table class="table table-hover mb-0">
                                     <thead>
                                         <tr>
                                             <th>#</th>
@@ -102,13 +107,11 @@
                                     </thead>
                                     <tbody>
                                         @forelse ($admissions as $admission)
-                                            <tr data-status="{{ strtolower($admission->student_status) }}"
-                                                data-payment="{{ strtolower($admission->payment_type) }}">
-                                                <td>{{ $loop->iteration + ($admissions->currentPage() - 1) * $admissions->perPage() }}
-                                                </td>
+                                            <tr>
+                                                <td>{{ $loop->iteration + ($admissions->currentPage() - 1) * $admissions->perPage() }}</td>
                                                 <td><img src="{{ asset($admission->image ?? 'default-avatar.png') }}"
-                                                        width="50" height="50"
-                                                        style="border-radius:50%;object-fit:cover;"></td>
+                                                         width="50" height="50"
+                                                         style="border-radius:50%;object-fit:cover;"></td>
                                                 <td>{{ $admission->name }}</td>
                                                 <td>{{ $admission->course->title ?? '-' }}</td>
                                                 <td>{{ $admission->batch->title ?? '-' }}</td>
@@ -125,11 +128,9 @@
                                                             @if ($admission->installment_1 > 0)
                                                                 1st: {{ $admission->installment_1 }}
                                                             @endif
-
                                                             @if ($admission->installment_2 > 0)
                                                                 | 2nd: {{ $admission->installment_2 }}
                                                             @endif
-
                                                             @if ($admission->installment_3 > 0)
                                                                 | 3rd: {{ $admission->installment_3 }}
                                                             @endif
@@ -142,55 +143,47 @@
                                                         {{ ucfirst($admission->student_status) }}
                                                     </span>
                                                 </td>
-                                                {{-- <td>@include('admin.pages.dashboard.admission.button')</td> --}}
                                                 <td class="text-nowrap">
                                                     <div class="d-flex align-items-center" style="column-gap: 5px;">
-                                                        {{-- Fee Submit --}}
                                                         <a href="{{ route('fee-submission.create', $admission->id) }}"
-                                                            class="btn btn-sm btn-icon btn-pure btn-default on-default button-view"
-                                                            data-toggle="tooltip" data-original-title="Submit Fee">
+                                                           class="btn btn-sm btn-icon btn-pure btn-default"
+                                                           data-toggle="tooltip" data-original-title="Submit Fee">
                                                             <i class="fas fa-money-check-alt"></i>
                                                         </a>
-
-                                                        <!-- View Button -->
                                                         <a href="{{ route('admission.show', $admission->id) }}"
-                                                            class="btn btn-sm btn-icon btn-pure btn-default on-default button-view"
-                                                            data-toggle="tooltip" data-original-title="View">
-                                                            <i class="icon-eye" aria-hidden="true"></i>
+                                                           class="btn btn-sm btn-icon btn-pure btn-default"
+                                                           data-toggle="tooltip" data-original-title="View">
+                                                            <i class="icon-eye"></i>
                                                         </a>
-
-                                                        <!-- Edit Button -->
                                                         <a href="{{ route('admission.edit', $admission->id) }}"
-                                                            class="btn btn-sm btn-icon btn-pure btn-default on-default button-edit"
-                                                            data-toggle="tooltip" data-original-title="Edit">
-                                                            <i class="icon-pencil" aria-hidden="true"></i>
+                                                           class="btn btn-sm btn-icon btn-pure btn-default"
+                                                           data-toggle="tooltip" data-original-title="Edit">
+                                                            <i class="icon-pencil"></i>
                                                         </a>
-
-                                                        <!-- Delete Button -->
                                                         <form action="{{ route('admission.destroy', $admission->id) }}"
-                                                            method="POST" onsubmit="return confirm('Are you sure?')">
+                                                              method="POST"
+                                                              onsubmit="return confirm('Are you sure?')">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit"
-                                                                class="btn btn-sm btn-icon btn-pure btn-default on-default button-remove"
-                                                                data-toggle="tooltip" data-original-title="Remove">
-                                                                <i class="icon-trash" aria-hidden="true"></i>
+                                                                    class="btn btn-sm btn-icon btn-pure btn-default"
+                                                                    data-toggle="tooltip" data-original-title="Remove">
+                                                                <i class="icon-trash"></i>
                                                             </button>
+                                                        </form>
                                                     </div>
-                                                    </form>
                                                 </td>
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="9" class="text-center text-muted">No admissions found.
-                                                </td>
+                                                <td colspan="9" class="text-center text-muted">No admissions found.</td>
                                             </tr>
                                         @endforelse
                                     </tbody>
                                 </table>
                             </div>
 
-                            {{-- Pagination --}}
+                            {{-- 📑 Pagination --}}
                             <div class="mt-3">
                                 {{ $admissions->links('pagination::bootstrap-4') }}
                             </div>
@@ -204,47 +197,21 @@
 @endsection
 
 @section('additional-javascript')
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const tableRows = document.querySelectorAll("#admissionTable tbody tr");
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('filterForm');
+    const search = form.querySelector('input[name="search"]');
+    const selects = form.querySelectorAll('select');
 
-            const searchInput = document.querySelector("input[name='search']");
-            const courseFilter = document.getElementById("filter-course");
-            const batchFilter = document.getElementById("filter-batch");
-            const statusFilter = document.getElementById("filter-status");
-            const paymentFilter = document.getElementById("filter-payment");
+    // auto-submit on select change
+    selects.forEach(sel => sel.addEventListener('change', () => form.submit()));
 
-            // 🔹 Main function to check visibility
-            function applyFilters() {
-                let search = searchInput ? searchInput.value.toLowerCase() : "";
-                let course = courseFilter.value.toLowerCase();
-                let batch = batchFilter.value.toLowerCase();
-                let status = statusFilter.value.toLowerCase();
-                let payment = paymentFilter.value.toLowerCase();
-
-                tableRows.forEach(function(row) {
-                    let rowText = row.innerText.toLowerCase();
-                    let courseCol = row.cells[3].innerText.toLowerCase();
-                    let batchCol = row.cells[4].innerText.toLowerCase();
-                    let statusCol = row.getAttribute("data-status");
-                    let paymentCol = row.getAttribute("data-payment");
-
-                    let visible =
-                        (!search || rowText.includes(search)) &&
-                        (!course || courseCol.includes(course)) &&
-                        (!batch || batchCol.includes(batch)) &&
-                        (!status || statusCol === status) &&
-                        (!payment || paymentCol === payment);
-
-                    row.style.display = visible ? "" : "none";
-                });
-            }
-
-            // 🔹 Attach events
-            if (searchInput) searchInput.addEventListener("keyup", applyFilters);
-            [courseFilter, batchFilter, statusFilter, paymentFilter].forEach(el => {
-                el.addEventListener("change", applyFilters);
-            });
-        });
-    </script>
+    // debounce search typing
+    let t;
+    search && search.addEventListener('input', () => {
+        clearTimeout(t);
+        t = setTimeout(() => form.submit(), 500);
+    });
+});
+</script>
 @endsection

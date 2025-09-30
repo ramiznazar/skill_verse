@@ -37,7 +37,7 @@
                                         class="form-control" placeholder="Search student..." autocomplete="off">
                                 </div>
 
-                                <div class="row" style="margin-top: 17px" >
+                                <div class="row" style="margin-top: 15px" >
                                     <div class="col-md-4 mb-2">
                                         <select name="course_id" id="filter-course" class="form-control">
                                             <option value="">Filter by Course</option>

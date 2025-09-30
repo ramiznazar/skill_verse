@@ -19,8 +19,31 @@ class AdmissionController extends Controller
     {
         $query = Admission::with(['course', 'batch'])->orderBy('joining_date', 'desc');
 
-        $admissions = $query->paginate(15)->withQueryString();
+        // 🔎 Search
+        $search = trim((string) $request->get('search'));
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhereHas('course', fn($c) => $c->where('title', 'like', "%{$search}%"))
+                    ->orWhereHas('batch', fn($b) => $b->where('title', 'like', "%{$search}%"));
+            });
+        }
 
+        // filter
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('student_status', $request->status);
+        }
+        if ($request->filled('course_id')) {
+            $query->where('course_id', $request->course_id);
+        }
+        if ($request->filled('batch_id')) {
+            $query->where('batch_id', $request->batch_id);
+        }
+        if ($request->filled('payment')) {
+            $query->where('payment_type', $request->payment);
+        }
+
+        $admissions = $query->paginate(15)->withQueryString();
         $totalStudents = $admissions->total();
         $activeStudents = Admission::where('student_status', 'active')->count();
 
@@ -35,6 +58,7 @@ class AdmissionController extends Controller
             'batches'
         ));
     }
+
 
     /**
      * Show the form for creating a new resource.
