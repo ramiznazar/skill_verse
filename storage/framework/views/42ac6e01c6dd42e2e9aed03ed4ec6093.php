@@ -53,13 +53,14 @@
                                                                     ?>
 
                                                                     <?php if($history->isEmpty()): ?>
-                                                                        <p>No fee submissions yet.</p>
+                                                                        <p class="text-center text-muted">No fee
+                                                                            submissions yet.</p>
                                                                     <?php else: ?>
-                                                                        <table class="table table-bordered table-sm">
-                                                                            <thead>
+                                                                        <table
+                                                                            class="table table-striped table-bordered table-sm">
+                                                                            <thead class="thead-light">
                                                                                 <tr>
                                                                                     <th>#</th>
-                                                                                    <th>Std Name</th>
                                                                                     <th>Fee Type</th>
                                                                                     <th>Amount</th>
                                                                                     <th>Method</th>
@@ -71,9 +72,6 @@
                                                                                 <?php $__currentLoopData = $history; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $h): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                                                     <tr>
                                                                                         <td><?php echo e($loop->iteration); ?></td>
-                                                                                        <td><?php echo e($h->admission->name); ?>
-
-                                                                                        </td>
                                                                                         <td><?php echo e(ucfirst(str_replace('_', ' ', $h->payment_type))); ?>
 
                                                                                         </td>
@@ -84,8 +82,7 @@
                                                                                             <?php echo e(ucfirst($h->payment_method)); ?>
 
                                                                                             <?php if($h->payment_method === 'account' && $h->account): ?>
-                                                                                                <br>
-                                                                                                <small
+                                                                                                <br><small
                                                                                                     class="text-muted">Acc
                                                                                                     #:
                                                                                                     <?php echo e($h->account->number ?? 'N/A'); ?></small>
@@ -121,6 +118,7 @@
                                                             <i class="fas fa-file-invoice"></i>
                                                         </button>
 
+                                                        
                                                         <div class="modal fade" id="receiptModal<?php echo e($admission->id); ?>"
                                                             tabindex="-1" role="dialog"
                                                             aria-labelledby="receiptModalLabel<?php echo e($admission->id); ?>"
@@ -138,37 +136,58 @@
                                                                             <span aria-hidden="true">&times;</span>
                                                                         </button>
                                                                     </div>
+
                                                                     <div class="modal-body">
-                                                                        <p><strong>Student:</strong>
-                                                                            <?php echo e($admission->name); ?>
+                                                                        <table
+                                                                            class="table table-bordered table-striped">
+                                                                            <tbody>
+                                                                                <tr>
+                                                                                    <th width="30%">Student</th>
+                                                                                    <td><?php echo e($admission->name); ?></td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <th>Course</th>
+                                                                                    <td><?php echo e($admission->course->title ?? 'N/A'); ?>
 
-                                                                        </p>
-                                                                        <p><strong>Course:</strong>
-                                                                            <?php echo e($admission->course->title ?? 'N/A'); ?>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <th>Fee Type</th>
+                                                                                    <td><?php echo e(ucfirst($latestFee->payment_type)); ?>
 
-                                                                        </p>
-                                                                        <p><strong>Fee Type:</strong>
-                                                                            <?php echo e(ucfirst($latestFee->payment_type)); ?></p>
-                                                                        <p><strong>Amount Paid:</strong>
-                                                                            <?php echo e(number_format($latestFee->amount)); ?> PKR
-                                                                        </p>
-                                                                        <p><strong>Payment Method:</strong>
-                                                                            <?php echo e(ucfirst($latestFee->payment_method ?? 'N/A')); ?>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <th>Amount Paid</th>
+                                                                                    <td><?php echo e(number_format($latestFee->amount)); ?>
 
-                                                                        </p>
-                                                                        <p><strong>Date:</strong>
-                                                                            <?php echo e(\Carbon\Carbon::parse($latestFee->submission_date ?? $latestFee->created_at)->format('d M Y')); ?>
+                                                                                        PKR</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <th>Payment Method</th>
+                                                                                    <td><?php echo e(ucfirst($latestFee->payment_method ?? 'N/A')); ?>
 
-                                                                        </p>
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <th>Date</th>
+                                                                                    <td><?php echo e(\Carbon\Carbon::parse($latestFee->submission_date ?? $latestFee->created_at)->format('d M Y')); ?>
+
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
                                                                     </div>
+
                                                                     <div class="modal-footer">
                                                                         <a href="<?php echo e(route('fee-submission.download-receipt', $latestFee->id)); ?>"
-                                                                            class="btn btn-primary">Download PDF</a>
+                                                                            class="btn btn-primary">
+                                                                            Download PDF
+                                                                        </a>
                                                                         <button type="button" class="btn btn-secondary"
                                                                             data-dismiss="modal">Close</button>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                    <?php endif; ?>
-<?php /**PATH E:\projects\codezy\zain-changes\codezy\resources\views/admin/pages/dashboard/fee-submission/button.blade.php ENDPATH**/ ?>
+                                                    <?php endif; ?><?php /**PATH E:\projects\codezy\zain-changes\codezy\resources\views/admin/pages/dashboard/fee-submission/button.blade.php ENDPATH**/ ?>

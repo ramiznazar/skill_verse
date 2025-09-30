@@ -31,10 +31,10 @@ class FeeSubmissionController extends Controller
         ])->orderBy('joining_date', 'desc');
 
         // read filters from query string
-        $status = $request->get('status', 'all'); 
+        $status = $request->get('status', 'all');
         $search = trim((string) $request->get('search'));
-        $courseId = $request->get('course_id'); 
-        $payment = $request->get('payment');  
+        $courseId = $request->get('course_id');
+        $payment = $request->get('payment');
 
         // 🔎 server-side search (across ALL pages)
         if ($search !== '') {
@@ -63,13 +63,14 @@ class FeeSubmissionController extends Controller
         // keep filters in pagination links
         $admissions = $query->paginate(15)->withQueryString();
 
-        // for the Course dropdown
         $courses = Course::whereHas('admissions')
             ->select('id', 'title')
             ->orderBy('title')
             ->get();
 
-        return view('admin.pages.dashboard.fee-submission.index', compact('admissions', 'status', 'courses'));
+        $totalCollected = FeeSubmission::sum('amount');
+        $totalRemaining = Admission::sum('full_fee') - $totalCollected;
+        return view('admin.pages.dashboard.fee-submission.index', compact('admissions', 'status', 'courses','totalCollected','totalRemaining'));
     }
 
     public function create($id)

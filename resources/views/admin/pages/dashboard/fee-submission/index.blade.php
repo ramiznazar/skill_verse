@@ -28,7 +28,6 @@
                         </div>
 
                         <div class="body">
-
                             {{-- 🔎 Search --}}
                             <form method="GET" action="{{ route('fee-submission.index') }}" id="filterForm"
                                 class="mb-3">
@@ -37,7 +36,7 @@
                                         class="form-control" placeholder="Search student..." autocomplete="off">
                                 </div>
 
-                                <div class="row" style="margin-top: 15px" >
+                                <div class="row" style="margin-top: 15px">
                                     <div class="col-md-4 mb-2">
                                         <select name="course_id" id="filter-course" class="form-control">
                                             <option value="">Filter by Course</option>
@@ -53,7 +52,7 @@
                                     <div class="col-md-4 mb-2">
                                         <select name="status" id="filter-status" class="form-control">
                                             <option value="all"
-                                                {{ request('status', 'all') === 'all' ? 'selected' : '' }}>All Statuses
+                                                {{ request('status', 'all') === 'all' ? 'selected' : '' }}>All Fees Status
                                             </option>
                                             <option value="complete"
                                                 {{ request('status') === 'complete' ? 'selected' : '' }}>Completed</option>
@@ -79,6 +78,19 @@
                                     </div>
                                 </div>
                             </form>
+
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <div class="alert alert-success mb-0">
+                                        <strong>Total Collected Fee:</strong> ₨ {{ number_format($totalCollected) }}
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="alert alert-warning mb-0">
+                                        <strong>Total Remaining Fee:</strong> ₨ {{ number_format($totalRemaining) }}
+                                    </div>
+                                </div>
+                            </div>
 
                             {{-- 📊 Table --}}
                             <div class="table-responsive">
@@ -115,9 +127,94 @@
                                                     </span>
                                                 </td>
                                                 <td>
+                                                    {{-- Expand Button --}}
+                                                    @if ($admission->payment_type === 'installment')
+                                                        <button class="btn btn-sm btn-info toggle-installments">
+                                                            <i class="fas fa-plus"></i>
+                                                        </button>
+                                                    @endif
+
                                                     @include('admin.pages.dashboard.fee-submission.button')
                                                 </td>
                                             </tr>
+
+                                            {{-- Hidden Installments Row --}}
+                                            @if ($admission->payment_type === 'installment')
+                                                @php
+                                                    // Collect all submissions for this student
+                                                    $paidInstallments = $admission->feeSubmissions
+                                                        ->pluck('payment_type')
+                                                        ->toArray();
+
+                                                    // Installments list with label + amount
+                                                    $installments = [];
+                                                    if ($admission->installment_1 > 0) {
+                                                        $installments[] = [
+                                                            'label' => '1st Installment',
+                                                            'amount' => $admission->installment_1,
+                                                            'key' => 'installment_1',
+                                                        ];
+                                                    }
+                                                    if ($admission->installment_2 > 0) {
+                                                        $installments[] = [
+                                                            'label' => '2nd Installment',
+                                                            'amount' => $admission->installment_2,
+                                                            'key' => 'installment_2',
+                                                        ];
+                                                    }
+                                                    if ($admission->installment_3 > 0) {
+                                                        $installments[] = [
+                                                            'label' => '3rd Installment',
+                                                            'amount' => $admission->installment_3,
+                                                            'key' => 'installment_3',
+                                                        ];
+                                                    }
+                                                    if (
+                                                        property_exists($admission, 'installment_4') &&
+                                                        $admission->installment_4 > 0
+                                                    ) {
+                                                        $installments[] = [
+                                                            'label' => '4th Installment',
+                                                            'amount' => $admission->installment_4,
+                                                            'key' => 'installment_4',
+                                                        ];
+                                                    }
+                                                @endphp
+
+                                                <tr class="installment-details d-none">
+                                                    <td colspan="6">
+                                                        <table class="table table-sm table-bordered mb-0">
+                                                            <thead>
+                                                                <tr>
+                                                                    <th>Full Fee</th>
+                                                                    @foreach ($installments as $inst)
+                                                                        <th>{{ $inst['label'] }}</th>
+                                                                    @endforeach
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                <tr>
+                                                                    {{-- Full Fee --}}
+                                                                    <td>₨{{ number_format($admission->full_fee) }}</td>
+
+                                                                    {{-- Dynamic Installments --}}
+                                                                    @foreach ($installments as $inst)
+                                                                        <td>
+                                                                            ₨{{ number_format($inst['amount']) }}
+                                                                            <br>
+                                                                            <span
+                                                                                class="badge badge-{{ in_array($inst['key'], $paidInstallments) ? 'success' : 'danger' }}">
+                                                                                {{ in_array($inst['key'], $paidInstallments) ? 'Paid' : 'Unpaid' }}
+                                                                            </span>
+                                                                        </td>
+                                                                    @endforeach
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            @endif
+                                            
                                         @endforeach
                                     </tbody>
                                 </table>
@@ -188,6 +285,30 @@
             search && search.addEventListener('input', () => {
                 clearTimeout(t);
                 t = setTimeout(() => form.submit(), 500);
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll(".toggle-installments").forEach(function(button) {
+                button.addEventListener("click", function() {
+                    const row = this.closest("tr");
+                    const detailsRow = row.nextElementSibling;
+
+                    if (detailsRow && detailsRow.classList.contains("installment-details")) {
+                        detailsRow.classList.toggle("d-none");
+
+                        // change icon
+                        const icon = this.querySelector("i");
+                        if (icon.classList.contains("fa-plus")) {
+                            icon.classList.remove("fa-plus");
+                            icon.classList.add("fa-minus");
+                        } else {
+                            icon.classList.remove("fa-minus");
+                            icon.classList.add("fa-plus");
+                        }
+                    }
+                });
             });
         });
     </script>

@@ -52,13 +52,14 @@
                                                                     @endphp
 
                                                                     @if ($history->isEmpty())
-                                                                        <p>No fee submissions yet.</p>
+                                                                        <p class="text-center text-muted">No fee
+                                                                            submissions yet.</p>
                                                                     @else
-                                                                        <table class="table table-bordered table-sm">
-                                                                            <thead>
+                                                                        <table
+                                                                            class="table table-striped table-bordered table-sm">
+                                                                            <thead class="thead-light">
                                                                                 <tr>
                                                                                     <th>#</th>
-                                                                                    <th>Std Name</th>
                                                                                     <th>Fee Type</th>
                                                                                     <th>Amount</th>
                                                                                     <th>Method</th>
@@ -70,8 +71,6 @@
                                                                                 @foreach ($history as $h)
                                                                                     <tr>
                                                                                         <td>{{ $loop->iteration }}</td>
-                                                                                        <td>{{ $h->admission->name }}
-                                                                                        </td>
                                                                                         <td>{{ ucfirst(str_replace('_', ' ', $h->payment_type)) }}
                                                                                         </td>
                                                                                         <td>{{ number_format($h->amount) }}
@@ -79,8 +78,7 @@
                                                                                         <td>
                                                                                             {{ ucfirst($h->payment_method) }}
                                                                                             @if ($h->payment_method === 'account' && $h->account)
-                                                                                                <br>
-                                                                                                <small
+                                                                                                <br><small
                                                                                                     class="text-muted">Acc
                                                                                                     #:
                                                                                                     {{ $h->account->number ?? 'N/A' }}</small>
@@ -114,6 +112,7 @@
                                                             <i class="fas fa-file-invoice"></i>
                                                         </button>
 
+                                                        {{-- Receipt Modal --}}
                                                         <div class="modal fade" id="receiptModal{{ $admission->id }}"
                                                             tabindex="-1" role="dialog"
                                                             aria-labelledby="receiptModalLabel{{ $admission->id }}"
@@ -130,28 +129,49 @@
                                                                             <span aria-hidden="true">&times;</span>
                                                                         </button>
                                                                     </div>
+
                                                                     <div class="modal-body">
-                                                                        <p><strong>Student:</strong>
-                                                                            {{ $admission->name }}
-                                                                        </p>
-                                                                        <p><strong>Course:</strong>
-                                                                            {{ $admission->course->title ?? 'N/A' }}
-                                                                        </p>
-                                                                        <p><strong>Fee Type:</strong>
-                                                                            {{ ucfirst($latestFee->payment_type) }}</p>
-                                                                        <p><strong>Amount Paid:</strong>
-                                                                            {{ number_format($latestFee->amount) }} PKR
-                                                                        </p>
-                                                                        <p><strong>Payment Method:</strong>
-                                                                            {{ ucfirst($latestFee->payment_method ?? 'N/A') }}
-                                                                        </p>
-                                                                        <p><strong>Date:</strong>
-                                                                            {{ \Carbon\Carbon::parse($latestFee->submission_date ?? $latestFee->created_at)->format('d M Y') }}
-                                                                        </p>
+                                                                        <table
+                                                                            class="table table-bordered table-striped">
+                                                                            <tbody>
+                                                                                <tr>
+                                                                                    <th width="30%">Student</th>
+                                                                                    <td>{{ $admission->name }}</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <th>Course</th>
+                                                                                    <td>{{ $admission->course->title ?? 'N/A' }}
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <th>Fee Type</th>
+                                                                                    <td>{{ ucfirst($latestFee->payment_type) }}
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <th>Amount Paid</th>
+                                                                                    <td>{{ number_format($latestFee->amount) }}
+                                                                                        PKR</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <th>Payment Method</th>
+                                                                                    <td>{{ ucfirst($latestFee->payment_method ?? 'N/A') }}
+                                                                                    </td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <th>Date</th>
+                                                                                    <td>{{ \Carbon\Carbon::parse($latestFee->submission_date ?? $latestFee->created_at)->format('d M Y') }}
+                                                                                    </td>
+                                                                                </tr>
+                                                                            </tbody>
+                                                                        </table>
                                                                     </div>
+
                                                                     <div class="modal-footer">
                                                                         <a href="{{ route('fee-submission.download-receipt', $latestFee->id) }}"
-                                                                            class="btn btn-primary">Download PDF</a>
+                                                                            class="btn btn-primary">
+                                                                            Download PDF
+                                                                        </a>
                                                                         <button type="button" class="btn btn-secondary"
                                                                             data-dismiss="modal">Close</button>
                                                                     </div>

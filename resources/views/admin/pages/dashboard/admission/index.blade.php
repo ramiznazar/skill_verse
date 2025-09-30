@@ -73,7 +73,7 @@
 
                                     <div class="col-md-3 mb-2">
                                         <select name="status" class="form-control">
-                                            <option value="all" {{ request('status', 'all') === 'all' ? 'selected' : '' }}>All Statuses</option>
+                                            <option value="all" {{ request('status', 'all') === 'all' ? 'selected' : '' }}>All Student Status</option>
                                             <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Active</option>
                                             <option value="unactive" {{ request('status') === 'unactive' ? 'selected' : '' }}>Unactive</option>
                                         </select>
