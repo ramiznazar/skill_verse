@@ -6,6 +6,7 @@ use App\Models\Lead;
 use App\Models\Batch;
 use App\Models\Course;
 use App\Models\Admission;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
@@ -105,7 +106,6 @@ class AdmissionController extends Controller
             'payment_type' => 'required|in:full_fee,installment',
             'full_fee' => 'required|numeric|min:0',
 
-            // Installment-related
             'installment_count' => 'nullable|in:2,3',
             'installment_1' => 'nullable|numeric|min:0',
             'installment_2' => 'nullable|numeric|min:0',
@@ -113,7 +113,6 @@ class AdmissionController extends Controller
             'apply_additional_charges' => 'nullable',
             'referral_type' => 'nullable|in:ads,referral,other',
         ]);
-
         // Handle image upload
         $imagePath = null;
         if ($request->hasFile('image')) {
@@ -160,7 +159,7 @@ class AdmissionController extends Controller
         $newRollNo = $lastRollNo ? $lastRollNo + 1 : 1;
 
         // Store admission
-        Admission::create([
+        $admission = Admission::create([
             'course_id' => $request->course_id,
             'batch_id' => $request->batch_id,
             'roll_no' => $newRollNo,
@@ -188,6 +187,15 @@ class AdmissionController extends Controller
             'installment_2' => (int) $request->installment_2,
             'installment_3' => (int) $request->installment_3,
             'referral_type' => $request->referral_type,
+        ]);
+        
+        // 🔔 Create Notification
+        Notification::create([
+            'title' => 'New Admission',
+            'message' => "Student {$admission->name} admitted in Course ID {$admission->course_id}",
+            'icon' => 'fa fa-user',
+            'type' => 'admission',
+            'status' => 1,
         ]);
 
         return redirect()->route('admission.index')->with('store', 'Admission created successfully.');

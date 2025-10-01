@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\Dashboard\{
     LeadFollowUpController,
     PartnerController,
     PartnerProfitController,
+    NotificationController,
     PartnerBalanceController,
     BatchController,
     AccountController,
@@ -101,7 +102,12 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
     Route::put('/user/update/{id}', [UserController::class, 'update'])->name('user.update');
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('user.destroy');
     //Profile
-    Route::get('/profile',[ProfileController::class,'index'])->name('profile.index');
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+
+    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+
 
     // Admin Resources
     Route::prefix('dashboard')->name('admin.')->group(function () {

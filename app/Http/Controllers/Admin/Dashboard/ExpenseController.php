@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Dashboard;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Expense;
+use App\Models\Notification;
 
 class ExpenseController extends Controller
 {
@@ -14,7 +15,7 @@ class ExpenseController extends Controller
     public function index()
     {
         $expenses = Expense::latest()->get();
-        return view('admin.pages.dashboard.expense.index',compact('expenses'));
+        return view('admin.pages.dashboard.expense.index', compact('expenses'));
     }
 
     /**
@@ -30,16 +31,25 @@ class ExpenseController extends Controller
      */
     public function store(Request $request)
     {
-          $data = $request->validate([
-            'title'   => 'required|string|max:255',
-            'ref_type'=> 'nullable|string|max:255',
-            'amount'  => 'required|numeric|min:0',
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+            'ref_type' => 'nullable|string|max:255',
+            'amount' => 'required|numeric|min:0',
             'purpose' => 'nullable|string',
-            'type'    => 'required|string',
-            'date'    => 'nullable|date',
+            'type' => 'required|string',
+            'date' => 'nullable|date',
         ]);
 
-        Expense::create($data);
+        $expense = Expense::create($data);
+
+        // 🔔 Create Notification
+        Notification::create([
+            'title' => 'New Expense',
+            'message' => 'Expense of ₨' . number_format($expense->amount) . ' added (' . $expense->title . ')',
+            'icon' => 'fa fa-credit-card',  // expense icon
+            'type' => 'expense',
+            'status' => 1, // unread
+        ]);
 
         return redirect()->route('expense.index')->with('store', 'Expense added successfully.');
     }
@@ -67,12 +77,12 @@ class ExpenseController extends Controller
     public function update(Request $request, string $id)
     {
         $data = $request->validate([
-            'title'   => 'required|string|max:255',
-            'ref_type'=> 'nullable|string|max:255',
-            'amount'  => 'required|numeric|min:0',
+            'title' => 'required|string|max:255',
+            'ref_type' => 'nullable|string|max:255',
+            'amount' => 'required|numeric|min:0',
             'purpose' => 'nullable|string',
-            'type'    => 'required|string',
-            'date'    => 'nullable|date',
+            'type' => 'required|string',
+            'date' => 'nullable|date',
         ]);
 
         $expense = Expense::findOrFail($id);

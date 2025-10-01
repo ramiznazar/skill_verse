@@ -7,6 +7,8 @@ use App\Models\Course;
 use App\Models\Account;
 
 use App\Models\Admission;
+use App\Models\Notification;
+use App\Mail\FeeSubmissionMail;
 use Illuminate\Support\Str;
 use App\Models\FeeCollector;
 use Illuminate\Http\Request;
@@ -70,7 +72,7 @@ class FeeSubmissionController extends Controller
 
         $totalCollected = FeeSubmission::sum('amount');
         $totalRemaining = Admission::sum('full_fee') - $totalCollected;
-        return view('admin.pages.dashboard.fee-submission.index', compact('admissions', 'status', 'courses','totalCollected','totalRemaining'));
+        return view('admin.pages.dashboard.fee-submission.index', compact('admissions', 'status', 'courses', 'totalCollected', 'totalRemaining'));
     }
 
     public function create($id)
@@ -119,7 +121,21 @@ class FeeSubmissionController extends Controller
                     'submission_date' => now(),
                 ]);
 
+                // 🔔 Create Notification
+                Notification::create([
+                    'title' => 'Fee Submitted',
+                    'message' => '₨' . number_format($feeSubmission->amount) . ' received from ' . $feeSubmission->admission->name,
+                    'icon' => 'fa fa-money',
+                    'type' => 'fee',
+                    'status' => 1,
+                ]);
+
                 $totalAmountThisSubmission += $amount;
+
+                // ✅ Send email to student
+                if (!empty($admission->email)) {
+                    Mail::to($admission->email)->send(new FeeSubmissionMail($feeSubmission));
+                }
 
                 // ✅ Referral commission
                 if (
