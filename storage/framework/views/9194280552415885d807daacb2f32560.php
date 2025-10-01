@@ -47,35 +47,61 @@
                         </div>
 
                         <div class="body">
-                            <form method="GET" action="<?php echo e(route('teacher-salary.index')); ?>" class="form-inline mb-3">
-                                <div class="form-group mr-2">
-                                    <label for="month">Month:</label>
-                                    <select name="month" id="month" class="form-control ml-2">
-                                        <option value="">All</option>
-                                        <?php $__currentLoopData = range(1, 12); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $m): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                            <option value="<?php echo e($m); ?>"
-                                                <?php echo e(request('month') == $m ? 'selected' : ''); ?>>
-                                                <?php echo e(\Carbon\Carbon::create()->month($m)->format('F')); ?>
+                            <form method="GET" action="<?php echo e(route('teacher-salary.index')); ?>" id="filterForm"
+                                class="mb-3">
 
+                                
+                                <div class="input-group mb-2">
+                                    <input type="text" name="search" value="<?php echo e(request('search')); ?>"
+                                        class="form-control" placeholder="Search teacher..." autocomplete="off">
+                                </div>
+
+                                <div class="row" style="margin-top: 15px;">
+                                    
+                                    <div class="col-md-4 mb-2">
+                                        <select name="month" class="form-control">
+                                            <option value="">All Months</option>
+                                            <?php $__currentLoopData = range(1, 12); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $m): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($m); ?>"
+                                                    <?php echo e(request('month') == $m ? 'selected' : ''); ?>>
+                                                    <?php echo e(\Carbon\Carbon::create()->month($m)->format('F')); ?>
+
+                                                </option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        </select>
+                                    </div>
+
+                                    
+                                    <div class="col-md-4 mb-2">
+                                        <select name="year" class="form-control">
+                                            <option value="">All Years</option>
+                                            <?php for($y = now()->year; $y >= 2020; $y--): ?>
+                                                <option value="<?php echo e($y); ?>"
+                                                    <?php echo e(request('year') == $y ? 'selected' : ''); ?>>
+                                                    <?php echo e($y); ?>
+
+                                                </option>
+                                            <?php endfor; ?>
+                                        </select>
+                                    </div>
+
+                                    
+                                    <div class="col-md-4 mb-2">
+                                        <select name="status" class="form-control">
+                                            <option value="all"
+                                                <?php echo e(request('status', 'all') === 'all' ? 'selected' : ''); ?>>All Status
                                             </option>
-                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                    </select>
+                                            <option value="paid" <?php echo e(request('status') === 'paid' ? 'selected' : ''); ?>>
+                                                Paid</option>
+                                            <option value="balance"
+                                                <?php echo e(request('status') === 'balance' ? 'selected' : ''); ?>>Balance</option>
+                                            <option value="pending"
+                                                <?php echo e(request('status') === 'pending' ? 'selected' : ''); ?>>Pending</option>
+                                        </select>
+                                    </div>
                                 </div>
-
-                                <div class="form-group mr-2">
-                                    <label for="year">Year:</label>
-                                    <select name="year" id="year" class="form-control ml-2">
-                                        <option value="">All</option>
-                                        <?php for($y = now()->year; $y >= 2020; $y--): ?>
-                                            <option value="<?php echo e($y); ?>"
-                                                <?php echo e(request('year') == $y ? 'selected' : ''); ?>>
-                                                <?php echo e($y); ?></option>
-                                        <?php endfor; ?>
-                                    </select>
-                                </div>
-
-                                <button type="submit" class="btn btn-primary">Filter</button>
                             </form>
+
 
                             <div class="table-responsive">
                                 <table class="table m-b-0">
@@ -206,5 +232,25 @@
         </div>
     </div>
 <?php $__env->stopSection(); ?>
+<?php $__env->startSection('additional-javascript'); ?>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('filterForm');
+    const search = form.querySelector('input[name="search"]');
+    const selects = form.querySelectorAll('select');
 
+    // auto-submit on select change
+    selects.forEach(sel => sel.addEventListener('change', () => form.submit()));
+
+    // debounce search typing
+    let t;
+    if (search) {
+        search.addEventListener('input', () => {
+            clearTimeout(t);
+            t = setTimeout(() => form.submit(), 500);
+        });
+    }
+});
+</script>
+<?php $__env->stopSection(); ?>
 <?php echo $__env->make('admin.layouts.main', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH E:\projects\codezy\zain-changes\codezy\resources\views/admin/pages/dashboard/teacher/salary/salary.blade.php ENDPATH**/ ?>

@@ -45,34 +45,59 @@
                         </div>
 
                         <div class="body">
-                            <form method="GET" action="{{ route('teacher-salary.index') }}" class="form-inline mb-3">
-                                <div class="form-group mr-2">
-                                    <label for="month">Month:</label>
-                                    <select name="month" id="month" class="form-control ml-2">
-                                        <option value="">All</option>
-                                        @foreach (range(1, 12) as $m)
-                                            <option value="{{ $m }}"
-                                                {{ request('month') == $m ? 'selected' : '' }}>
-                                                {{ \Carbon\Carbon::create()->month($m)->format('F') }}
+                            <form method="GET" action="{{ route('teacher-salary.index') }}" id="filterForm"
+                                class="mb-3">
+
+                                {{-- 🔎 Search Teacher --}}
+                                <div class="input-group mb-2">
+                                    <input type="text" name="search" value="{{ request('search') }}"
+                                        class="form-control" placeholder="Search teacher..." autocomplete="off">
+                                </div>
+
+                                <div class="row" style="margin-top: 15px;">
+                                    {{-- 📅 Month --}}
+                                    <div class="col-md-4 mb-2">
+                                        <select name="month" class="form-control">
+                                            <option value="">All Months</option>
+                                            @foreach (range(1, 12) as $m)
+                                                <option value="{{ $m }}"
+                                                    {{ request('month') == $m ? 'selected' : '' }}>
+                                                    {{ \Carbon\Carbon::create()->month($m)->format('F') }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    {{-- 📅 Year --}}
+                                    <div class="col-md-4 mb-2">
+                                        <select name="year" class="form-control">
+                                            <option value="">All Years</option>
+                                            @for ($y = now()->year; $y >= 2020; $y--)
+                                                <option value="{{ $y }}"
+                                                    {{ request('year') == $y ? 'selected' : '' }}>
+                                                    {{ $y }}
+                                                </option>
+                                            @endfor
+                                        </select>
+                                    </div>
+
+                                    {{-- 💳 Status --}}
+                                    <div class="col-md-4 mb-2">
+                                        <select name="status" class="form-control">
+                                            <option value="all"
+                                                {{ request('status', 'all') === 'all' ? 'selected' : '' }}>All Status
                                             </option>
-                                        @endforeach
-                                    </select>
+                                            <option value="paid" {{ request('status') === 'paid' ? 'selected' : '' }}>
+                                                Paid</option>
+                                            <option value="balance"
+                                                {{ request('status') === 'balance' ? 'selected' : '' }}>Balance</option>
+                                            <option value="pending"
+                                                {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
+                                        </select>
+                                    </div>
                                 </div>
-
-                                <div class="form-group mr-2">
-                                    <label for="year">Year:</label>
-                                    <select name="year" id="year" class="form-control ml-2">
-                                        <option value="">All</option>
-                                        @for ($y = now()->year; $y >= 2020; $y--)
-                                            <option value="{{ $y }}"
-                                                {{ request('year') == $y ? 'selected' : '' }}>
-                                                {{ $y }}</option>
-                                        @endfor
-                                    </select>
-                                </div>
-
-                                <button type="submit" class="btn btn-primary">Filter</button>
                             </form>
+
 
                             <div class="table-responsive">
                                 <table class="table m-b-0">
@@ -197,4 +222,25 @@
             </div>
         </div>
     </div>
+@endsection
+@section('additional-javascript')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('filterForm');
+    const search = form.querySelector('input[name="search"]');
+    const selects = form.querySelectorAll('select');
+
+    // auto-submit on select change
+    selects.forEach(sel => sel.addEventListener('change', () => form.submit()));
+
+    // debounce search typing
+    let t;
+    if (search) {
+        search.addEventListener('input', () => {
+            clearTimeout(t);
+            t = setTimeout(() => form.submit(), 500);
+        });
+    }
+});
+</script>
 @endsection
