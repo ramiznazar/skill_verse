@@ -47,7 +47,10 @@ class BatchController extends Controller
 
         $batches = $query->paginate(15)->withQueryString();
 
-        $courses = Course::select('id', 'title')->orderBy('title')->get();
+        $courses = Course::whereHas('batch')
+            ->select('id', 'title')
+            ->orderBy('title')
+            ->get();
 
         return view('admin.pages.dashboard.batch.index', compact('batches', 'courses'));
     }

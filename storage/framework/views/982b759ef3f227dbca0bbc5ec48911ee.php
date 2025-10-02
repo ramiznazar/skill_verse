@@ -217,11 +217,25 @@ endif;
 unset($__errorArgs, $__bag); ?>
                                     </div>
 
+                                    
                                     <div class="col-md-4">
-                                        <label>Last Institute</label>
-                                        <input type="text" name="last_institute" class="form-control"
-                                            value="<?php echo e(old('last_institute')); ?>">
-                                        <?php $__errorArgs = ['last_institute'];
+                                        <label>Lead Status</label>
+                                        <select name="status" class="form-control">
+                                            <option value="">Select Status</option>
+                                            <option value="new" <?php echo e(old('status') == 'new' ? 'selected' : ''); ?>>New
+                                            </option>
+                                            <option value="contacted" <?php echo e(old('status') == 'contacted' ? 'selected' : ''); ?>>
+                                                Contacted</option>
+                                            <option value="converted" <?php echo e(old('status') == 'converted' ? 'selected' : ''); ?>>
+                                                Converted</option>
+                                            <option value="lost" <?php echo e(old('status') == 'lost' ? 'selected' : ''); ?>>Lost
+                                            </option>
+                                            <option value="interested" <?php echo e(old('status') == 'interested' ? 'selected' : ''); ?>>Interested
+                                            </option>
+                                            <option value="not_interested" <?php echo e(old('status') == 'not_interested' ? 'selected' : ''); ?>>Not Interested
+                                            </option>
+                                        </select>
+                                        <?php $__errorArgs = ['status'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -232,13 +246,30 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
                                     </div>
+
                                 </div>
 
                                 <div class="row mt-3">
 
                                 </div>
                                 <div class="row mt-3">
-                                    <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <label>Full Fee</label>
+                                        <input type="text" name="full_fee" class="form-control"
+                                            value="<?php echo e(old('full_fee')); ?>">
+                                        <?php $__errorArgs = ['full_fee'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                            <small class="text-danger"><?php echo e($message); ?></small>
+                                        <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
+                                    </div>
+
+                                    <div class="col-md-6">
                                         <label for="referral_type">Referral Type</label>
                                         <select name="referral_type" id="referral_type" class="form-control">
                                             <option value="">Select Type</option>
@@ -356,4 +387,5 @@ unset($__errorArgs, $__bag); ?>
         });
     </script>
 <?php $__env->stopSection(); ?>
+
 <?php echo $__env->make('admin.layouts.main', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH E:\projects\codezy\zain-changes\codezy\resources\views/admin/pages/dashboard/lead/create.blade.php ENDPATH**/ ?>

@@ -35,54 +35,38 @@
                         </div>
                         <div class="body">
                             <div class="table-responsive">
-                                <table class="table m-b-0">
-                                    <thead>
-                                        <tr>
-                                            <th>#</th>
-                                            <th>When</th>
-                                            <th>Method</th>
-                                            <th>Status</th>
-                                            <th>Note</th>
-                                            <th>By</th>
-                                            <th>Options</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse ($followUps as $i => $fu)
-                                            <tr>
-                                                <td>{{ $followUps->firstItem() + $i }}</td>
-                                                <td>{{ optional($fu->followed_at)->format('d M Y, h:i A') ?? '-' }}</td>
-                                                <td>{{ $fu->contact_method === 'in_person' ? 'In-person' : ucfirst(str_replace('_', ' ', $fu->contact_method ?? '-')) }}
-                                                </td>
-                                                <td>{{ $fu->status ? ucwords(str_replace('_', ' ', $fu->status)) : '-' }}
-                                                </td>
-                                                <td style="max-width:480px; white-space:normal;">{{ $fu->note ?? '-' }}
-                                                </td>
-                                                <td>{{ $fu->user->name ?? '-' }}</td>
-                                                <td class="text-nowrap">
-                                                    <a href="{{ route('lead-followups.edit', [$lead->id, $fu->id]) }}"
-                                                        class="btn btn-sm btn-icon btn-pure btn-default" title="Edit">
-                                                        <i class="icon-pencil"></i>
-                                                    </a>
-                                                    <form
-                                                        action="{{ route('lead-followups.destroy', [$lead->id, $fu->id]) }}"
-                                                        method="POST" style="display:inline"
-                                                        onsubmit="return confirm('Delete this follow-up?')">
-                                                        @csrf @method('DELETE')
-                                                        <button class="btn btn-sm btn-icon btn-pure btn-default"
-                                                            title="Delete">
-                                                            <i class="icon-trash"></i>
-                                                        </button>
-                                                    </form>
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="7" class="text-center text-muted">No follow-ups yet.</td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
+                                <div class="timeline">
+    @forelse ($followUps as $fu)
+        <div class="timeline-item mb-4 p-3 border rounded shadow-sm">
+            <div class="d-flex justify-content-between">
+                <strong>{{ optional($fu->followed_at)->format('d M Y, h:i A') ?? '-' }}</strong>
+                <span class="badge badge-{{ $fu->status === 'interested' ? 'info' : ($fu->status === 'not_interested' ? 'dark' : ($fu->status === 'converted' ? 'success' : ($fu->status === 'lost' ? 'danger' : 'secondary'))) }}">
+                    {{ ucwords(str_replace('_', ' ', $fu->status)) }}
+                </span>
+            </div>
+            <div class="mt-2">
+                <span class="badge badge-primary">{{ ucfirst(str_replace('_', ' ', $fu->contact_method)) }}</span>
+                <p class="mt-2 mb-1">{{ $fu->note ?? '-' }}</p>
+                <small class="text-muted">By: {{ $fu->user->name ?? '-' }}</small>
+            </div>
+            <div class="mt-2 d-flex">
+                <a href="{{ route('lead-followups.edit', [$lead->id, $fu->id]) }}" class="btn btn-sm btn-outline-warning mr-2">Edit</a>
+                <form action="{{ route('lead-followups.destroy', [$lead->id, $fu->id]) }}" method="POST" onsubmit="return confirm('Delete this follow-up?')">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    @empty
+        <p class="text-muted">No follow-ups yet.</p>
+    @endforelse
+</div>
+
+{{-- Pagination --}}
+<div class="mt-3">
+    {{ $followUps->links('pagination::bootstrap-4') }}
+</div>
+
                             </div>
 
                             <div class="mt-3">

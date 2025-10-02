@@ -154,18 +154,41 @@
                                     </div>
 
                                     <div class="col-md-4">
-                                        <label>Last Institute</label>
-                                        <input type="text" name="last_institute" class="form-control"
-                                            value="{{ old('last_institute', $lead->last_institute) }}">
-                                        @error('last_institute')
+                                        <label>Lead Status</label>
+                                        <select name="status" class="form-control">
+                                            <option value="">Select Status</option>
+                                            <option value="new"
+                                                {{ old('status', $lead->status ?? '') == 'new' ? 'selected' : '' }}>New
+                                            </option>
+                                            <option value="contacted"
+                                                {{ old('status', $lead->status ?? '') == 'contacted' ? 'selected' : '' }}>
+                                                Contacted</option>
+                                            <option value="converted"
+                                                {{ old('status', $lead->status ?? '') == 'converted' ? 'selected' : '' }}>
+                                                Converted</option>
+                                            <option value="lost"
+                                                {{ old('status', $lead->status ?? '') == 'lost' ? 'selected' : '' }}>Lost
+                                            </option>
+                                        </select>
+                                        @error('status')
                                             <small class="text-danger">{{ $message }}</small>
                                         @enderror
                                     </div>
+
                                 </div>
 
                                 {{-- Referral Type --}}
                                 <div class="row mt-3">
-                                    <div class="col-md-12">
+                                    <div class="col-md-6">
+                                        <label>Full Fee</label>
+                                        <input type="text" name="full_fee" class="form-control"
+                                            value="{{ old('full_fee', $lead->full_fee) }}">
+                                        @error('full_fee')
+                                            <small class="text-danger">{{ $message }}</small>
+                                        @enderror
+                                    </div>
+
+                                    <div class="col-md-6">
                                         <label for="referral_type">Referral Type</label>
                                         <select name="referral_type" id="referral_type" class="form-control">
                                             <option value="">Select Type</option>
