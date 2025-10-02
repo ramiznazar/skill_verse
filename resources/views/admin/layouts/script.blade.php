@@ -48,6 +48,7 @@
 {{-- // Notification Bell Icon  --}}
 <meta name="csrf-token" content="{{ csrf_token() }}">
 
+<!-- Script -->
 <script>
     // Format date as Today / Yesterday / d M Y + time
     function formatDate(dateString) {
@@ -87,11 +88,20 @@
                 // Show dot only if unread notifications exist
                 dot.style.display = (data.length > 0) ? "inline-block" : "none";
 
-                let html = '<li class="header">You have ' + data.length + ' new Notifications</li>';
+                let html = '';
 
                 if (data.length === 0) {
-                    html += `<li class="text-center p-2">No new notifications</li>`;
+                    // Clean empty state
+                    html += `
+                        <li class="header">Notifications</li>
+                        <li class="text-center p-3 text-muted" style="font-style:italic;">
+                            <i class="fa fa-bell-slash" style="font-size:16px; margin-right:5px;"></i>
+                            No new notifications
+                        </li>
+                    `;
                 } else {
+                    html += '<li class="header">You have ' + data.length + ' new Notifications</li>';
+
                     data.forEach(n => {
                         html += `
                             <li id="notif-${n.id}" 
@@ -169,4 +179,5 @@
 </script>
 
 </body>
+
 </html>
