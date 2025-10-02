@@ -56,6 +56,57 @@
                             </ul>
                         </div>
                         <div class="body">
+                            
+                            <form method="GET" action="<?php echo e(route('batch.index')); ?>" id="filterForm" class="mb-3">
+                                <div class="input-group mb-2">
+                                    <input type="text" name="search" value="<?php echo e(request('search')); ?>"
+                                        class="form-control" placeholder="Search batch/teacher/course..."
+                                        autocomplete="off">
+                                </div>
+
+                                <div class="row" style="margin-top: 15px">
+                                    
+                                    <div class="col-md-4 mb-2">
+                                        <select name="course_id" class="form-control">
+                                            <option value="">Filter by Course</option>
+                                            <?php $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($course->id); ?>"
+                                                    <?php echo e((string) request('course_id') === (string) $course->id ? 'selected' : ''); ?>>
+                                                    <?php echo e($course->title); ?>
+
+                                                </option>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        </select>
+                                    </div>
+
+                                    
+                                    <div class="col-md-4 mb-2">
+                                        <select name="status" class="form-control">
+                                            <option value="">All Status</option>
+                                            <option value="active" <?php echo e(request('status') === 'active' ? 'selected' : ''); ?>>
+                                                Active</option>
+                                            <option value="completed"
+                                                <?php echo e(request('status') === 'completed' ? 'selected' : ''); ?>>Completed
+                                            </option>
+                                            <option value="cancelled"
+                                                <?php echo e(request('status') === 'cancelled' ? 'selected' : ''); ?>>Cancelled
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    
+                                    <div class="col-md-4 mb-2">
+                                        <select name="shift" class="form-control">
+                                            <option value="">All Shifts</option>
+                                            <option value="morning" <?php echo e(request('shift') === 'morning' ? 'selected' : ''); ?>>
+                                                Morning</option>
+                                            <option value="evening" <?php echo e(request('shift') === 'evening' ? 'selected' : ''); ?>>
+                                                Evening</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+
                             <div class="table-responsive">
                                 <table class="table m-b-0">
                                     <thead>
@@ -78,10 +129,13 @@
                                         <?php $__currentLoopData = $batches; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $batch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                             <tr>
                                                 <td><?php echo e($loop->iteration); ?></td>
-                                                <td> <span class="text-primary"><?php echo e($batch->course->title ?? 'N/A'); ?></span> </td>
+                                                <td> <span class="text-primary"><?php echo e($batch->course->title ?? 'N/A'); ?></span>
+                                                </td>
                                                 <td><?php echo e($batch->title ?? '-'); ?></td>
                                                 <td><?php echo e($batch->teacher->name ?? '-'); ?></td>
-                                                <td><span class="badge badge-info text-uppercase"><?php echo e($batch->shift); ?></span> </td>
+                                                <td><span
+                                                        class="badge badge-info text-uppercase"><?php echo e($batch->shift); ?></span>
+                                                </td>
                                                 <td><?php echo e($batch->timing); ?></td>
                                                 <td><?php echo e(\Carbon\Carbon::parse($batch->start_date)->format('d M, Y')); ?></td>
                                                 <td>
@@ -147,6 +201,23 @@
     <script>
         $('.sparkbar').sparkline('html', {
             type: 'bar'
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('filterForm');
+            const search = form.querySelector('input[name="search"]');
+            const selects = form.querySelectorAll('select');
+
+            // auto-submit on select change
+            selects.forEach(sel => sel.addEventListener('change', () => form.submit()));
+
+            // debounce search typing → submit after 500ms
+            let t;
+            search && search.addEventListener('input', () => {
+                clearTimeout(t);
+                t = setTimeout(() => form.submit(), 500);
+            });
         });
     </script>
 <?php $__env->stopSection(); ?>

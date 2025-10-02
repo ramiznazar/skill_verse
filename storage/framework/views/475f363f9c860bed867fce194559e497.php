@@ -180,5 +180,4 @@
 
 </body>
 
-</html>
-<?php /**PATH E:\projects\codezy\zain-changes\codezy\resources\views/admin/layouts/script.blade.php ENDPATH**/ ?>
+</html><?php /**PATH E:\projects\codezy\zain-changes\codezy\resources\views/admin/layouts/script.blade.php ENDPATH**/ ?>

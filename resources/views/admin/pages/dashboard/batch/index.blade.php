@@ -53,6 +53,56 @@
                             </ul>
                         </div>
                         <div class="body">
+                            {{-- Filter --}}
+                            <form method="GET" action="{{ route('batch.index') }}" id="filterForm" class="mb-3">
+                                <div class="input-group mb-2">
+                                    <input type="text" name="search" value="{{ request('search') }}"
+                                        class="form-control" placeholder="Search batch/teacher/course..."
+                                        autocomplete="off">
+                                </div>
+
+                                <div class="row" style="margin-top: 15px">
+                                    {{-- Course Filter --}}
+                                    <div class="col-md-4 mb-2">
+                                        <select name="course_id" class="form-control">
+                                            <option value="">Filter by Course</option>
+                                            @foreach ($courses as $course)
+                                                <option value="{{ $course->id }}"
+                                                    {{ (string) request('course_id') === (string) $course->id ? 'selected' : '' }}>
+                                                    {{ $course->title }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    {{-- Status Filter --}}
+                                    <div class="col-md-4 mb-2">
+                                        <select name="status" class="form-control">
+                                            <option value="">All Status</option>
+                                            <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>
+                                                Active</option>
+                                            <option value="completed"
+                                                {{ request('status') === 'completed' ? 'selected' : '' }}>Completed
+                                            </option>
+                                            <option value="cancelled"
+                                                {{ request('status') === 'cancelled' ? 'selected' : '' }}>Cancelled
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    {{-- Shift Filter --}}
+                                    <div class="col-md-4 mb-2">
+                                        <select name="shift" class="form-control">
+                                            <option value="">All Shifts</option>
+                                            <option value="morning" {{ request('shift') === 'morning' ? 'selected' : '' }}>
+                                                Morning</option>
+                                            <option value="evening" {{ request('shift') === 'evening' ? 'selected' : '' }}>
+                                                Evening</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </form>
+
                             <div class="table-responsive">
                                 <table class="table m-b-0">
                                     <thead>
@@ -75,10 +125,13 @@
                                         @foreach ($batches as $batch)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
-                                                <td> <span class="text-primary">{{ $batch->course->title ?? 'N/A' }}</span> </td>
+                                                <td> <span class="text-primary">{{ $batch->course->title ?? 'N/A' }}</span>
+                                                </td>
                                                 <td>{{ $batch->title ?? '-' }}</td>
                                                 <td>{{ $batch->teacher->name ?? '-' }}</td>
-                                                <td><span class="badge badge-info text-uppercase">{{ $batch->shift }}</span> </td>
+                                                <td><span
+                                                        class="badge badge-info text-uppercase">{{ $batch->shift }}</span>
+                                                </td>
                                                 <td>{{ $batch->timing }}</td>
                                                 <td>{{ \Carbon\Carbon::parse($batch->start_date)->format('d M, Y') }}</td>
                                                 <td>
@@ -143,6 +196,23 @@
     <script>
         $('.sparkbar').sparkline('html', {
             type: 'bar'
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('filterForm');
+            const search = form.querySelector('input[name="search"]');
+            const selects = form.querySelectorAll('select');
+
+            // auto-submit on select change
+            selects.forEach(sel => sel.addEventListener('change', () => form.submit()));
+
+            // debounce search typing → submit after 500ms
+            let t;
+            search && search.addEventListener('input', () => {
+                clearTimeout(t);
+                t = setTimeout(() => form.submit(), 500);
+            });
         });
     </script>
 @endsection

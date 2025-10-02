@@ -12,10 +12,44 @@ use Illuminate\Support\Facades\Log;
 
 class BatchController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $batches = Batch::with(['course', 'teacher'])->get();
-        return view('admin.pages.dashboard.batch.index', compact('batches'));
+        $query = Batch::with(['course', 'teacher'])->orderBy('start_date', 'desc');
+
+        $search = trim((string) $request->get('search'));
+        $courseId = $request->get('course_id');
+        $status = $request->get('status');
+        $shift = $request->get('shift');
+
+        // 🔎 Search filter
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhereHas('course', fn($c) => $c->where('title', 'like', "%{$search}%"))
+                    ->orWhereHas('teacher', fn($t) => $t->where('name', 'like', "%{$search}%"));
+            });
+        }
+
+        // 🎯 Course filter
+        if (!empty($courseId)) {
+            $query->where('course_id', $courseId);
+        }
+
+        // 🎯 Status filter
+        if (!empty($status)) {
+            $query->where('status', $status);
+        }
+
+        // 🎯 Shift filter
+        if (!empty($shift)) {
+            $query->where('shift', $shift);
+        }
+
+        $batches = $query->paginate(15)->withQueryString();
+
+        $courses = Course::select('id', 'title')->orderBy('title')->get();
+
+        return view('admin.pages.dashboard.batch.index', compact('batches', 'courses'));
     }
 
     public function create()
@@ -28,16 +62,16 @@ class BatchController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'course_id'    => 'required|exists:courses,id',
-            'teacher_id'   => 'required|exists:teachers,id',
-            'title'        => 'nullable|string|max:255',
-            'timing'       => 'nullable|string|max:255',
-            'shift'        => 'required|in:morning,evening,night',
-            'start_date'   => 'required|date',
-            'end_date'     => 'nullable|date|after_or_equal:start_date',
-            'status'       => 'required',
-            'capacity'     => 'nullable|integer|min:0',
-            'note'        => 'nullable|string',
+            'course_id' => 'required|exists:courses,id',
+            'teacher_id' => 'required|exists:teachers,id',
+            'title' => 'nullable|string|max:255',
+            'timing' => 'nullable|string|max:255',
+            'shift' => 'required|in:morning,evening,night',
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'status' => 'required',
+            'capacity' => 'nullable|integer|min:0',
+            'note' => 'nullable|string',
         ]);
 
         Batch::create($request->all());
@@ -56,16 +90,16 @@ class BatchController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'course_id'    => 'required|exists:courses,id',
-            'teacher_id'   => 'required|exists:teachers,id',
-            'title'        => 'nullable|string|max:255',
-            'timing'       => 'nullable|string|max:255',
-            'shift'        => 'required|in:morning,evening,night',
-            'start_date'   => 'required|date',
-            'end_date'     => 'nullable|date|after_or_equal:start_date',
-            'status'       => 'required',
-            'capacity'     => 'nullable|integer|min:0',
-            'note'        => 'nullable|string',
+            'course_id' => 'required|exists:courses,id',
+            'teacher_id' => 'required|exists:teachers,id',
+            'title' => 'nullable|string|max:255',
+            'timing' => 'nullable|string|max:255',
+            'shift' => 'required|in:morning,evening,night',
+            'start_date' => 'required|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date',
+            'status' => 'required',
+            'capacity' => 'nullable|integer|min:0',
+            'note' => 'nullable|string',
         ]);
 
         $batch = Batch::findOrFail($id);
