@@ -37,7 +37,7 @@
                                     </div>
 
                                     {{-- ref type --}}
-                                    <div class="col-md-6">
+                                    {{-- <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Type</label>
                                             <input type="text" name="ref_type" class="form-control"
@@ -46,7 +46,26 @@
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>
+                                    </div> --}}
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Type</label>
+                                            <select name="ref_type" class="form-control" required>
+                                                <option value="">-- Select Category --</option>
+                                                <option value="furniture">Furniture</option>
+                                                <option value="stationery">Stationery</option>
+                                                <option value="utility">Utility</option>
+                                                <option value="maintenance">Maintenance</option>
+                                                <option value="salary">Salary</option>
+                                                <option value="commission">Commission</option>
+                                                <option value="Other">Other</option>
+                                            </select>
+                                            @error('ref_type')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
                                     </div>
+
                                 </div>
 
                                 <div class="row">

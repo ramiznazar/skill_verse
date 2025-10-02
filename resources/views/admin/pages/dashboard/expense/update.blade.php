@@ -37,7 +37,7 @@
                                         </div>
                                     </div>
                                     {{-- Type --}}
-                                    <div class="col-md-6">
+                                    {{-- <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Type</label>
                                             <input type="text" name="ref_type" class="form-control"
@@ -46,7 +46,40 @@
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>
+                                    </div> --}}
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Type</label>
+                                            <select name="ref_type" class="form-control" required>
+                                                <option value="">-- Select Category --</option>
+                                                <option value="furniture"
+                                                    {{ old('ref_type', $expense->ref_type ?? '') == 'furniture' ? 'selected' : '' }}>
+                                                    Furniture</option>
+                                                <option value="stationery"
+                                                    {{ old('ref_type', $expense->ref_type ?? '') == 'stationery' ? 'selected' : '' }}>
+                                                    Stationery</option>
+                                                <option value="utility"
+                                                    {{ old('ref_type', $expense->ref_type ?? '') == 'utility' ? 'selected' : '' }}>
+                                                    Utility</option>
+                                                <option value="maintenance"
+                                                    {{ old('ref_type', $expense->ref_type ?? '') == 'maintenance' ? 'selected' : '' }}>
+                                                    Maintenance</option>
+                                                <option value="salary"
+                                                    {{ old('ref_type', $expense->ref_type ?? '') == 'salary' ? 'selected' : '' }}>
+                                                    Salary</option>
+                                                <option value="commission"
+                                                    {{ old('ref_type', $expense->ref_type ?? '') == 'commission' ? 'selected' : '' }}>
+                                                    Commission</option>
+                                                <option value="other"
+                                                    {{ old('ref_type', $expense->ref_type ?? '') == 'other' ? 'selected' : '' }}>
+                                                    Other</option>
+                                            </select>
+                                            @error('ref_type')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
                                     </div>
+
                                 </div>
 
                                 <div class="row">

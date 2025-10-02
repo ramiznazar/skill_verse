@@ -44,11 +44,34 @@ unset($__errorArgs, $__bag); ?>
                                         </div>
                                     </div>
                                     
+                                    
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Type</label>
-                                            <input type="text" name="ref_type" class="form-control"
-                                                value="<?php echo e(old('ref_type', $expense->ref_type)); ?>">
+                                            <select name="ref_type" class="form-control" required>
+                                                <option value="">-- Select Category --</option>
+                                                <option value="furniture"
+                                                    <?php echo e(old('ref_type', $expense->ref_type ?? '') == 'furniture' ? 'selected' : ''); ?>>
+                                                    Furniture</option>
+                                                <option value="stationery"
+                                                    <?php echo e(old('ref_type', $expense->ref_type ?? '') == 'stationery' ? 'selected' : ''); ?>>
+                                                    Stationery</option>
+                                                <option value="utility"
+                                                    <?php echo e(old('ref_type', $expense->ref_type ?? '') == 'utility' ? 'selected' : ''); ?>>
+                                                    Utility</option>
+                                                <option value="maintenance"
+                                                    <?php echo e(old('ref_type', $expense->ref_type ?? '') == 'maintenance' ? 'selected' : ''); ?>>
+                                                    Maintenance</option>
+                                                <option value="salary"
+                                                    <?php echo e(old('ref_type', $expense->ref_type ?? '') == 'salary' ? 'selected' : ''); ?>>
+                                                    Salary</option>
+                                                <option value="commission"
+                                                    <?php echo e(old('ref_type', $expense->ref_type ?? '') == 'commission' ? 'selected' : ''); ?>>
+                                                    Commission</option>
+                                                <option value="other"
+                                                    <?php echo e(old('ref_type', $expense->ref_type ?? '') == 'other' ? 'selected' : ''); ?>>
+                                                    Other</option>
+                                            </select>
                                             <?php $__errorArgs = ['ref_type'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -61,6 +84,7 @@ endif;
 unset($__errorArgs, $__bag); ?>
                                         </div>
                                     </div>
+
                                 </div>
 
                                 <div class="row">

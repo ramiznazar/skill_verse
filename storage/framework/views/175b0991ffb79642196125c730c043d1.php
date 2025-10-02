@@ -44,11 +44,20 @@ unset($__errorArgs, $__bag); ?>
                                     </div>
 
                                     
+                                    
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Type</label>
-                                            <input type="text" name="ref_type" class="form-control"
-                                                value="<?php echo e(old('ref_type')); ?>">
+                                            <select name="ref_type" class="form-control" required>
+                                                <option value="">-- Select Category --</option>
+                                                <option value="furniture">Furniture</option>
+                                                <option value="stationery">Stationery</option>
+                                                <option value="utility">Utility</option>
+                                                <option value="maintenance">Maintenance</option>
+                                                <option value="salary">Salary</option>
+                                                <option value="commission">Commission</option>
+                                                <option value="Other">Other</option>
+                                            </select>
                                             <?php $__errorArgs = ['ref_type'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -61,6 +70,7 @@ endif;
 unset($__errorArgs, $__bag); ?>
                                         </div>
                                     </div>
+
                                 </div>
 
                                 <div class="row">
