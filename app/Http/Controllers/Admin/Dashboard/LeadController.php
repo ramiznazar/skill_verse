@@ -51,7 +51,6 @@ class LeadController extends Controller
         return view('admin.pages.dashboard.lead.index', compact('leads', 'courses'));
     }
 
-
     public function create()
     {
         $courses = Course::all();

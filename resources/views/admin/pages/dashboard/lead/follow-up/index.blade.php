@@ -36,36 +36,41 @@
                         <div class="body">
                             <div class="table-responsive">
                                 <div class="timeline">
-    @forelse ($followUps as $fu)
-        <div class="timeline-item mb-4 p-3 border rounded shadow-sm">
-            <div class="d-flex justify-content-between">
-                <strong>{{ optional($fu->followed_at)->format('d M Y, h:i A') ?? '-' }}</strong>
-                <span class="badge badge-{{ $fu->status === 'interested' ? 'info' : ($fu->status === 'not_interested' ? 'dark' : ($fu->status === 'converted' ? 'success' : ($fu->status === 'lost' ? 'danger' : 'secondary'))) }}">
-                    {{ ucwords(str_replace('_', ' ', $fu->status)) }}
-                </span>
-            </div>
-            <div class="mt-2">
-                <span class="badge badge-primary">{{ ucfirst(str_replace('_', ' ', $fu->contact_method)) }}</span>
-                <p class="mt-2 mb-1">{{ $fu->note ?? '-' }}</p>
-                <small class="text-muted">By: {{ $fu->user->name ?? '-' }}</small>
-            </div>
-            <div class="mt-2 d-flex">
-                <a href="{{ route('lead-followups.edit', [$lead->id, $fu->id]) }}" class="btn btn-sm btn-outline-warning mr-2">Edit</a>
-                <form action="{{ route('lead-followups.destroy', [$lead->id, $fu->id]) }}" method="POST" onsubmit="return confirm('Delete this follow-up?')">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
-                </form>
-            </div>
-        </div>
-    @empty
-        <p class="text-muted">No follow-ups yet.</p>
-    @endforelse
-</div>
+                                    @forelse ($followUps as $fu)
+                                        <div class="timeline-item mb-4 p-3 border rounded shadow-sm">
+                                            <div class="d-flex justify-content-between">
+                                                <strong>{{ optional($fu->followed_at)->format('d M Y, h:i A') ?? '-' }}</strong>
+                                                <span
+                                                    class="badge badge-{{ $fu->status === 'interested' ? 'info' : ($fu->status === 'not_interested' ? 'dark' : ($fu->status === 'converted' ? 'success' : ($fu->status === 'lost' ? 'danger' : 'secondary'))) }}">
+                                                    {{ ucwords(str_replace('_', ' ', $fu->status)) }}
+                                                </span>
+                                            </div>
+                                            <div class="mt-2">
+                                                <span
+                                                    class="badge badge-primary">{{ ucfirst(str_replace('_', ' ', $fu->contact_method)) }}</span>
+                                                <p class="mt-2 mb-1">{{ $fu->note ?? '-' }}</p>
+                                                <small class="text-muted">By: {{ $fu->user->name ?? '-' }}</small>
+                                            </div>
+                                            <div class="mt-2 d-flex">
+                                                <a href="{{ route('lead-followups.edit', [$lead->id, $fu->id]) }}"
+                                                    class="btn btn-sm btn-outline-warning mr-2">Edit</a>
+                                                <form action="{{ route('lead-followups.destroy', [$lead->id, $fu->id]) }}"
+                                                    method="POST" onsubmit="return confirm('Delete this follow-up?')">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit"
+                                                        class="btn btn-sm btn-outline-danger">Delete</button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    @empty
+                                        <p class="text-muted">No follow-ups yet.</p>
+                                    @endforelse
+                                </div>
 
-{{-- Pagination --}}
-<div class="mt-3">
-    {{ $followUps->links('pagination::bootstrap-4') }}
-</div>
+                                {{-- Pagination --}}
+                                <div class="mt-3">
+                                    {{ $followUps->links('pagination::bootstrap-4') }}
+                                </div>
 
                             </div>
 

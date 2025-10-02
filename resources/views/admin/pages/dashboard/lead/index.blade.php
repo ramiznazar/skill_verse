@@ -179,6 +179,7 @@
 
                                                 <td class="text-nowrap">
                                                     <div class="d-flex align-items-center" style="column-gap: 5px;">
+
                                                         <a href="{{ route('lead-followups.index', $lead->id) }}"
                                                             class="btn btn-sm btn-icon btn-pure btn-info"
                                                             title="Follow-ups">
