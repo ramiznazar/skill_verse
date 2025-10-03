@@ -36,6 +36,7 @@ use App\Http\Controllers\Admin\Dashboard\{
     TeacherSalaryController,
     TeacherBalanceController,
     ProfitCalculationController,
+    StudentAttendanceController,
     ReferralCommissionController
 };
 use App\Http\Controllers\Admin\Website\{
@@ -108,7 +109,17 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
 
+    // Attendance
+    Route::get('/student-attendance', [StudentAttendanceController::class, 'index'])->name('student.attendance.index');
 
+    // Quick actions (single student)
+    Route::post('/student-attendance/mark-present', [StudentAttendanceController::class, 'markPresent'])->name('student.attendance.markPresent');
+    Route::post('/student-attendance/mark-absent', [StudentAttendanceController::class, 'markAbsent'])->name('student.attendance.markAbsent');
+    Route::post('/student-attendance/mark-leave', [StudentAttendanceController::class, 'markLeave'])->name('student.attendance.markLeave');
+    Route::post('/student-attendance/mark-late', [StudentAttendanceController::class, 'markLate'])->name('student.attendance.markLate');
+    // Bulk action for all filtered students
+    Route::post('/student-attendance/bulk-present', [StudentAttendanceController::class, 'bulkMarkPresent'])->name('student.attendance.bulkPresent');
+    
     // Admin Resources
     Route::prefix('dashboard')->name('admin.')->group(function () {
         Route::resource('partners', PartnerController::class);
