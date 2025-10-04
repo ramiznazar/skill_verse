@@ -272,6 +272,17 @@
                             </ul>
                         </li>
 
+                        <li>
+                            <a href="#attendanceMenu" class="has-arrow">
+                                <i class="fas fa-user-check"></i>
+                                <span>Attendance</span>
+                            </a>
+                            <ul>
+                                <li><a href="<?php echo e(route('student.attendance.index')); ?>">Student Attendance</a></li>
+                                <li><a href="">Teacher Attendance</a></li>
+                            </ul>
+                        </li>
+
                         <li><a href="<?php echo e(route('fee-submission.index')); ?>"><i class="fas fa-money-check-alt"></i><span>Fee
                                     Submission</span></a></li>
 

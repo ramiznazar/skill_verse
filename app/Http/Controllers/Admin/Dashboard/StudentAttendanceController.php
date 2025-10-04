@@ -45,7 +45,11 @@ class StudentAttendanceController extends Controller
                         ->orWhere('guardian_name', 'like', "%{$search}%");
                 });
             })
+            ->when($date, function ($q) use ($date) {
+                $q->whereDate('joining_date', '<=', $date);
+            })
             ->orderBy('name');
+
 
         // Get admissions
         $admissions = $admissionsQuery->get(['id', 'name', 'course_id', 'batch_id']);
