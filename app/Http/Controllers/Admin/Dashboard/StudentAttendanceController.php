@@ -16,12 +16,21 @@ class StudentAttendanceController extends Controller
      */
     public function index(Request $request)
     {
-        // Filters
-        $courses      = Course::select('id','title')->orderBy('title')->get();
+        // Filters: only courses/batches that exist in admissions
+        $courses = Course::whereHas('admissions')
+            ->select('id', 'title')
+            ->orderBy('title')
+            ->get();
+
+        $batches = \App\Models\Batch::whereHas('admissions')
+            ->select('id', 'title', 'shift')
+            ->orderBy('title')
+            ->get();
+
         $selectedCourseId = $request->input('course_id');
-        $selectedShift    = $request->input('shift');     // "morning" / "evening"
-        $date             = $request->input('date', now()->toDateString());
-        $search           = trim((string) $request->input('search', ''));
+        $selectedShift = $request->input('shift');     // "morning" / "evening"
+        $date = $request->input('date', now()->toDateString());
+        $search = trim((string) $request->input('search', ''));
 
         // Pull admissions (students) by Course + Shift (+ optional search)
         $admissionsQuery = Admission::with(['course:id,title', 'batch:id,title,shift'])
@@ -32,16 +41,16 @@ class StudentAttendanceController extends Controller
             ->when($search !== '', function ($q) use ($search) {
                 $q->where(function ($qq) use ($search) {
                     $qq->where('name', 'like', "%{$search}%")
-                       ->orWhere('phone', 'like', "%{$search}%")
-                       ->orWhere('guardian_name', 'like', "%{$search}%");
+                        ->orWhere('phone', 'like', "%{$search}%")
+                        ->orWhere('guardian_name', 'like', "%{$search}%");
                 });
             })
             ->orderBy('name');
 
-        // Get all admissions matching filter (we keep it simple + fast for action table)
-        $admissions = $admissionsQuery->get(['id','name','course_id','batch_id']);
+        // Get admissions
+        $admissions = $admissionsQuery->get(['id', 'name', 'course_id', 'batch_id']);
 
-        // Attendance keyed by admission for the selected date
+        // Attendance map
         $attendanceMap = collect();
         if ($admissions->isNotEmpty()) {
             $attendanceMap = StudentAttendance::whereIn('admission_id', $admissions->pluck('id'))
@@ -50,40 +59,53 @@ class StudentAttendanceController extends Controller
                 ->keyBy('admission_id');
         }
 
-        // Summary cards
-        $totalStudents  = $admissions->count();
-        $totalPresents  = $attendanceMap->whereIn('status', ['present','late'])->count(); // late counts as present
-        $totalLeaves    = $attendanceMap->where('status', 'leave')->count();
-        $totalAbsents   = max(0, $totalStudents - $totalPresents - $totalLeaves);
+        // Summary
+        $totalStudents = $admissions->count();
+        $totalPresents = $attendanceMap->whereIn('status', ['present', 'late'])->count();
+        $totalLeaves = $attendanceMap->where('status', 'leave')->count();
+        $totalAbsents = max(0, $totalStudents - $totalPresents - $totalLeaves);
 
         return view('admin.pages.dashboard.attendance.student.index', [
-            'courses'         => $courses,
-            'admissions'      => $admissions,
-            'attendances'     => $attendanceMap, // keyed by admission_id
-            'selectedCourseId'=> $selectedCourseId,
-            'selectedShift'   => $selectedShift,
-            'date'            => $date,
-            'search'          => $search,
-            'totalStudents'   => $totalStudents,
-            'totalPresents'   => $totalPresents,
-            'totalLeaves'     => $totalLeaves,
-            'totalAbsents'    => $totalAbsents,
+            'courses' => $courses,
+            'batches' => $batches,
+            'admissions' => $admissions,
+            'attendances' => $attendanceMap,
+            'selectedCourseId' => $selectedCourseId,
+            'selectedShift' => $selectedShift,
+            'date' => $date,
+            'search' => $search,
+            'totalStudents' => $totalStudents,
+            'totalPresents' => $totalPresents,
+            'totalLeaves' => $totalLeaves,
+            'totalAbsents' => $totalAbsents,
         ]);
     }
 
     /**
      * 🔘 Helpers to set status for a single student
      */
-    public function markPresent(Request $request) { return $this->setStatus($request, 'present'); }
-    public function markAbsent(Request $request)  { return $this->setStatus($request, 'absent');  }
-    public function markLeave(Request $request)   { return $this->setStatus($request, 'leave');   }
-    public function markLate(Request $request)    { return $this->setStatus($request, 'late');    }
+    public function markPresent(Request $request)
+    {
+        return $this->setStatus($request, 'present');
+    }
+    public function markAbsent(Request $request)
+    {
+        return $this->setStatus($request, 'absent');
+    }
+    public function markLeave(Request $request)
+    {
+        return $this->setStatus($request, 'leave');
+    }
+    public function markLate(Request $request)
+    {
+        return $this->setStatus($request, 'late');
+    }
 
     protected function setStatus(Request $request, string $status)
     {
         $request->validate([
             'admission_id' => 'required|exists:admissions,id',
-            'date'         => 'required|date',
+            'date' => 'required|date',
         ]);
 
         $admission = Admission::with('batch:id')->findOrFail($request->admission_id);
@@ -92,10 +114,10 @@ class StudentAttendanceController extends Controller
         StudentAttendance::updateOrCreate(
             ['admission_id' => $admission->id, 'date' => $request->date],
             [
-                'batch_id'   => $admission->batch_id,
+                'batch_id' => $admission->batch_id,
                 'teacher_id' => $teacherId,
-                'status'     => $status,
-                'remarks'    => $request->input('remarks') ?: null,
+                'status' => $status,
+                'remarks' => $request->input('remarks') ?: null,
             ]
         );
 
@@ -109,8 +131,8 @@ class StudentAttendanceController extends Controller
     {
         $request->validate([
             'course_id' => 'required|exists:courses,id',
-            'shift'     => 'required|in:morning,evening',
-            'date'      => 'required|date',
+            'shift' => 'required|in:morning,evening',
+            'date' => 'required|date',
         ]);
 
         $teacherId = Auth::id();
@@ -118,7 +140,7 @@ class StudentAttendanceController extends Controller
         // Pull admissions matching filters
         $admissions = Admission::where('course_id', $request->course_id)
             ->whereHas('batch', fn($b) => $b->where('shift', $request->shift))
-            ->get(['id','batch_id']);
+            ->get(['id', 'batch_id']);
 
         if ($admissions->isEmpty()) {
             return back()->with('success', 'No students found for this filter.');
@@ -127,7 +149,7 @@ class StudentAttendanceController extends Controller
         // Existing attendance map for that date
         $existing = StudentAttendance::whereIn('admission_id', $admissions->pluck('id'))
             ->whereDate('date', $request->date)
-            ->pluck('id','admission_id');
+            ->pluck('id', 'admission_id');
 
         // Only create for students WITHOUT existing record
         $toCreate = $admissions->filter(fn($a) => !isset($existing[$a->id]));
@@ -135,14 +157,42 @@ class StudentAttendanceController extends Controller
         foreach ($toCreate as $adm) {
             StudentAttendance::create([
                 'admission_id' => $adm->id,
-                'batch_id'     => $adm->batch_id,
-                'teacher_id'   => $teacherId,
-                'date'         => $request->date,
-                'status'       => 'present',
-                'remarks'      => null,
+                'batch_id' => $adm->batch_id,
+                'teacher_id' => $teacherId,
+                'date' => $request->date,
+                'status' => 'present',
+                'remarks' => null,
             ]);
         }
 
         return back()->with('success', 'All unmarked students set to Present for selected filter.');
     }
+
+    public function history(Request $request, $admissionId)
+    {
+        $month = (int) $request->get('month', now()->month);
+        $year = (int) $request->get('year', now()->year);
+
+        $student = Admission::with('course', 'batch')->findOrFail($admissionId);
+
+        // get all attendance for that month
+        $attendances = StudentAttendance::where('admission_id', $admissionId)
+            ->whereMonth('date', $month)
+            ->whereYear('date', $year)
+            ->get()
+            ->keyBy(function ($a) {
+                return \Carbon\Carbon::parse($a->date)->day; // key = day of month
+            });
+
+        $daysInMonth = \Carbon\Carbon::createFromDate($year, $month, 1)->daysInMonth;
+
+        return view('admin.pages.dashboard.attendance.student.history', compact(
+            'student',
+            'attendances',
+            'month',
+            'year',
+            'daysInMonth'
+        ));
+    }
+
 }

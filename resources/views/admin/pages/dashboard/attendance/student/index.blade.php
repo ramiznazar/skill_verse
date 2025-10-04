@@ -207,6 +207,11 @@
                                                         <button type="submit"
                                                             class="btn btn-sm btn-warning">Late</button>
                                                     </form>
+                                                    {{-- 🔗 History --}}
+                                                    <a href="{{ route('student.attendance.history', $student->id) }}"
+                                                        class="btn btn-sm btn-info">
+                                                        History
+                                                    </a>
                                                 </td>
                                             </tr>
                                         @empty

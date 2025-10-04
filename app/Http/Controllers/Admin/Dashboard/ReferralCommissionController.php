@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Admin\Dashboard;
 
-use App\Http\Controllers\Controller;
-
 use App\Models\Expense;
+
+use App\Models\Admission;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Models\StudentAttendance;
 use App\Models\ReferralCommission;
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 use App\Models\ReferralCommissionHistory;
 
 class ReferralCommissionController extends Controller
@@ -15,7 +17,7 @@ class ReferralCommissionController extends Controller
     public function index()
     {
         // A) History (paid) aggregation (nullable-safe)
-        $paidAgg = \App\Models\ReferralCommissionHistory::query()
+        $paidAgg = ReferralCommissionHistory::query()
             ->selectRaw("
             referral_name,
             COALESCE(referral_contact, '') AS contact_key,
@@ -25,7 +27,7 @@ class ReferralCommissionController extends Controller
             ->groupBy('referral_name', DB::raw("COALESCE(referral_contact, '')"));
 
         // B) Live commissions (unpaid) aggregation (nullable-safe)
-        $unpaidAgg = \App\Models\ReferralCommission::query()
+        $unpaidAgg = ReferralCommission::query()
             ->selectRaw("
             referral_name,
             COALESCE(referral_contact, '') AS contact_key,
@@ -35,7 +37,7 @@ class ReferralCommissionController extends Controller
             ->groupBy('referral_name', DB::raw("COALESCE(referral_contact, '')"));
 
         // C) Admissions math, nullable-safe key + keep original contact for display
-        $studAgg = \App\Models\Admission::query()
+        $studAgg = Admission::query()
             ->selectRaw("
             referral_source                         AS referral_name,
             COALESCE(referral_source_contact, '')   AS contact_key,
@@ -54,13 +56,13 @@ class ReferralCommissionController extends Controller
         // Final join on (name, contact_key)
         $referrers = DB::query()
             ->fromSub($studAgg, 's')
-            ->leftJoinSub($paidAgg,  'h', function ($j) {
+            ->leftJoinSub($paidAgg, 'h', function ($j) {
                 $j->on('s.referral_name', '=', 'h.referral_name')
-                    ->on('s.contact_key',   '=', 'h.contact_key');
+                    ->on('s.contact_key', '=', 'h.contact_key');
             })
             ->leftJoinSub($unpaidAgg, 'u', function ($j) {
                 $j->on('s.referral_name', '=', 'u.referral_name')
-                    ->on('s.contact_key',   '=', 'u.contact_key');
+                    ->on('s.contact_key', '=', 'u.contact_key');
             })
             ->selectRaw("
             s.referral_name,
@@ -83,7 +85,7 @@ class ReferralCommissionController extends Controller
     public function paid(Request $request)
     {
         $data = $request->validate([
-            'referral_name'    => ['required', 'string'],
+            'referral_name' => ['required', 'string'],
             'referral_contact' => ['nullable', 'string'],
         ]);
 
@@ -104,20 +106,20 @@ class ReferralCommissionController extends Controller
 
         foreach ($commissions as $commission) {
             DB::transaction(function () use ($commission) {
-                $amount       = (int) $commission->commission_amount;
+                $amount = (int) $commission->commission_amount;
                 $referrerName = $commission->referral_name ?? 'Unknown';
 
                 // 1) History log
                 ReferralCommissionHistory::create([
                     'referral_commission_id' => $commission->id,
-                    'admission_id'           => $commission->admission_id,
-                    'fee_submission_id'      => $commission->fee_submission_id,
-                    'referral_name'          => $commission->referral_name,
-                    'referral_contact'       => $commission->referral_contact,
-                    'amount'                 => $amount,
-                    'status'                 => 'paid',
-                    'performed_by'           => auth()->id(),
-                    'performed_at'           => now(),
+                    'admission_id' => $commission->admission_id,
+                    'fee_submission_id' => $commission->fee_submission_id,
+                    'referral_name' => $commission->referral_name,
+                    'referral_contact' => $commission->referral_contact,
+                    'amount' => $amount,
+                    'status' => 'paid',
+                    'performed_by' => auth()->id(),
+                    'performed_at' => now(),
                 ]);
 
                 // 2) Expense (deduped by ref_type/ref_id)
@@ -125,21 +127,21 @@ class ReferralCommissionController extends Controller
                     Expense::firstOrCreate(
                         [
                             'ref_type' => 'commission',
-                            'ref_id'   => $commission->id,
+                            'ref_id' => $commission->id,
                         ],
                         [
-                            'title'   => 'Referral Commission',
-                            'amount'  => (string) $amount,
-                            'date'    => now()->toDateString(),
+                            'title' => 'Referral Commission',
+                            'amount' => (string) $amount,
+                            'date' => now()->toDateString(),
                             'purpose' => "Referral Commission payout to {$referrerName}",
-                            'type'    => 'essential',
+                            'type' => 'essential',
                         ]
                     );
                 }
 
                 // 3) Close commission
                 $commission->update([
-                    'status'            => 'paid',
+                    'status' => 'paid',
                     'commission_amount' => 0,
                 ]);
             });
@@ -149,6 +151,7 @@ class ReferralCommissionController extends Controller
 
         return back()->with('paid', "{$processed} commission(s) marked as paid. History & expenses created.");
     }
+
 
     public function history($name, $contact = null)
     {

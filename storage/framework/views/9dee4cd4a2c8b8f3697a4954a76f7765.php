@@ -211,6 +211,11 @@
                                                         <button type="submit"
                                                             class="btn btn-sm btn-warning">Late</button>
                                                     </form>
+                                                    
+                                                    <a href="<?php echo e(route('student.attendance.history', $student->id)); ?>"
+                                                        class="btn btn-sm btn-info">
+                                                        History
+                                                    </a>
                                                 </td>
                                             </tr>
                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>

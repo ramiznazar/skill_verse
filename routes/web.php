@@ -111,7 +111,8 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
 
     // Attendance
     Route::get('/student-attendance', [StudentAttendanceController::class, 'index'])->name('student.attendance.index');
-
+    Route::get('/student-attendance/history/{admission}', [StudentAttendanceController::class, 'history'])
+        ->name('student.attendance.history');
     // Quick actions (single student)
     Route::post('/student-attendance/mark-present', [StudentAttendanceController::class, 'markPresent'])->name('student.attendance.markPresent');
     Route::post('/student-attendance/mark-absent', [StudentAttendanceController::class, 'markAbsent'])->name('student.attendance.markAbsent');
@@ -119,7 +120,7 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
     Route::post('/student-attendance/mark-late', [StudentAttendanceController::class, 'markLate'])->name('student.attendance.markLate');
     // Bulk action for all filtered students
     Route::post('/student-attendance/bulk-present', [StudentAttendanceController::class, 'bulkMarkPresent'])->name('student.attendance.bulkPresent');
-    
+
     // Admin Resources
     Route::prefix('dashboard')->name('admin.')->group(function () {
         Route::resource('partners', PartnerController::class);
