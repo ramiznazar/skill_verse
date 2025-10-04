@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Admin\Dashboard;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Models\Course;
 use App\Models\Teacher;
+use Illuminate\Http\Request;
 use App\Models\TeacherSalary;
+use App\Http\Controllers\Controller;
 
 class TeacherController extends Controller
 {
@@ -14,7 +15,7 @@ class TeacherController extends Controller
      */
     public function index()
     {
-        $teachers = Teacher::all();
+        $teachers = Teacher::with('course')->get();
         return view('admin.pages.dashboard.teacher.index', compact('teachers'));
     }
 
@@ -23,7 +24,8 @@ class TeacherController extends Controller
      */
     public function create()
     {
-        return view('admin.pages.dashboard.teacher.create');
+        $courses = Course::orderBy('title')->get(['id', 'title']);
+        return view('admin.pages.dashboard.teacher.create',compact('courses'));
     }
 
     /**
@@ -37,7 +39,7 @@ class TeacherController extends Controller
             'email'         => 'nullable|email|unique:teachers,email',
             'phone'         => 'required|string|max:20',
             'qualification' => 'nullable|string|max:255',
-            'skill'         => 'required|string|max:255',
+            'course_id'     => 'required|exists:courses,id',
             'experience'    => 'required|string|max:255',
 
             // NEW payout fields
@@ -80,7 +82,7 @@ class TeacherController extends Controller
             'email'         => $request->email,
             'phone'         => $request->phone,
             'qualification' => $request->qualification,
-            'skill'         => $request->skill,
+            'course_id'     => $request->course_id,
             'experience'    => $request->experience,
 
             // NEW fields
@@ -114,7 +116,8 @@ class TeacherController extends Controller
     public function edit(string $id)
     {
         $teacher = Teacher::findOrFail($id);
-        return view('admin.pages.dashboard.teacher.update', compact('teacher'));
+        $courses = Course::orderBy('title')->get(['id', 'title']);
+        return view('admin.pages.dashboard.teacher.update', compact('teacher','courses'));
     }
 
     /**
@@ -128,7 +131,7 @@ class TeacherController extends Controller
             'email'         => 'nullable|email|unique:teachers,email,' . $id,
             'phone'         => 'required|string|max:20',
             'qualification' => 'nullable|string|max:255',
-            'skill'         => 'required|string|max:255',
+            'course_id'     => 'required|exists:courses,id',
             'experience'    => 'required|string|max:255',
 
             // payout fields
@@ -176,7 +179,7 @@ class TeacherController extends Controller
         $teacher->email         = $request->email;
         $teacher->phone         = $request->phone;
         $teacher->qualification = $request->qualification;
-        $teacher->skill         = $request->skill;
+        $teacher->course_id     = $request->course_id;
         $teacher->experience    = $request->experience;
 
         // New payout fields

@@ -14,7 +14,7 @@ class Teacher extends Model
         'email',
         'phone',
         'qualification',
-        'skill',
+        'course_id',
         'experience',
         'pay_type',
         'percentage',
@@ -26,15 +26,21 @@ class Teacher extends Model
     ];
 
     protected $casts = [
-        'percentage'    => 'integer',
-        'fixed_salary'  => 'integer',
-        'joining_date'  => 'date',
+        'percentage' => 'integer',
+        'fixed_salary' => 'integer',
+        'joining_date' => 'date',
     ];
 
-    public function batch()
+    public function course()
     {
-        return $this->hasOne(Batch::class);
+        return $this->belongsTo(Course::class);
     }
+
+    public function batches()
+    {
+        return $this->hasMany(Batch::class);
+    }
+
     public function salary()
     {
         return $this->hasMany(TeacherSalary::class);
@@ -42,5 +48,9 @@ class Teacher extends Model
     public function balance()
     {
         return $this->hasMany(TeacherBalance::class);
+    }
+    public function attendance()
+    {
+        return $this->hasMany(TeacherAttendance::class);
     }
 }

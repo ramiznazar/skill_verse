@@ -73,10 +73,17 @@
                                 <div class="row">
                                     <div class="col-md-5">
                                         <div class="form-group">
-                                            <label>Skill</label>
-                                            <input type="text" name="skill" class="form-control"
-                                                value="{{ old('skill') }}">
-                                            @error('skill')
+                                            <label for="course_id">Assigned Course</label>
+                                            <select name="course_id" id="course_id" class="form-control" required>
+                                                <option value="">-- Select Course --</option>
+                                                @foreach ($courses as $course)
+                                                    <option value="{{ $course->id }}"
+                                                        {{ old('course_id') == $course->id ? 'selected' : '' }}>
+                                                        {{ $course->title }}
+                                                    </option>
+                                                @endforeach
+                                            </select>
+                                            @error('course_id')
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>
@@ -176,7 +183,7 @@
 
                                 {{-- Status / Joining Date --}}
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Status</label>
                                             <select name="status" class="form-control">
@@ -192,7 +199,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-4">
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Joining Date</label>
                                             <input type="date" name="joining_date" class="form-control"

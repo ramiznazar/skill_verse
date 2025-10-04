@@ -98,8 +98,28 @@ class StudentAttendanceController extends Controller
     }
     public function markLeave(Request $request)
     {
-        return $this->setStatus($request, 'leave');
+        $request->validate([
+            'admission_id' => 'required|exists:admissions,id',
+            'date' => 'required|date',
+            'remarks' => 'nullable|string|max:255',
+        ]);
+
+        $admission = Admission::with('batch:id')->findOrFail($request->admission_id);
+        $teacherId = Auth::id();
+
+        StudentAttendance::updateOrCreate(
+            ['admission_id' => $admission->id, 'date' => $request->date],
+            [
+                'batch_id' => $admission->batch_id,
+                'teacher_id' => $teacherId,
+                'status' => 'leave',
+                'remarks' => $request->remarks,
+            ]
+        );
+
+        return back()->with('success', 'Leave marked successfully!');
     }
+
     public function markLate(Request $request)
     {
         return $this->setStatus($request, 'late');
@@ -172,31 +192,47 @@ class StudentAttendanceController extends Controller
         return back()->with('success', 'All unmarked students set to Present for selected filter.');
     }
 
-    public function history(Request $request, $admissionId)
+    public function history(Request $request, Admission $admission)
     {
         $month = (int) $request->get('month', now()->month);
         $year = (int) $request->get('year', now()->year);
 
-        $student = Admission::with('course', 'batch')->findOrFail($admissionId);
+        // Student info (with course + batch)
+        $student = $admission->load(['course:id,title', 'batch:id,title,shift']);
 
-        // get all attendance for that month
-        $attendances = StudentAttendance::where('admission_id', $admissionId)
-            ->whereMonth('date', $month)
+        // 🗓️ Selected month’s first date
+        $selectedDate = \Carbon\Carbon::createFromDate($year, $month, 1);
+        $joiningDate = \Carbon\Carbon::parse($student->joining_date);
+
+        // 🚫 If selected month is before joining month → show message instead of data
+        if ($selectedDate->lt($joiningDate->startOfMonth())) {
+            return view('admin.pages.dashboard.attendance.student.history', [
+                'student' => $student,
+                'attendances' => collect(),
+                'month' => $month,
+                'year' => $year,
+                'daysInMonth' => 0,
+                'joinedTooLate' => true, // 👈 flag for view
+            ]);
+        }
+
+        // ✅ Otherwise load attendances normally
+        $attendances = StudentAttendance::where('admission_id', $admission->id)
             ->whereYear('date', $year)
+            ->whereMonth('date', $month)
             ->get()
-            ->keyBy(function ($a) {
-                return \Carbon\Carbon::parse($a->date)->day; // key = day of month
-            });
+            ->keyBy(fn($a) => \Carbon\Carbon::parse($a->date)->day);
 
         $daysInMonth = \Carbon\Carbon::createFromDate($year, $month, 1)->daysInMonth;
 
-        return view('admin.pages.dashboard.attendance.student.history', compact(
-            'student',
-            'attendances',
-            'month',
-            'year',
-            'daysInMonth'
-        ));
+        return view('admin.pages.dashboard.attendance.student.history', [
+            'student' => $student,
+            'attendances' => $attendances,
+            'month' => $month,
+            'year' => $year,
+            'daysInMonth' => $daysInMonth,
+            'joinedTooLate' => false, // 👈 normal case
+        ]);
     }
 
 }

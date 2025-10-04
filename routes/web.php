@@ -37,6 +37,7 @@ use App\Http\Controllers\Admin\Dashboard\{
     TeacherBalanceController,
     ProfitCalculationController,
     StudentAttendanceController,
+    TeacherAttendanceController,
     ReferralCommissionController
 };
 use App\Http\Controllers\Admin\Website\{
@@ -109,7 +110,7 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
 
-    // Attendance
+    //Student Attendance
     Route::get('/student-attendance', [StudentAttendanceController::class, 'index'])->name('student.attendance.index');
     Route::get('/student-attendance/history/{admission}', [StudentAttendanceController::class, 'history'])
         ->name('student.attendance.history');
@@ -121,6 +122,16 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
     // Bulk action for all filtered students
     Route::post('/student-attendance/bulk-present', [StudentAttendanceController::class, 'bulkMarkPresent'])->name('student.attendance.bulkPresent');
 
+    //Teacher Attendance
+    Route::get('/teacher-attendance', [TeacherAttendanceController::class, 'index'])->name('teacher.attendance.index');
+    Route::get('/teacher-attendance/history/{teacher}', [TeacherAttendanceController::class, 'history'])->name('teacher.attendance.history');
+
+    Route::post('/teacher-attendance/mark-present', [TeacherAttendanceController::class, 'markPresent'])->name('teacher.attendance.markPresent');
+    Route::post('/teacher-attendance/mark-absent', [TeacherAttendanceController::class, 'markAbsent'])->name('teacher.attendance.markAbsent');
+    Route::post('/teacher-attendance/mark-leave', [TeacherAttendanceController::class, 'markLeave'])->name('teacher.attendance.markLeave');
+    Route::post('/teacher-attendance/mark-late', [TeacherAttendanceController::class, 'markLate'])->name('teacher.attendance.markLate');
+    Route::post('/teacher-attendance/bulk-present', [TeacherAttendanceController::class, 'bulkMarkPresent'])->name('teacher.attendance.bulkPresent');
+    
     // Admin Resources
     Route::prefix('dashboard')->name('admin.')->group(function () {
         Route::resource('partners', PartnerController::class);

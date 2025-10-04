@@ -88,7 +88,7 @@
                                                 <td>{{ $teacher->name }}</td>
                                                 <td>{{ $teacher->email }}</td>
                                                 <td>{{ $teacher->phone }}</td>
-                                                <td><span class="text-info">{{ $teacher->skill }}</span></td>
+                                                <td><span class="text-info">{{ $teacher->course->title ?? '—' }}</span></td>
                                                 <td>{{ $teacher->experience }}</td>
 
                                                 {{-- New payout column: shows mode + both values (you always want to see % even if paying fixed) --}}

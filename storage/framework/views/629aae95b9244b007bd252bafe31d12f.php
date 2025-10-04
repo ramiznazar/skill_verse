@@ -279,7 +279,7 @@
                             </a>
                             <ul>
                                 <li><a href="<?php echo e(route('student.attendance.index')); ?>">Student Attendance</a></li>
-                                <li><a href="">Teacher Attendance</a></li>
+                                <li><a href="<?php echo e(route('teacher.attendance.index')); ?>">Teacher Attendance</a></li>
                             </ul>
                         </li>
 

@@ -189,17 +189,14 @@
                                                             value="<?php echo e($date); ?>">
                                                         <button type="submit" class="btn btn-sm btn-dark">Absent</button>
                                                     </form>
-                                                    <form method="POST"
-                                                        action="<?php echo e(route('student.attendance.markLeave')); ?>"
-                                                        class="d-inline">
-                                                        <?php echo csrf_field(); ?>
-                                                        <input type="hidden" name="admission_id"
-                                                            value="<?php echo e($student->id); ?>">
-                                                        <input type="hidden" name="date"
-                                                            value="<?php echo e($date); ?>">
-                                                        <button type="submit"
-                                                            class="btn btn-sm btn-danger">Leave</button>
-                                                    </form>
+
+                                                    <!-- Leave Button triggers modal -->
+                                                    <button type="button" class="btn btn-sm btn-danger"
+                                                        data-toggle="modal" data-target="#leaveModal"
+                                                        data-student="<?php echo e($student->id); ?>">
+                                                        Leave
+                                                    </button>
+
                                                     <form method="POST"
                                                         action="<?php echo e(route('student.attendance.markLate')); ?>"
                                                         class="d-inline">
@@ -228,6 +225,39 @@
                                 </table>
                             </div>
 
+                            <!-- Leave Modal -->
+                            <div class="modal fade" id="leaveModal" tabindex="-1" role="dialog"
+                                aria-labelledby="leaveModalLabel" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered" role="document">
+                                    <div class="modal-content">
+                                        <form method="POST" action="<?php echo e(route('student.attendance.markLeave')); ?>">
+                                            <?php echo csrf_field(); ?>
+                                            <div class="modal-header bg-warning text-dark">
+                                                <h5 class="modal-title" id="leaveModalLabel">Mark Leave</h5>
+                                                <button type="button" class="close"
+                                                    data-dismiss="modal"><span>&times;</span></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <input type="hidden" name="admission_id" id="leaveStudentId">
+                                                <input type="hidden" name="date" value="<?php echo e($date); ?>">
+
+                                                <div class="form-group">
+                                                    <label for="remarks">Remarks (Optional)</label>
+                                                    <textarea name="remarks" id="leaveRemarks" class="form-control" rows="3"
+                                                        placeholder="Enter reason for leave..."></textarea>
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button type="button" class="btn btn-secondary"
+                                                    data-dismiss="modal">Cancel</button>
+                                                <button type="submit" class="btn btn-warning">Save Leave</button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+
                         </div>
                     </div>
                 </div>
@@ -245,6 +275,16 @@
 
             selects.forEach(sel => sel.addEventListener('change', () => form.submit()));
             inputs.forEach(inp => inp.addEventListener('change', () => form.submit()));
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            $('#leaveModal').on('show.bs.modal', function(event) {
+                const button = $(event.relatedTarget);
+                const studentId = button.data('student');
+                $('#leaveStudentId').val(studentId);
+                $('#leaveRemarks').val('');
+            });
         });
     </script>
 <?php $__env->stopSection(); ?>
