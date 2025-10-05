@@ -154,10 +154,10 @@
                                                             class="badge badge-{{ $attendance->status === 'present' ? 'success' : ($attendance->status === 'absent' ? 'danger' : ($attendance->status === 'leave' ? 'warning' : 'info')) }}">
                                                             {{ ucfirst($attendance->status) }}
                                                         </span>
-                                                        @if ($attendance->remarks)
+                                                        {{-- @if ($attendance->remarks)
                                                             <small
                                                                 class="text-muted d-block">{{ $attendance->remarks }}</small>
-                                                        @endif
+                                                        @endif --}}
                                                     @endif
                                                 </td>
                                                 <td class="text-nowrap">

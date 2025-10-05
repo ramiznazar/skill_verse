@@ -61,7 +61,7 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            {{-- <th>Image</th> --}}
+                                            <th>Image</th>
                                             <th>Name</th>
                                             <th>Username</th>
                                             <th>Email</th>
@@ -75,15 +75,15 @@
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
 
-                                                {{-- <td>
-                                                    @if ($user->profile_picture)
-                                                        <img src="{{ asset($user->profile_picture) }}" width="60"
+                                                <td>
+                                                    @if ($user->image)
+                                                        <img src="{{ asset($user->image) }}" width="60"
                                                             height="60" style="border-radius: 50%;" alt="User Image">
                                                     @else
                                                         <img src="{{ asset('default-avatar.png') }}" width="60"
                                                             height="60" style="border-radius: 50%;" alt="User Image">
                                                     @endif
-                                                </td> --}}
+                                                </td>
 
                                                 <td>{{ $user->name }}</td>
                                                 <td>{{ $user->username }}</td>

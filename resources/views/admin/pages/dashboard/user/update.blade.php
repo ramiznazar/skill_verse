@@ -26,20 +26,19 @@
                                 @method('PUT')
 
                                 {{-- Profile Picture --}}
-                                {{-- <div class="form-group">
+                                <div class="form-group">
                                     <label>Profile Picture</label>
-                                    <input type="file" name="profile_picture" accept="image/*" class="form-control">
+                                    <input type="file" name="image" accept="image/*" class="form-control">
                                     @if ($user->profile_picture)
-                                        <img src="{{ asset($user->profile_picture) }}" width="80" height="80"
+                                        <img src="{{ asset($user->image) }}" width="80" height="80"
                                             style="border-radius: 50%;" class="mt-2">
                                     @endif
                                     @error('profile_picture')
                                         <small class="text-danger">{{ $message }}</small>
                                     @enderror
-                                </div> --}}
+                                </div>
 
                                 {{-- Name + Username --}}
-                                {{-- Name + Username + Email --}}
                                 <div class="row">
                                     <div class="col-md-{{ Auth::user()->role === 'admin' ? '4' : '6' }}">
                                         <div class="form-group">

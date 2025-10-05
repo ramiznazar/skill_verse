@@ -28,6 +28,7 @@ class UserController extends Controller
     public function store(Request $request)
     {
         $request->validate([
+            'image' => 'required|image',
             'name' => 'required|string|max:255',
             'username' => 'required|string|max:255|unique:users,username',
             'phone' => 'required|string|max:20',
@@ -35,8 +36,16 @@ class UserController extends Controller
             'password' => 'required|string|min:6|confirmed',
             'role' => 'required|string'
         ]);
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $imagePath = 'assets/admin/images/code/user/' . $imageName;
+            $image->move(public_path('assets/admin/images/code/user/'), $imageName);
+        }
 
         User::create([
+            'image' => $imagePath,
             'name' => $request->name,
             'username' => $request->username,
             'phone' => $request->phone,
@@ -65,6 +74,19 @@ class UserController extends Controller
             'role' => 'required|string',
             'password' => 'nullable|string|min:6',
         ]);
+        if ($request->hasFile('image')) {
+            if ($user->image) {
+                $oldImagePath = public_path($user->image);
+                if (file_exists($oldImagePath)) {
+                    @unlink($oldImagePath);
+                }
+            }
+            $image = $request->file('image');
+            $imageName = time() . '.' . $image->getClientOriginalExtension();
+            $imagePath = 'assets/admin/images/code/user/' . $imageName;
+            $image->move(public_path('assets/admin/images/code/user/'), $imageName);
+            $user->image = $imagePath;
+        }
 
         // Update basic fields
         $user->name = $request->name;

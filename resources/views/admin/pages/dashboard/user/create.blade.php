@@ -20,8 +20,22 @@
                             <h2>Add New Users</h2>
                         </div>
                         <div class="body">
-                            <form action="{{ route('user.store') }}" method="POST" novalidate>
+                            <form action="{{ route('user.store') }}" method="POST" enctype="multipart/form-data">
                                 @csrf
+
+                                {{-- Image --}}
+                                <div class="row">
+                                    <div class="col-md-12">
+                                        <div class="form-group">
+                                            <label>Image</label>
+                                            <input type="file" name="image" class="form-control"
+                                                value="{{ old('image') }}">
+                                            @error('image')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
 
                                 {{-- Name & Username --}}
                                 <div class="row">

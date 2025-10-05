@@ -105,6 +105,8 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
     Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('user.destroy');
     //Profile
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile/update/',[ProfileController::class,'update'])->name('profile.update');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');

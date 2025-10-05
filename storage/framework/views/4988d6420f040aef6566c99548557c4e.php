@@ -157,10 +157,7 @@
                                                             <?php echo e(ucfirst($attendance->status)); ?>
 
                                                         </span>
-                                                        <?php if($attendance->remarks): ?>
-                                                            <small
-                                                                class="text-muted d-block"><?php echo e($attendance->remarks); ?></small>
-                                                        <?php endif; ?>
+                                                        
                                                     <?php endif; ?>
                                                 </td>
                                                 <td class="text-nowrap">

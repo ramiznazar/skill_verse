@@ -196,7 +196,7 @@
                 <a href="javascript:void(0);" class="dropdown-toggle user-name"
                     data-toggle="dropdown"><strong><?php echo e(Auth::user()->name); ?></strong></a>
                 <ul class="dropdown-menu dropdown-menu-right account">
-                    <li><a href="page-profile.html"><i class="icon-user"></i>My Profile</a></li>
+                    <li><a href="<?php echo e(route('profile.index')); ?>"><i class="icon-user"></i>My Profile</a></li>
                     <li><a href="app-inbox.html"><i class="icon-envelope-open"></i>Messages</a></li>
                     <li><a href="javascript:void(0);"><i class="icon-settings"></i>Settings</a></li>
                     <li class="divider"></li>
@@ -460,6 +460,16 @@
                             <ul>
                                 <li><a href="<?php echo e(route('admission.index')); ?>">All Admissions</a></li>
                                 <li><a href="<?php echo e(route('admission.create')); ?>">Add New Admission</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#attendanceMenu" class="has-arrow">
+                                <i class="fas fa-user-check"></i>
+                                <span>Attendance</span>
+                            </a>
+                            <ul>
+                                <li><a href="<?php echo e(route('student.attendance.index')); ?>">Student Attendance</a></li>
+                                <li><a href="<?php echo e(route('teacher.attendance.index')); ?>">Teacher Attendance</a></li>
                             </ul>
                         </li>
                         <li><a href="<?php echo e(route('fee-submission.index')); ?>"><i class="fas fa-money-check-alt"></i><span>Fee
