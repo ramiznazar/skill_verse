@@ -1,5 +1,4 @@
 </div>
-
 <!-- Javascript -->
 <script src="<?php echo e(asset('assets/admin/bundles/libscripts.bundle.js')); ?>"></script>
 <script src="<?php echo e(asset('assets/admin/bundles/vendorscripts.bundle.js')); ?>"></script>
@@ -20,10 +19,20 @@
 <script src="<?php echo e(asset('assets/admin/vendor/jquery-datatable/buttons/buttons.colVis.min.js')); ?>"></script>
 <script src="<?php echo e(asset('assets/admin/vendor/jquery-datatable/buttons/buttons.html5.min.js')); ?>"></script>
 <script src="<?php echo e(asset('assets/admin/vendor/jquery-datatable/buttons/buttons.print.min.js')); ?>"></script>
-<script src="<?php echo e(asset('assets/admin/vendor/sweetalert/sweetalert.min.js')); ?>"></script><!-- SweetAlert Plugin Js -->
+<script src="<?php echo e(asset('assets/admin/vendor/sweetalert/sweetalert.min.js')); ?>"></script>
 <script src="<?php echo e(asset('assets/admin/bundles/mainscripts.bundle.js')); ?>"></script>
 <script src="<?php echo e(asset('assets/admin/js/pages/tables/jquery-datatable.js')); ?>"></script>
 
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const toggleBtn = document.querySelector('.btn-toggle-offcanvas');
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', function() {
+                document.body.classList.toggle('offcanvas-active');
+            });
+        }
+    });
+</script>
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
@@ -179,5 +188,4 @@
 </script>
 
 </body>
-
 </html><?php /**PATH E:\projects\codezy\zain-changes\codezy\resources\views/admin/layouts/script.blade.php ENDPATH**/ ?>

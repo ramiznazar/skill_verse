@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Dashboard;
 
 use App\Models\Batch;
 use App\Models\Course;
+use App\Models\User;
 use App\Models\Account;
 
 use App\Models\Admission;
@@ -121,14 +122,28 @@ class FeeSubmissionController extends Controller
                     'submission_date' => now(),
                 ]);
 
-                // 🔔 Create Notification
-                Notification::create([
+                // 🔔 Create & attach per-user notification (Fee Submission)
+                $notification = Notification::create([
                     'title' => 'Fee Submitted',
                     'message' => '₨' . number_format($feeSubmission->amount) . ' received from ' . $feeSubmission->admission->name,
                     'icon' => 'fa fa-money',
                     'type' => 'fee',
                     'status' => 1,
                 ]);
+
+                // Attach to target roles (no Spatie; using users.role column)
+                $targetRoles = ['admin', 'administrator', 'partner'];
+                $userIds = User::whereIn('role', $targetRoles)->pluck('id');
+
+                if ($userIds->isNotEmpty()) {
+                    $now = now();
+                    $attach = [];
+                    foreach ($userIds as $uid) {
+                        $attach[$uid] = ['is_read' => false, 'created_at' => $now, 'updated_at' => $now];
+                    }
+                    $notification->users()->syncWithoutDetaching($attach);
+                }
+
 
                 $totalAmountThisSubmission += $amount;
 

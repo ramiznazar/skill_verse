@@ -17,11 +17,17 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-  
+
     use Notifiable;
 
     protected $fillable = [
-        'image','name', 'username', 'email', 'phone', 'password', 'role'
+        'image',
+        'name',
+        'username',
+        'email',
+        'phone',
+        'password',
+        'role'
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -31,7 +37,7 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
-    
+
 
     /**
      * The attributes that should be cast.
@@ -42,8 +48,16 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
     ];
-    
-    public function feeSubmission(){
+    // app/Models/User.php
+    public function notifications()
+    {
+        return $this->belongsToMany(Notification::class, 'notification_user')
+            ->withPivot('is_read')
+            ->withTimestamps();
+    }
+
+    public function feeSubmission()
+    {
         return $this->hasMany(FeeSubmission::class);
     }
 }

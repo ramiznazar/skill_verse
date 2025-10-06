@@ -36,7 +36,6 @@
         href="<?php echo e(asset('assets/admin/vendor/jquery-datatable/fixedeader/dataTables.fixedheader.bootstrap4.min.css')); ?>">
     <link rel="stylesheet" href="<?php echo e(asset('assets/admin/vendor/sweetalert/sweetalert.css')); ?>" />
 
-
     <style>
         td.details-control {
             background: url("<?php echo e(asset('assets/admin/images/details_open.png')); ?>") no-repeat center center;
@@ -63,49 +62,14 @@
 
                 <div class="navbar-left">
                     <div class="navbar-btn">
-                        <a href="index.html"><img src="<?php echo e(asset('assets/admin/images/icon-light.svg')); ?>"
-                                alt="HexaBit Logo" class="img-fluid logo"></a>
+                        <a href="<?php echo e(route('admin')); ?>"><img
+                                src="<?php echo e(asset('assets/website/images/logo/white-logo.png')); ?>" width="150" alt="HexaBit Logo"
+                                class="img-fluid logo"></a>
                         <button type="button" class="btn-toggle-offcanvas"><i
                                 class="lnr lnr-menu fa fa-bars"></i></button>
                     </div>
                     <a href="javascript:void(0);" class="icon-menu btn-toggle-fullwidth"><i
                             class="fa fa-arrow-left"></i></a>
-                    <ul class="nav navbar-nav">
-                        <li class="dropdown dropdown-animated scale-right">
-                            <a href="javascript:void(0);" class="dropdown-toggle icon-menu" data-toggle="dropdown"><i
-                                    class="icon-grid"></i></a>
-                            <ul class="dropdown-menu menu-icon app_menu">
-                                <li>
-                                    <a class="#">
-                                        <i class="icon-envelope"></i>
-                                        <span>Inbox</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="#">
-                                        <i class="icon-bubbles"></i>
-                                        <span>Chat</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="#">
-                                        <i class="icon-list"></i>
-                                        <span>Task</span>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="#">
-                                        <i class="icon-globe"></i>
-                                        <span>Blog</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                        <li><a href="app-calendar.html" class="icon-menu d-none d-sm-block d-md-none d-lg-block"><i
-                                    class="icon-calendar"></i></a></li>
-                        <li><a href="app-chat.html" class="icon-menu d-none d-sm-block"><i class="icon-bubbles"></i></a>
-                        </li>
-                    </ul>
                 </div>
 
                 <div class="navbar-right">
@@ -195,10 +159,8 @@
                                     <li class="header">Notifications</li>
                                 </ul>
                             </li>
-
-                            <li><a href="javascript:void(0);" class="right_toggle icon-menu" title="Right Menu"><i
-                                        class="icon-settings"></i></a></li>
-                            <li><a href="page-login.html" class="icon-menu"><i class="icon-power"></i></a></li>
+                            <li><a href="<?php echo e(route('auth.logout')); ?>" class="icon-menu"><i
+                                        class="icon-power"></i></a></li>
                         </ul>
                     </div>
                 </div>

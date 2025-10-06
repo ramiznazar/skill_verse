@@ -3,7 +3,7 @@
         <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#setting">Settings</a></li>
         <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#chat">Chat</a></li>
     </ul>
-    <div class="tab-content">
+    {{-- <div class="tab-content">
         <div class="tab-pane active" id="setting">
             <div class="slim_scroll">
                 <div class="card">
@@ -174,31 +174,35 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> --}}
 </div>
 
 <div id="left-sidebar" class="sidebar">
-    <div class="navbar-brand">
-        <a href="index.html"><img src="{{ asset('assets/website/images/logo/white-logo.png') }}" alt="HexaBit Logo"
-                class="img-fluid logo">
-            {{-- <span>HexaBit</span> --}}
+    <div class="navbar-brand d-flex align-items-center justify-content-between">
+        <a href="{{ route('admin') }}">
+            <img src="{{ asset('assets/website/images/logo/white-logo.png') }}" alt="SkillVerse Logo"
+                class="img-fluid logo" style="max-height:45px;">
         </a>
-        <button type="button" class="btn-toggle-offcanvas btn btn-sm btn-default float-right"><i
-                class="lnr lnr-menu fa fa-chevron-circle-left"></i></button>
+
+        <button type="button" class="btn btn-sm btn-toggle-offcanvas" title="Hide Sidebar">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
     </div>
+
     <div class="sidebar-scroll">
         <div class="user-account">
             <div class="user_div">
-                <img src="{{ asset('assets/admin/images/user.png') }}" class="user-photo" alt="User Profile Picture">
+                <img src="{{ Auth::user()->image ? asset( Auth::user()->image) : asset('assets/admin/images/user.png') }}"
+                    class="user-photo" alt="User Profile Picture">
             </div>
+
             <div class="dropdown">
                 <span>Welcome,</span>
                 <a href="javascript:void(0);" class="dropdown-toggle user-name"
                     data-toggle="dropdown"><strong>{{ Auth::user()->name }}</strong></a>
                 <ul class="dropdown-menu dropdown-menu-right account">
                     <li><a href="{{ route('profile.index') }}"><i class="icon-user"></i>My Profile</a></li>
-                    <li><a href="app-inbox.html"><i class="icon-envelope-open"></i>Messages</a></li>
-                    <li><a href="javascript:void(0);"><i class="icon-settings"></i>Settings</a></li>
+                    <li><a href="{{ route('message.index') }}"><i class="icon-envelope-open"></i>Messages</a></li>
                     <li class="divider"></li>
                     <li><a href="{{ route('auth.logout') }}"><i class="icon-power"></i>Logout</a></li>
                 </ul>
@@ -214,8 +218,7 @@
                         <li class=""><a href="{{ route('admin') }}"><i
                                     class="icon-home"></i><span>Dashboard</span></a> </li>
                         <li>
-                            <a href="#uiElements" class="has-arrow"><i
-                                    class="fas fa-user-tie"></i><span>Teachers</span></a>
+                            <a href="#uiElements" class="has-arrow"><i class="fas fa-user-tie"></i><span>Teachers</span></a>
                             <ul>
                                 <li><a href="{{ route('teacher.index') }}">All Teacher</a></li>
                                 <li><a href="{{ route('teacher.create') }}">Add New Teacher</a></li>

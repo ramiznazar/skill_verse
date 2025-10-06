@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\TeacherSalary;
 use App\Models\TeacherBalance;
 use App\Models\Expense;
+use App\Models\Notification;
 use App\Models\TeacherSalaryHistory;
 use Illuminate\Support\Facades\DB;
 
@@ -17,8 +18,10 @@ class TeacherSalaryController extends Controller
     {
         $query = TeacherSalary::with('teacher');
 
-        if ($request->filled('month')) $query->where('month', $request->month);
-        if ($request->filled('year'))  $query->where('year',  $request->year);
+        if ($request->filled('month'))
+            $query->where('month', $request->month);
+        if ($request->filled('year'))
+            $query->where('year', $request->year);
 
         $salaries = $query->latest()->get();
         return view('admin.pages.dashboard.teacher.salary.salary', compact('salaries'));
@@ -29,7 +32,7 @@ class TeacherSalaryController extends Controller
         $histories = TeacherSalaryHistory::with(['teacher', 'salary'])
             ->where('teacher_id', $teacherId)
             ->when($request->filled('month'), fn($q) => $q->where('month', $request->month))
-            ->when($request->filled('year'),  fn($q) => $q->where('year',  $request->year))
+            ->when($request->filled('year'), fn($q) => $q->where('year', $request->year))
             ->latest()
             ->get();
 
@@ -41,14 +44,15 @@ class TeacherSalaryController extends Controller
     public function StatusPaid($id)
     {
         $salary = TeacherSalary::with('teacher')->findOrFail($id);
-        if ($salary->status === 'paid') return back()->with('paid', 'Already marked as paid.');
+        if ($salary->status === 'paid')
+            return back()->with('paid', 'Already marked as paid.');
 
         // ✅ Fixed-pay: is month me pahle hi 'paid' ya 'Balance → Paid' ho chuka?
         $payTypeSnapshot = $salary->pay_type ?? ($salary->teacher->pay_type ?? 'percentage');
         if ($payTypeSnapshot === 'fixed') {
             $alreadyPaidThisMonth = TeacherSalaryHistory::where('teacher_id', $salary->teacher_id)
                 ->where('month', $salary->month)
-                ->where('year',  $salary->year)
+                ->where('year', $salary->year)
                 ->whereIn('status', ['paid', 'Balance → Paid'])
                 ->exists();
 
@@ -66,38 +70,63 @@ class TeacherSalaryController extends Controller
 
             // History
             TeacherSalaryHistory::create([
-                'teacher_id'        => $salary->teacher_id,
+                'teacher_id' => $salary->teacher_id,
                 'teacher_salary_id' => $salary->id,
-                'month'             => $salary->month,
-                'year'              => $salary->year,
-                'amount'            => $amount,
-                'status'            => 'paid',
-                'performed_by'      => auth()->id(),
-                'performed_at'      => now(),
+                'month' => $salary->month,
+                'year' => $salary->year,
+                'amount' => $amount,
+                'status' => 'paid',
+                'performed_by' => auth()->id(),
+                'performed_at' => now(),
             ]);
 
-            //Expense auto create
+            // Expense auto create (Salary → Expense)
             if ($amount > 0) {
-                Expense::firstOrCreate(
+                $expense = Expense::firstOrCreate(
                     [
                         'ref_type' => 'salary',
-                        'ref_id'   => $salary->id,
+                        'ref_id' => $salary->id,
                     ],
                     [
-                        'title'   => 'salary',
-                        'amount'  => (string) $amount,
-                        'date'    => now()->toDateString(),
+                        'title' => 'salary',
+                        'amount' => (string) $amount,
+                        'date' => now()->toDateString(),
                         'purpose' => "Salary payout for {$teacherName}",
-                        'type'    => 'essential',
+                        'type' => 'essential',
                     ]
                 );
+
+                // 🔔 Notify only when a new expense row was created (avoid duplicates)
+                if ($expense->wasRecentlyCreated) {
+                    $notification = Notification::create([
+                        'title' => 'Salary Expense Logged',
+                        'message' => '₨' . number_format((float) $expense->amount) . " salary payout for {$teacherName}",
+                        'icon' => 'fa fa-credit-card',
+                        'type' => 'expense',
+                        'status' => 1,
+                    ]);
+
+                    // Attach to target roles (no Spatie; using users.role column)
+                    $targetRoles = ['admin', 'administrator', 'partner'];
+                    $userIds = \App\Models\User::whereIn('role', $targetRoles)->pluck('id');
+
+                    if ($userIds->isNotEmpty()) {
+                        $now = now();
+                        $attach = [];
+                        foreach ($userIds as $uid) {
+                            $attach[$uid] = ['is_read' => false, 'created_at' => $now, 'updated_at' => $now];
+                        }
+                        $notification->users()->syncWithoutDetaching($attach);
+                    }
+                }
             }
+
 
             // Close current cycle
             $salary->update([
-                'status'               => 'paid',
-                'salary_amount'        => 0,
-                'total_fee_collected'  => 0,
+                'status' => 'paid',
+                'salary_amount' => 0,
+                'total_fee_collected' => 0,
                 // 'total_students'       => 0,
             ]);
         });
@@ -118,8 +147,8 @@ class TeacherSalaryController extends Controller
             // Add / increment TeacherBalance
             $tb = TeacherBalance::firstOrNew([
                 'teacher_id' => $salary->teacher_id,
-                'month'      => $salary->month,
-                'year'       => $salary->year,
+                'month' => $salary->month,
+                'year' => $salary->year,
             ]);
             $tb->amount = (int) ($tb->amount ?? 0) + $amount;
             $tb->save();
@@ -138,9 +167,9 @@ class TeacherSalaryController extends Controller
 
             // Close current cycle (reset counters so next fees start fresh)
             $salary->update([
-                'status'               => 'balance',
-                'salary_amount'        => 0,
-                'total_fee_collected'  => 0,
+                'status' => 'balance',
+                'salary_amount' => 0,
+                'total_fee_collected' => 0,
                 // 'total_students'       => 0,
             ]);
         });

@@ -24,6 +24,7 @@ use App\Http\Controllers\Admin\Dashboard\{
     PartnerController,
     PartnerProfitController,
     NotificationController,
+    NotificationTableController,
     PartnerBalanceController,
     BatchController,
     AccountController,
@@ -106,11 +107,16 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
     //Profile
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::put('/profile/update/',[ProfileController::class,'update'])->name('profile.update');
+    Route::put('/profile/update/', [ProfileController::class, 'update'])->name('profile.update');
 
-    Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
-    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+    Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+    Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
+    //Notification Table
+     Route::get('notifications/all', [NotificationTableController::class, 'index'])->name('admin.notifications.table');
+    Route::get('notifications/{notification}', [NotificationTableController::class, 'show'])->name('admin.notifications.show');
+    // (optional) bulk actions
+    Route::post('notifications/bulk/status', [NotificationTableController::class, 'bulkStatus'])->name('admin.notifications.bulkStatus');
 
     //Student Attendance
     Route::get('/student-attendance', [StudentAttendanceController::class, 'index'])->name('student.attendance.index');
@@ -133,7 +139,7 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
     Route::post('/teacher-attendance/mark-leave', [TeacherAttendanceController::class, 'markLeave'])->name('teacher.attendance.markLeave');
     Route::post('/teacher-attendance/mark-late', [TeacherAttendanceController::class, 'markLate'])->name('teacher.attendance.markLate');
     Route::post('/teacher-attendance/bulk-present', [TeacherAttendanceController::class, 'bulkMarkPresent'])->name('teacher.attendance.bulkPresent');
-    
+
     // Admin Resources
     Route::prefix('dashboard')->name('admin.')->group(function () {
         Route::resource('partners', PartnerController::class);

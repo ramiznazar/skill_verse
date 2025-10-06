@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Dashboard;
 
 use App\Models\Lead;
 use App\Models\Batch;
+use App\Models\User;
 use App\Models\Course;
 use App\Models\Admission;
 use App\Models\Notification;
@@ -187,15 +188,31 @@ class AdmissionController extends Controller
             'installment_3' => (int) $request->installment_3,
             'referral_type' => $request->referral_type,
         ]);
-        
-        // 🔔 Create Notification
-        Notification::create([
+
+        // 6) 🔔 Create notification (same as before)
+        $notification = Notification::create([
             'title' => 'New Admission',
             'message' => "Student {$admission->name} admitted in Course ID {$admission->course_id}",
             'icon' => 'fa fa-user',
             'type' => 'admission',
             'status' => 1,
         ]);
+
+        // 7) ✅ Attach recipients (per-user unread state)
+        //    If you’re NOT using Spatie, and you have a 'role' column on users:
+        $targetRoles = ['admin', 'administrator', 'partner'];
+
+        $userIds = User::whereIn('role', $targetRoles)->pluck('id'); // Collection of IDs
+
+        if ($userIds->isNotEmpty()) {
+            $now = now();
+            $attach = [];
+            foreach ($userIds as $uid) {
+                $attach[$uid] = ['is_read' => false, 'created_at' => $now, 'updated_at' => $now];
+            }
+            // make sure Notification model has users() belongsToMany relation
+            $notification->users()->syncWithoutDetaching($attach);
+        }
 
         return redirect()->route('admission.index')->with('store', 'Admission created successfully.');
     }

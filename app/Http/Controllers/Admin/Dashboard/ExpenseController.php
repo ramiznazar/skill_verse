@@ -43,13 +43,26 @@ class ExpenseController extends Controller
         $expense = Expense::create($data);
 
         // 🔔 Create Notification
-        Notification::create([
+        $notification = Notification::create([
             'title' => 'New Expense',
             'message' => 'Expense of ₨' . number_format($expense->amount) . ' added (' . $expense->title . ')',
-            'icon' => 'fa fa-credit-card',  // expense icon
+            'icon' => 'fa fa-credit-card',
             'type' => 'expense',
-            'status' => 1, // unread
+            'status' => 1, // active
         ]);
+
+        // Attach to target roles (no Spatie; using users.role column)
+        $targetRoles = ['admin', 'administrator', 'partner'];
+        $userIds = \App\Models\User::whereIn('role', $targetRoles)->pluck('id');
+
+        if ($userIds->isNotEmpty()) {
+            $now = now();
+            $attach = [];
+            foreach ($userIds as $uid) {
+                $attach[$uid] = ['is_read' => false, 'created_at' => $now, 'updated_at' => $now];
+            }
+            $notification->users()->syncWithoutDetaching($attach);
+        }
 
         return redirect()->route('expense.index')->with('store', 'Expense added successfully.');
     }

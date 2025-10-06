@@ -10851,7 +10851,8 @@ ul.choose-skin li div,
 /* Maue */
 
 
- .active-filter {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
-        transform: translateY(-1px); /* little lift */
-    }
+.active-filter {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45);
+    transform: translateY(-1px);
+    /* little lift */
+}

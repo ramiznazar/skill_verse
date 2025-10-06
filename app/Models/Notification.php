@@ -9,4 +9,10 @@ class Notification extends Model
 {
     use HasFactory;
     protected $guarded = [];
+    public function users()
+    {
+        return $this->belongsToMany(User::class, 'notification_user')
+            ->withPivot('is_read')
+            ->withTimestamps();
+    }
 }

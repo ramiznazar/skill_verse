@@ -53,7 +53,7 @@
                                                 @foreach ($teachers as $teacher)
                                                     <option value="{{ $teacher->id }}"
                                                         {{ old('teacher_id')}}>
-                                                        {{ $teacher->name }} ({{ $teacher->skill }})
+                                                        {{ $teacher->name }} ({{ $teacher->course->title }})
                                                     </option>
                                                 @endforeach
                                             </select>
