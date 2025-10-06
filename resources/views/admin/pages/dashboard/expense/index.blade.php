@@ -76,12 +76,12 @@
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="alert alert-success mb-0">
+                            <div class="alert alert-warning mb-0">
                                 <strong>Essential Total:</strong> ₨ {{ number_format($essentialTotal) }}
                             </div>
                         </div>
                         <div class="col-md-4">
-                            <div class="alert alert-danger mb-0">
+                            <div class="alert alert-success mb-0">
                                 <strong>Non-Essential Total:</strong> ₨ {{ number_format($nonEssentialTotal) }}
                             </div>
                         </div>
