@@ -65,7 +65,7 @@
                                             {{-- <th>Slug</th> --}}
                                             <th>Category</th>
                                             <th>Duration</th>
-                                            <th>Full Fee</th>
+                                            <th>FullFee</th>
                                             <th>Discount%</th>
                                             <th>MinFee</th>
                                             {{-- <th>Short Des</th> --}}
