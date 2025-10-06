@@ -76,10 +76,10 @@
                 <div class="row">
                     <div class="col-md-6">
                         <h5>Outlines</h5>
-                        <?php if(isset($course->outlines) && count($course->outlines) > 0): ?>
+                        <?php if(isset($course->outline) && count($course->outline) > 0): ?>
                             <ul>
-                                <?php $__currentLoopData = $course->outlines; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $outline): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <li><?php echo e($outline->title); ?></li>
+                                <?php $__currentLoopData = $course->outline; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $out): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                    <li><?php echo e($out->title); ?></li>
                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                             </ul>
                         <?php else: ?>

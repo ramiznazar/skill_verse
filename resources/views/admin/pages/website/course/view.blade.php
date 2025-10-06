@@ -76,10 +76,10 @@
                 <div class="row">
                     <div class="col-md-6">
                         <h5>Outlines</h5>
-                        @if(isset($course->outlines) && count($course->outlines) > 0)
+                        @if(isset($course->outline) && count($course->outline) > 0)
                             <ul>
-                                @foreach($course->outline as $outline)
-                                    <li>{{ $outline->title }}</li>
+                                @foreach($course->outline as $out)
+                                    <li>{{ $out->title }}</li>
                                 @endforeach
                             </ul>
                         @else
