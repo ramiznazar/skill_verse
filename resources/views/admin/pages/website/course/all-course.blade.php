@@ -117,6 +117,7 @@
                                                             <i class="icon-eye"></i>
                                                         </a>
 
+                                                         @if (Auth::user()->role !== 'administrator')
                                                         <!-- Edit Button -->
                                                         <a href="{{ route('course.edit', $course->id) }}"
                                                             class="btn btn-sm btn-icon btn-pure btn-default on-default button-edit"
@@ -135,6 +136,8 @@
                                                                 <i class="icon-trash" aria-hidden="true"></i>
                                                             </button>
                                                         </form>
+                                                        @endif
+
                                                     </div>
                                                 </td>
                                             </tr>
