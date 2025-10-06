@@ -2,20 +2,64 @@
 
 namespace App\Http\Controllers\Admin\Dashboard;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use Carbon\Carbon;
 use App\Models\Expense;
 use App\Models\Notification;
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
 
 class ExpenseController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $expenses = Expense::latest()->get();
-        return view('admin.pages.dashboard.expense.index', compact('expenses'));
+        $query = Expense::query()->orderBy('date', 'desc');
+
+        // 🔎 Search filter
+        $search = trim((string) $request->get('search'));
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                    ->orWhere('purpose', 'like', "%{$search}%")
+                    ->orWhere('ref_type', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('month')) {
+            $query->whereMonth('date', '=', Carbon::parse($request->month)->month)
+                ->whereYear('date', '=', Carbon::parse($request->month)->year);
+        }
+        if ($request->filled('type') && in_array($request->type, ['essential', 'non-essential'])) {
+            $query->where('type', $request->type);
+        }
+        if ($request->filled('ref_type')) {
+            $query->where('ref_type', $request->ref_type);
+        }
+
+        // ✅ Paginate and get filtered expenses
+        $expenses = $query->paginate(15)->withQueryString();
+
+        // 💰 Summary totals
+        $totalExpense = $query->sum('amount');
+        $essentialTotal = (clone $query)->where('type', 'essential')->sum('amount');
+        $nonEssentialTotal = (clone $query)->where('type', 'non-essential')->sum('amount');
+
+        // 📦 Categories list (for filter dropdown)
+        $categories = Expense::select('ref_type')
+            ->distinct()
+            ->pluck('ref_type')
+            ->filter()
+            ->values();
+
+        return view('admin.pages.dashboard.expense.index', compact(
+            'expenses',
+            'totalExpense',
+            'essentialTotal',
+            'nonEssentialTotal',
+            'categories'
+        ));
     }
 
     /**
