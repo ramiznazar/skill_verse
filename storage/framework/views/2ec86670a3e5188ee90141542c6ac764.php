@@ -65,7 +65,7 @@
                                             <th>#</th>
                                             <th>Image</th>
                                             <th>Title</th>
-                                            <th>Slug</th>
+                                            
                                             <th>Category</th>
                                             <th>Duration</th>
                                             <th>Full Fee</th>
@@ -84,7 +84,7 @@
                                                             height="60" style="border-radius: 50%;"
                                                             alt=""></span></td>
                                                 <td><?php echo e($course->title); ?></td>
-                                                <td><?php echo e($course->slug); ?></td>
+                                                
                                                 <td><span
                                                         class="text-info"><?php echo e($course->courseCategory->name ?? 'N/A'); ?></span>
                                                 </td>
@@ -122,6 +122,7 @@
                                                             <i class="icon-eye"></i>
                                                         </a>
 
+                                                         <?php if(Auth::user()->role !== 'administrator'): ?>
                                                         <!-- Edit Button -->
                                                         <a href="<?php echo e(route('course.edit', $course->id)); ?>"
                                                             class="btn btn-sm btn-icon btn-pure btn-default on-default button-edit"
@@ -140,6 +141,8 @@
                                                                 <i class="icon-trash" aria-hidden="true"></i>
                                                             </button>
                                                         </form>
+                                                        <?php endif; ?>
+
                                                     </div>
                                                 </td>
                                             </tr>

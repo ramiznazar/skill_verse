@@ -62,14 +62,14 @@
                                             <th>#</th>
                                             <th>Image</th>
                                             <th>Title</th>
-                                            <th>Slug</th>
+                                            {{-- <th>Slug</th> --}}
                                             <th>Category</th>
                                             <th>Duration</th>
                                             <th>Full Fee</th>
                                             <th>Discount%</th>
                                             <th>MinFee</th>
                                             <th>Short Des</th>
-                                            <th>Des</th>
+                                            {{-- <th>Des</th> --}}
                                             <th>Options</th>
                                         </tr>
                                     </thead>
@@ -81,7 +81,7 @@
                                                             height="60" style="border-radius: 50%;"
                                                             alt=""></span></td>
                                                 <td>{{ $course->title }}</td>
-                                                <td>{{ $course->slug }}</td>
+                                                {{-- <td>{{ $course->slug }}</td> --}}
                                                 <td><span
                                                         class="text-info">{{ $course->courseCategory->name ?? 'N/A' }}</span>
                                                 </td>
@@ -90,7 +90,7 @@
                                                 <td>{{ $course->discount }}%</td>
                                                 <td>{{ intval($course->min_fee) }}</td>
                                                 <td>{{ \Illuminate\Support\Str::words($course->short_description, 5, '...') }}
-                                                <td>{{ \Illuminate\Support\Str::words($course->description, 7, '...') }}
+                                                {{-- <td>{{ \Illuminate\Support\Str::words($course->description, 7, '...') }} --}}
                                                 </td>
                                                 {{-- <td><span class="badge badge-success">Admit</span></td> --}}
                                                 <td class="actions">
