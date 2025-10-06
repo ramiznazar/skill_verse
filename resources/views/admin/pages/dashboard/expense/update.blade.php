@@ -64,6 +64,9 @@
                                                 <option value="maintenance"
                                                     {{ old('ref_type', $expense->ref_type ?? '') == 'maintenance' ? 'selected' : '' }}>
                                                     Maintenance</option>
+                                                <option value="installment"
+                                                    {{ old('ref_type', $expense->ref_type ?? '') == 'installment' ? 'selected' : '' }}>
+                                                    Installment</option>
                                                 <option value="salary"
                                                     {{ old('ref_type', $expense->ref_type ?? '') == 'salary' ? 'selected' : '' }}>
                                                     Salary</option>

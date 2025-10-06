@@ -68,11 +68,11 @@
                                             
                                             <th>Category</th>
                                             <th>Duration</th>
-                                            <th>Full Fee</th>
+                                            <th>FullFee</th>
                                             <th>Discount%</th>
                                             <th>MinFee</th>
-                                            <th>Short Des</th>
-                                            <th>Des</th>
+                                            
+                                            
                                             <th>Options</th>
                                         </tr>
                                     </thead>
@@ -92,10 +92,8 @@
                                                 <td><?php echo e($course->full_fee); ?></td>
                                                 <td><?php echo e($course->discount); ?>%</td>
                                                 <td><?php echo e(intval($course->min_fee)); ?></td>
-                                                <td><?php echo e(\Illuminate\Support\Str::words($course->short_description, 5, '...')); ?>
-
-                                                <td><?php echo e(\Illuminate\Support\Str::words($course->description, 7, '...')); ?>
-
+                                                
+                                                
                                                 </td>
                                                 
                                                 <td class="actions">

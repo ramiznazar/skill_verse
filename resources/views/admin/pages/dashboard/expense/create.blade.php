@@ -56,6 +56,7 @@
                                                 <option value="stationery">Stationery</option>
                                                 <option value="utility">Utility</option>
                                                 <option value="maintenance">Maintenance</option>
+                                                <option value="installment">Installments</option>
                                                 <option value="salary">Salary</option>
                                                 <option value="commission">Commission</option>
                                                 <option value="Other">Other</option>
