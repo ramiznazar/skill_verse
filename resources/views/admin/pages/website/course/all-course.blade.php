@@ -6,9 +6,11 @@
                 <div class="col-md-6 col-sm-12">
                     <h2>Courses</h2>
                 </div>
-                <div class="col-md-6 col-sm-12 text-right">
-                    <a href="{{ route('course.create') }}" class="btn btn-sm btn-primary" title="">Create New</a>
-                </div>
+                @if (Auth::user()->role !== 'administrator')
+                    <div class="col-md-6 col-sm-12 text-right">
+                        <a href="{{ route('course.create') }}" class="btn btn-sm btn-primary" title="">Create New</a>
+                    </div>
+                @endif
             </div>
         </div>
         {{-- Store --}}
@@ -106,6 +108,13 @@
                                                             data-toggle="tooltip"
                                                             data-original-title="Add Programming Language">
                                                             <i class="fas fa-code" aria-hidden="true"></i>
+                                                        </a>
+
+                                                        {{-- View Course --}}
+                                                        <a href="{{ route('course.show', $course->id) }}"
+                                                            class="btn btn-sm btn-icon btn-pure btn-default"
+                                                            data-toggle="tooltip" data-original-title="View">
+                                                            <i class="icon-eye"></i>
                                                         </a>
 
                                                         <!-- Edit Button -->

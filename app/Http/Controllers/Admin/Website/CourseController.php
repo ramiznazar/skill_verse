@@ -33,12 +33,12 @@ class CourseController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'image'    => 'nullable|image',
-            'title'    => 'nullable|string|max:255',
-            'slug'     => 'required|string|max:255',
+            'image' => 'nullable|image',
+            'title' => 'nullable|string|max:255',
+            'slug' => 'required|string|max:255',
             'duration' => 'nullable|string|max:100',
-            'mode'     => 'nullable',
-            'level'    => 'nullable',
+            'mode' => 'nullable',
+            'level' => 'nullable',
             'short_description' => 'nullable',
             'description' => 'nullable',
             'full_fee' => 'nullable|string',
@@ -76,10 +76,12 @@ class CourseController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id)
     {
-        //
+        $course = Course::with(['courseCategory', 'outline'])->findOrFail($id);
+        return view('admin.pages.website.course.view', compact('course'));
     }
+
 
     /**
      * Show the form for editing the specified resource.
@@ -97,12 +99,12 @@ class CourseController extends Controller
     public function update(Request $request, string $id)
     {
         $request->validate([
-            'image'    => 'nullable|image',
-            'title'    => 'nullable|string|max:255',
-            'slug'    => 'required|string|max:255',
+            'image' => 'nullable|image',
+            'title' => 'nullable|string|max:255',
+            'slug' => 'required|string|max:255',
             'duration' => 'nullable|string|max:100',
-            'mode'     => 'nullable',
-            'level'     => 'nullable',
+            'mode' => 'nullable',
+            'level' => 'nullable',
             'short_description' => 'nullable',
             'description' => 'nullable',
             'full_fee' => 'nullable|string',

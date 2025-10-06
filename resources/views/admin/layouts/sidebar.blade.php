@@ -192,7 +192,7 @@
     <div class="sidebar-scroll">
         <div class="user-account">
             <div class="user_div">
-                <img src="{{ Auth::user()->image ? asset( Auth::user()->image) : asset('assets/admin/images/user.png') }}"
+                <img src="{{ Auth::user()->image ? asset(Auth::user()->image) : asset('assets/admin/images/user.png') }}"
                     class="user-photo" alt="User Profile Picture">
             </div>
 
@@ -306,8 +306,7 @@
                         <li> <a href="{{ route('fee-collector.index') }}">
                                 <i class="fas fa-money-bill-wave"></i><span>Fee Collector</span></a></li>
                         <li>
-                            <a href="#uiElements" class="has-arrow"><i
-                                    class="fas fa-receipt"></i><span>Expenses</span></a>
+                            <a href="#uiElements" class="has-arrow"><i class="fas fa-receipt"></i><span>Expenses</span></a>
                             <ul>
                                 <li><a href="{{ route('expense.index') }}">All Expense</a></li>
                                 <li><a href="{{ route('expense.create') }}">Add New Expense</a></li>
@@ -478,6 +477,8 @@
                         </li>
                         <li><a href="{{ route('fee-submission.index') }}"><i class="fas fa-money-check-alt"></i><span>Fee
                                     Submission</span></a></li>
+                        <li><a href="{{ route('course.index') }}"><i
+                                    class="fas fa-chalkboard-teacher"></i><span>Courses</span></a></li>
                         <li><a href="{{ route('message.index') }}"><i class="icon-bubbles"></i><span>Messages</span></a>
                         </li>
                         {{-- Website Changes --}}
