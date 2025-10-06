@@ -78,7 +78,7 @@
                         <h5>Outlines</h5>
                         @if(isset($course->outlines) && count($course->outlines) > 0)
                             <ul>
-                                @foreach($course->outlines as $outline)
+                                @foreach($course->outline as $outline)
                                     <li>{{ $outline->title }}</li>
                                 @endforeach
                             </ul>
