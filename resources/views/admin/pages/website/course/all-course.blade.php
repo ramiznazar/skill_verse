@@ -68,7 +68,7 @@
                                             <th>Full Fee</th>
                                             <th>Discount%</th>
                                             <th>MinFee</th>
-                                            <th>Short Des</th>
+                                            {{-- <th>Short Des</th> --}}
                                             {{-- <th>Des</th> --}}
                                             <th>Options</th>
                                         </tr>
@@ -89,7 +89,7 @@
                                                 <td>{{ $course->full_fee }}</td>
                                                 <td>{{ $course->discount }}%</td>
                                                 <td>{{ intval($course->min_fee) }}</td>
-                                                <td>{{ \Illuminate\Support\Str::words($course->short_description, 5, '...') }}
+                                                {{-- <td>{{ \Illuminate\Support\Str::words($course->short_description, 5, '...') }} --}}
                                                 {{-- <td>{{ \Illuminate\Support\Str::words($course->description, 7, '...') }} --}}
                                                 </td>
                                                 {{-- <td><span class="badge badge-success">Admit</span></td> --}}
