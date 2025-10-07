@@ -344,7 +344,10 @@
 
                         // soft highlight
                         row.css('background-color', '#d4edda');
-                        setTimeout(() => row.css('background-color', ''), 600);
+                        setTimeout(() => row.css('background-color', ''), 100);
+                        // ⚡ toastr success only 1 s
+                        toastr.options.timeOut = 1000;
+                        toastr.options.fadeOut = 200;
 
                         toastr.success(`Marked ${response.status} successfully!`);
                     },
