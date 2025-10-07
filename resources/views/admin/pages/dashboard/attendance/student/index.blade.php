@@ -193,6 +193,7 @@
                                                         Leave
                                                     </button>
 
+                                                    {{-- LATE  --}}
                                                     <form method="POST"
                                                         action="{{ route('student.attendance.markLate') }}"
                                                         class="d-inline">
@@ -201,9 +202,13 @@
                                                             value="{{ $student->id }}">
                                                         <input type="hidden" name="date"
                                                             value="{{ $date }}">
-                                                        <button type="submit"
-                                                            class="btn btn-sm btn-warning">Late</button>
+                                                        <button type="submit" class="btn btn-sm btn-warning js-mark-late"
+                                                            data-student="{{ $student->id }}"
+                                                            data-date="{{ $date }}">
+                                                            Late
+                                                        </button>
                                                     </form>
+
                                                     {{-- 🔗 History --}}
                                                     <a href="{{ route('student.attendance.history', $student->id) }}"
                                                         class="btn btn-sm btn-info">
@@ -236,7 +241,6 @@
                                             <div class="modal-body">
                                                 <input type="hidden" name="admission_id" id="leaveStudentId">
                                                 <input type="hidden" name="date" value="{{ $date }}">
-
                                                 <div class="form-group">
                                                     <label for="remarks">Remarks (Optional)</label>
                                                     <textarea name="remarks" id="leaveRemarks" class="form-control" rows="3"
@@ -252,7 +256,6 @@
                                     </div>
                                 </div>
                             </div>
-
 
                         </div>
                     </div>
@@ -280,6 +283,128 @@
                 const studentId = button.data('student');
                 $('#leaveStudentId').val(studentId);
                 $('#leaveRemarks').val('');
+            });
+        });
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Always send CSRF header with AJAX
+            $.ajaxSetup({
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                }
+            });
+
+            // Reusable AJAX attendance updater
+            function markAttendance(studentId, date, route, remarks = '') {
+                if (!studentId || !date) {
+                    toastr.error('Missing student or date.');
+                    return;
+                }
+
+                $.ajax({
+                    url: route,
+                    method: 'POST',
+                    data: {
+                        admission_id: studentId,
+                        date: date,
+                        remarks: remarks
+                    },
+                    beforeSend: function() {
+                        $('button[data-student="' + studentId + '"]').prop('disabled', true);
+                    },
+                    success: function(response) {
+                        const row = $('button[data-student="' + studentId + '"]').closest('tr');
+                        const statusCell = row.find('td:nth-child(5) span');
+
+                        let badgeClass = 'badge-secondary';
+                        switch (response.status) {
+                            case 'present':
+                                badgeClass = 'badge-success';
+                                break;
+                            case 'absent':
+                                badgeClass = 'badge-dark';
+                                break;
+                            case 'late':
+                                badgeClass = 'badge-info';
+                                break;
+                            case 'leave':
+                                badgeClass = 'badge-warning';
+                                break;
+                        }
+
+                        statusCell
+                            .removeClass()
+                            .addClass('badge ' + badgeClass)
+                            .text(response.status.charAt(0).toUpperCase() + response.status.slice(1));
+
+                        // soft highlight
+                        row.css('background-color', '#d4edda');
+                        setTimeout(() => row.css('background-color', ''), 600);
+
+                        toastr.success(`Marked ${response.status} successfully!`);
+                    },
+                    error: function(xhr) {
+                        console.error(xhr.responseText || xhr.statusText);
+                        toastr.error('Failed to update attendance.');
+                    },
+                    complete: function() {
+                        $('button[data-student="' + studentId + '"]').prop('disabled', false);
+                    }
+                });
+            }
+
+            // Present
+            $('button.btn-success').on('click', function(e) {
+                e.preventDefault();
+                const $tr = $(this).closest('tr');
+                const id = $tr.find('input[name=admission_id]').val();
+                const date = $tr.find('input[name=date]').val() || '{{ $date }}';
+                markAttendance(id, date, "{{ route('student.attendance.markPresent') }}");
+            });
+
+            // Absent
+            $('button.btn-dark').on('click', function(e) {
+                e.preventDefault();
+                const $tr = $(this).closest('tr');
+                const id = $tr.find('input[name=admission_id]').val();
+                const date = $tr.find('input[name=date]').val() || '{{ $date }}';
+                markAttendance(id, date, "{{ route('student.attendance.markAbsent') }}");
+            });
+
+            // Late — IMPORTANT: target ONLY our table button, not modal's Save Leave
+            $(document).on('click', 'button.js-mark-late', function(e) {
+                e.preventDefault();
+                const id = $(this).data('student') || $(this).closest('tr').find('input[name=admission_id]')
+                    .val();
+                const date = $(this).data('date') || $(this).closest('tr').find('input[name=date]').val() ||
+                    '{{ $date }}';
+                markAttendance(id, date, "{{ route('student.attendance.markLate') }}");
+            });
+
+            // Set student id when opening Leave modal
+            $('#leaveModal').on('show.bs.modal', function(event) {
+                const button = $(event.relatedTarget);
+                const studentId = button.data('student');
+                $('#leaveStudentId').val(studentId);
+                $('#leaveRemarks').val('');
+            });
+
+            // Leave submit via AJAX
+            $('#leaveModal form').on('submit', function(e) {
+                e.preventDefault();
+                const studentId = $('#leaveStudentId').val();
+                const remarks = $('#leaveRemarks').val();
+                const date = '{{ $date }}';
+
+                if (!studentId) {
+                    toastr.error('Student ID missing — please reopen the modal.');
+                    return;
+                }
+
+                markAttendance(studentId, date, "{{ route('student.attendance.markLeave') }}", remarks ||
+                    '');
+                $('#leaveModal').modal('hide');
             });
         });
     </script>

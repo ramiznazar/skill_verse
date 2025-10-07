@@ -90,12 +90,38 @@ class StudentAttendanceController extends Controller
      */
     public function markPresent(Request $request)
     {
-        return $this->setStatus($request, 'present');
+        $result = $this->setStatus($request, 'present');
+
+        // 🔄 Return JSON if AJAX
+        if ($request->ajax()) {
+            return response()->json(['status' => 'present']);
+        }
+
+        return $result;
     }
+
     public function markAbsent(Request $request)
     {
-        return $this->setStatus($request, 'absent');
+        $result = $this->setStatus($request, 'absent');
+
+        if ($request->ajax()) {
+            return response()->json(['status' => 'absent']);
+        }
+
+        return $result;
     }
+
+    public function markLate(Request $request)
+    {
+        $result = $this->setStatus($request, 'late');
+
+        if ($request->ajax()) {
+            return response()->json(['status' => 'late']);
+        }
+
+        return $result;
+    }
+
     public function markLeave(Request $request)
     {
         $request->validate([
@@ -117,12 +143,12 @@ class StudentAttendanceController extends Controller
             ]
         );
 
-        return back()->with('success', 'Leave marked successfully!');
-    }
+        // 🔄 AJAX support
+        if ($request->ajax()) {
+            return response()->json(['status' => 'leave', 'remarks' => $request->remarks]);
+        }
 
-    public function markLate(Request $request)
-    {
-        return $this->setStatus($request, 'late');
+        return back()->with('success', 'Leave marked successfully!');
     }
 
     protected function setStatus(Request $request, string $status)
@@ -145,6 +171,12 @@ class StudentAttendanceController extends Controller
             ]
         );
 
+        // 🔄 If AJAX — just return response
+        if ($request->ajax()) {
+            return response()->json(['status' => $status]);
+        }
+
+        // Normal request fallback
         return back()->with('success', 'Attendance updated!');
     }
 

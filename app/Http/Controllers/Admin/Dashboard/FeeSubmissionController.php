@@ -122,29 +122,6 @@ class FeeSubmissionController extends Controller
                     'submission_date' => now(),
                 ]);
 
-                // 🔔 Create & attach per-user notification (Fee Submission)
-                $notification = Notification::create([
-                    'title' => 'Fee Submitted',
-                    'message' => '₨' . number_format($feeSubmission->amount) . ' received from ' . $feeSubmission->admission->name,
-                    'icon' => 'fa fa-money',
-                    'type' => 'fee',
-                    'status' => 1,
-                ]);
-
-                // Attach to target roles (no Spatie; using users.role column)
-                $targetRoles = ['admin', 'administrator', 'partner'];
-                $userIds = User::whereIn('role', $targetRoles)->pluck('id');
-
-                if ($userIds->isNotEmpty()) {
-                    $now = now();
-                    $attach = [];
-                    foreach ($userIds as $uid) {
-                        $attach[$uid] = ['is_read' => false, 'created_at' => $now, 'updated_at' => $now];
-                    }
-                    $notification->users()->syncWithoutDetaching($attach);
-                }
-
-
                 $totalAmountThisSubmission += $amount;
 
                 // ✅ Send email to student
@@ -258,6 +235,28 @@ class FeeSubmissionController extends Controller
                 ->count('admission_id');
 
             $teacherSalary->save();
+        }
+        
+        // 🔔 Create & attach per-user notification (Fee Submission)
+        $notification = Notification::create([
+            'title' => 'Fee Submitted',
+            'message' => '₨' . number_format($feeSubmission->amount) . ' received from ' . $feeSubmission->admission->name,
+            'icon' => 'fa fa-money',
+            'type' => 'fee',
+            'status' => 1,
+        ]);
+
+        // Attach to target roles (no Spatie; using users.role column)
+        $targetRoles = ['admin', 'administrator', 'partner'];
+        $userIds = User::whereIn('role', $targetRoles)->pluck('id');
+
+        if ($userIds->isNotEmpty()) {
+            $now = now();
+            $attach = [];
+            foreach ($userIds as $uid) {
+                $attach[$uid] = ['is_read' => false, 'created_at' => $now, 'updated_at' => $now];
+            }
+            $notification->users()->syncWithoutDetaching($attach);
         }
 
         return redirect()->route('fee-submission.index')->with('success', 'Fee submitted successfully.');
