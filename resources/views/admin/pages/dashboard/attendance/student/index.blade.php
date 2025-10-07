@@ -338,15 +338,11 @@
                             .addClass('badge ' + badgeClass)
                             .text(response.status.charAt(0).toUpperCase() + response.status.slice(1));
 
-                        // soft highlight
+                        // ⚡ very quick visual feedback (no toast)
                         row.css('background-color', '#d4edda');
-                        setTimeout(() => row.css('background-color', ''), 100);
-                        // ⚡ toastr success only 1 s
-                        toastr.options.timeOut = 1000;
-                        toastr.options.fadeOut = 200;
-
-                        toastr.success(`Marked ${response.status} successfully!`);
+                        setTimeout(() => row.css('background-color', ''), 150);
                     },
+
                     error: function(xhr) {
                         console.error(xhr.responseText || xhr.statusText);
                         toastr.error('Failed to update attendance.');
