@@ -1,6 +1,6 @@
-@extends('admin.layouts.main')
 
-@section('content')
+
+<?php $__env->startSection('content'); ?>
     <div id="main-content">
         <div class="block-header">
             <div class="row clearfix">
@@ -8,28 +8,29 @@
                     <h2>Teacher Attendance</h2>
                 </div>
                 <div class="col-md-6 col-sm-12 text-right">
-                    @if ($selectedCourseId && $date)
-                        <form method="POST" action="{{ route('teacher.attendance.bulkPresent') }}" class="d-inline">
-                            @csrf
-                            <input type="hidden" name="course_id" value="{{ $selectedCourseId }}">
-                            <input type="hidden" name="date" value="{{ $date }}">
-                            @if ($selectedShift)
-                                <input type="hidden" name="shift" value="{{ $selectedShift }}">
-                            @endif
+                    <?php if($selectedCourseId && $date): ?>
+                        <form method="POST" action="<?php echo e(route('teacher.attendance.bulkPresent')); ?>" class="d-inline">
+                            <?php echo csrf_field(); ?>
+                            <input type="hidden" name="course_id" value="<?php echo e($selectedCourseId); ?>">
+                            <input type="hidden" name="date" value="<?php echo e($date); ?>">
+                            <?php if($selectedShift): ?>
+                                <input type="hidden" name="shift" value="<?php echo e($selectedShift); ?>">
+                            <?php endif; ?>
                             <button type="submit" class="btn btn-sm btn-success"><i class="icon-check"></i> Mark All
                                 Present</button>
                         </form>
-                    @endif
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
 
-        @if (session('success'))
+        <?php if(session('success')): ?>
             <div class="alert alert-success alert-dismissible fade show">
-                {{ session('success') }}
+                <?php echo e(session('success')); ?>
+
                 <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
             </div>
-        @endif
+        <?php endif; ?>
 
         <div class="container-fluid">
             <div class="row clearfix">
@@ -46,48 +47,49 @@
                         </div>
 
                         <div class="body">
-                            {{-- Filters --}}
-                            <form method="GET" action="{{ route('teacher.attendance.index') }}" id="filterForm"
+                            
+                            <form method="GET" action="<?php echo e(route('teacher.attendance.index')); ?>" id="filterForm"
                                 class="mb-3">
                                 <div class="row" style="margin-top: 15px;">
                                     <div class="col-md-12 mb-2">
                                         <input type="text" name="search" class="form-control"
-                                            value="{{ $search }}" placeholder="Search teacher...">
+                                            value="<?php echo e($search); ?>" placeholder="Search teacher...">
                                     </div>
                                     <div class="col-md-4 mb-2">
                                         <select name="course_id" class="form-control">
                                             <option value="">Filter by Course</option>
-                                            @foreach ($courses as $course)
-                                                <option value="{{ $course->id }}"
-                                                    {{ (string) $selectedCourseId === (string) $course->id ? 'selected' : '' }}>
-                                                    {{ $course->title }}
+                                            <?php $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($course->id); ?>"
+                                                    <?php echo e((string) $selectedCourseId === (string) $course->id ? 'selected' : ''); ?>>
+                                                    <?php echo e($course->title); ?>
+
                                                 </option>
-                                            @endforeach
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                     </div>
                                     <div class="col-md-4 mb-2">
                                         <select name="shift" class="form-control">
                                             <option value="">Filter by Shift</option>
-                                            <option value="morning" {{ $selectedShift === 'morning' ? 'selected' : '' }}>
+                                            <option value="morning" <?php echo e($selectedShift === 'morning' ? 'selected' : ''); ?>>
                                                 Morning</option>
-                                            <option value="evening" {{ $selectedShift === 'evening' ? 'selected' : '' }}>
+                                            <option value="evening" <?php echo e($selectedShift === 'evening' ? 'selected' : ''); ?>>
                                                 Evening</option>
                                         </select>
                                     </div>
                                     <div class="col-md-4 mb-2">
                                         <input type="date" name="date" class="form-control"
-                                            value="{{ $date }}">
+                                            value="<?php echo e($date); ?>">
                                     </div>
                                 </div>
                             </form>
 
-                            {{-- Summary --}}
+                            
                             <div class="row mb-4">
                                 <div class="col-md-3">
                                     <div class="card border-0 shadow-sm text-center">
                                         <div class="body">
                                             <h6 class="text-muted">Total</h6>
-                                            <h3>{{ $totalTeachers }}</h3>
+                                            <h3><?php echo e($totalTeachers); ?></h3>
                                         </div>
                                     </div>
                                 </div>
@@ -95,7 +97,7 @@
                                     <div class="card border-0 shadow-sm text-center">
                                         <div class="body">
                                             <h6 class="text-muted">Present</h6>
-                                            <h3 class="text-success">{{ $totalPresents }}</h3>
+                                            <h3 class="text-success"><?php echo e($totalPresents); ?></h3>
                                         </div>
                                     </div>
                                 </div>
@@ -103,7 +105,7 @@
                                     <div class="card border-0 shadow-sm text-center">
                                         <div class="body">
                                             <h6 class="text-muted">Absent</h6>
-                                            <h3 class="text-danger">{{ $totalAbsents }}</h3>
+                                            <h3 class="text-danger"><?php echo e($totalAbsents); ?></h3>
                                         </div>
                                     </div>
                                 </div>
@@ -111,13 +113,13 @@
                                     <div class="card border-0 shadow-sm text-center">
                                         <div class="body">
                                             <h6 class="text-muted">Leave</h6>
-                                            <h3 class="text-warning">{{ $totalLeaves }}</h3>
+                                            <h3 class="text-warning"><?php echo e($totalLeaves); ?></h3>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            {{-- Table --}}
+                            
                             <div class="table-responsive">
                                 <table class="table table-hover mb-0">
                                     <thead class="thead-dark">
@@ -126,99 +128,97 @@
                                             <th>Name</th>
                                             <th>Course</th>
                                             <th>Shift(s)</th>
-                                            <th>Status ({{ $date }})</th>
+                                            <th>Status (<?php echo e($date); ?>)</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        @forelse($teachers as $t)
-                                            @php $attendance = $attendances[$t->id] ?? null; @endphp
+                                        <?php $__empty_1 = true; $__currentLoopData = $teachers; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $t): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
+                                            <?php $attendance = $attendances[$t->id] ?? null; ?>
                                             <tr>
-                                                <td>{{ $loop->iteration }}</td>
-                                                <td>{{ $t->name }}</td>
-                                                <td>{{ $t->course->title ?? '-' }}</td>
+                                                <td><?php echo e($loop->iteration); ?></td>
+                                                <td><?php echo e($t->name); ?></td>
+                                                <td><?php echo e($t->course->title ?? '-'); ?></td>
                                                 <td>
-                                                    @forelse($t->batches as $b)
+                                                    <?php $__empty_2 = true; $__currentLoopData = $t->batches; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $b): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_2 = false; ?>
                                                         <span class="badge badge-light d-inline-block mb-1">
-                                                            {{ $b->title }} ({{ ucfirst($b->shift ?? '-') }})
+                                                            <?php echo e($b->title); ?> (<?php echo e(ucfirst($b->shift ?? '-')); ?>)
                                                         </span><br>
-                                                    @empty
+                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_2): ?>
                                                         <span class="text-muted">-</span>
-                                                    @endforelse
+                                                    <?php endif; ?>
                                                 </td>
                                                 <td>
-                                                    @if (!$attendance)
+                                                    <?php if(!$attendance): ?>
                                                         <span class="badge badge-secondary">Not Marked</span>
-                                                    @else
+                                                    <?php else: ?>
                                                         <span
-                                                            class="badge badge-{{ $attendance->status === 'present' ? 'success' : ($attendance->status === 'absent' ? 'danger' : ($attendance->status === 'leave' ? 'warning' : 'info')) }}">
-                                                            {{ ucfirst($attendance->status) }}
+                                                            class="badge badge-<?php echo e($attendance->status === 'present' ? 'success' : ($attendance->status === 'absent' ? 'danger' : ($attendance->status === 'leave' ? 'warning' : 'info'))); ?>">
+                                                            <?php echo e(ucfirst($attendance->status)); ?>
+
                                                         </span>
-                                                        {{-- @if ($attendance->remarks)
-                                                            <small
-                                                                class="text-muted d-block">{{ $attendance->remarks }}</small>
-                                                        @endif --}}
-                                                    @endif
+                                                        
+                                                    <?php endif; ?>
                                                 </td>
                                                 <td class="text-nowrap">
                                                     <form method="POST"
-                                                        action="{{ route('teacher.attendance.markPresent') }}"
+                                                        action="<?php echo e(route('teacher.attendance.markPresent')); ?>"
                                                         class="d-inline">
-                                                        @csrf
+                                                        <?php echo csrf_field(); ?>
                                                         <input type="hidden" name="teacher_id"
-                                                            value="{{ $t->id }}">
+                                                            value="<?php echo e($t->id); ?>">
                                                         <input type="hidden" name="date"
-                                                            value="{{ $date }}">
+                                                            value="<?php echo e($date); ?>">
                                                         <button type="submit"
                                                             class="btn btn-sm btn-success">Present</button>
                                                     </form>
                                                     <form method="POST"
-                                                        action="{{ route('teacher.attendance.markAbsent') }}"
+                                                        action="<?php echo e(route('teacher.attendance.markAbsent')); ?>"
                                                         class="d-inline">
-                                                        @csrf
+                                                        <?php echo csrf_field(); ?>
                                                         <input type="hidden" name="teacher_id"
-                                                            value="{{ $t->id }}">
+                                                            value="<?php echo e($t->id); ?>">
                                                         <input type="hidden" name="date"
-                                                            value="{{ $date }}">
+                                                            value="<?php echo e($date); ?>">
                                                         <button type="submit" class="btn btn-sm btn-dark">Absent</button>
                                                     </form>
 
-                                                    {{-- Leave via modal --}}
+                                                    
                                                     <button type="button" class="btn btn-sm btn-danger"
                                                         data-toggle="modal" data-target="#leaveModal"
-                                                        data-teacher="{{ $t->id }}">
+                                                        data-teacher="<?php echo e($t->id); ?>">
                                                         Leave
                                                     </button>
 
                                                     <button type="submit" class="btn btn-sm btn-warning js-mark-late"
-                                                        data-teacher="{{ $t->id }}"
-                                                        data-date="{{ $date }}">
+                                                        data-teacher="<?php echo e($t->id); ?>"
+                                                        data-date="<?php echo e($date); ?>">
                                                         Late
                                                     </button>
 
-                                                    <a href="{{ route('teacher.attendance.history', $t->id) }}"
+                                                    <a href="<?php echo e(route('teacher.attendance.history', $t->id)); ?>"
                                                         class="btn btn-sm btn-info">
                                                         History
                                                     </a>
                                                 </td>
                                             </tr>
-                                        @empty
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                             <tr>
                                                 <td colspan="6" class="text-center text-muted">No teachers found for
                                                     this filter.</td>
                                             </tr>
-                                        @endforelse
+                                        <?php endif; ?>
                                     </tbody>
                                 </table>
                             </div>
 
-                            {{-- Leave Modal --}}
+                            
                             <div class="modal fade" id="leaveModal" tabindex="-1" role="dialog"
                                 aria-labelledby="leaveModalLabel" aria-hidden="true">
                                 <div class="modal-dialog modal-dialog-centered" role="document">
                                     <div class="modal-content">
-                                        <form method="POST" action="{{ route('teacher.attendance.markLeave') }}">
-                                            @csrf
+                                        <form method="POST" action="<?php echo e(route('teacher.attendance.markLeave')); ?>">
+                                            <?php echo csrf_field(); ?>
                                             <div class="modal-header bg-warning text-dark">
                                                 <h5 class="modal-title" id="leaveModalLabel">Mark Leave (Teacher)</h5>
                                                 <button type="button" class="close"
@@ -226,7 +226,7 @@
                                             </div>
                                             <div class="modal-body">
                                                 <input type="hidden" name="teacher_id" id="leaveTeacherId">
-                                                <input type="hidden" name="date" value="{{ $date }}">
+                                                <input type="hidden" name="date" value="<?php echo e($date); ?>">
                                                 <div class="form-group">
                                                     <label>Remarks (Optional)</label>
                                                     <textarea name="remarks" id="leaveRemarks" class="form-control" rows="3"
@@ -243,15 +243,15 @@
                                 </div>
                             </div>
 
-                        </div> {{-- body --}}
+                        </div> 
                     </div>
                 </div>
             </div>
         </div>
     </div>
-@endsection
+<?php $__env->stopSection(); ?>
 
-@section('additional-javascript')
+<?php $__env->startSection('additional-javascript'); ?>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Auto-submit filters
@@ -274,7 +274,7 @@
             // ✅ Set CSRF for AJAX
             $.ajaxSetup({
                 headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                    'X-CSRF-TOKEN': '<?php echo e(csrf_token()); ?>'
                 }
             });
 
@@ -336,8 +336,8 @@
                 e.preventDefault();
                 const row = $(this).closest('tr');
                 const id = row.find('input[name=teacher_id]').val();
-                const date = row.find('input[name=date]').val() || '{{ $date }}';
-                markAttendance(id, date, "{{ route('teacher.attendance.markPresent') }}");
+                const date = row.find('input[name=date]').val() || '<?php echo e($date); ?>';
+                markAttendance(id, date, "<?php echo e(route('teacher.attendance.markPresent')); ?>");
             });
 
             // ✅ Absent
@@ -345,8 +345,8 @@
                 e.preventDefault();
                 const row = $(this).closest('tr');
                 const id = row.find('input[name=teacher_id]').val();
-                const date = row.find('input[name=date]').val() || '{{ $date }}';
-                markAttendance(id, date, "{{ route('teacher.attendance.markAbsent') }}");
+                const date = row.find('input[name=date]').val() || '<?php echo e($date); ?>';
+                markAttendance(id, date, "<?php echo e(route('teacher.attendance.markAbsent')); ?>");
             });
 
             // ✅ Late — only target our .js-mark-late button (avoid modal conflict)
@@ -354,8 +354,8 @@
                 e.preventDefault();
                 const id = $(this).data('teacher') || $(this).closest('tr').find('input[name=teacher_id]')
                     .val();
-                const date = $(this).data('date') || '{{ $date }}';
-                markAttendance(id, date, "{{ route('teacher.attendance.markLate') }}");
+                const date = $(this).data('date') || '<?php echo e($date); ?>';
+                markAttendance(id, date, "<?php echo e(route('teacher.attendance.markLate')); ?>");
             });
 
             // ✅ Leave modal submit via AJAX
@@ -363,12 +363,14 @@
                 e.preventDefault();
                 const teacherId = $('#leaveTeacherId').val();
                 const remarks = $('#leaveRemarks').val();
-                const date = '{{ $date }}';
+                const date = '<?php echo e($date); ?>';
                 if (!teacherId) return;
-                markAttendance(teacherId, date, "{{ route('teacher.attendance.markLeave') }}", remarks ||
+                markAttendance(teacherId, date, "<?php echo e(route('teacher.attendance.markLeave')); ?>", remarks ||
                     '');
                 $('#leaveModal').modal('hide');
             });
         });
     </script>
-@endsection
+<?php $__env->stopSection(); ?>
+
+<?php echo $__env->make('admin.layouts.main', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH E:\projects\codezy\zain-changes\codezy\resources\views/admin/pages/dashboard/attendance/teacher/index.blade.php ENDPATH**/ ?>
