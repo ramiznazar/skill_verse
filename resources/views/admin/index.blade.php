@@ -367,7 +367,6 @@
                 });
             }
         }
-
         // Attach event listeners
         document.getElementById('btnLeadMonthly').addEventListener('click', function() {
             renderLeadSourceChart(@json($leadSourceLabels), @json($leadSourceSeriesMonthly));

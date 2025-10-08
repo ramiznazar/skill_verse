@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Dashboard;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Carbon;
 use Illuminate\Http\Request;
 use App\Models\Course;
 use App\Models\Lead;
@@ -18,11 +19,13 @@ class LeadController extends Controller
 
         $search = trim((string) $request->get('search'));
         $courseId = $request->get('course_id');
-        $leadType = $request->get('lead_type');
         $referralType = $request->get('referral_type');
         $status = $request->get('status');
+        $fromDate = $request->get('from_date'); // Y-m-d
+        $toDate = $request->get('to_date');   // Y-m-d
+        $month = $request->get('month');     // Y-m
 
-        // 🔎 Search filter
+        // 🔎 Search
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -35,14 +38,37 @@ class LeadController extends Controller
         if (!empty($courseId)) {
             $query->where('course_id', $courseId);
         }
-        if (!empty($leadType)) {
-            $query->where('lead_type', $leadType);
-        }
         if (!empty($referralType)) {
             $query->where('referral_type', $referralType);
         }
         if (!empty($status)) {
             $query->where('status', $status);
+        }
+
+        // 🗓️ Date Filters (timestamps-aware)
+        // Priority: month > date-range
+        if (!empty($month)) {
+            // $month format: "YYYY-MM"
+            try {
+                $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+                $end = (clone $start)->endOfMonth();
+                $query->whereBetween('created_at', [$start, $end]);
+            } catch (\Exception $e) {
+                // ignore invalid month
+            }
+        } else {
+            // Range or single-sided range
+            if (!empty($fromDate) && !empty($toDate)) {
+                $start = Carbon::createFromFormat('Y-m-d', $fromDate)->startOfDay();
+                $end = Carbon::createFromFormat('Y-m-d', $toDate)->endOfDay();
+                $query->whereBetween('created_at', [$start, $end]);
+            } elseif (!empty($fromDate)) {
+                $start = Carbon::createFromFormat('Y-m-d', $fromDate)->startOfDay();
+                $query->where('created_at', '>=', $start);
+            } elseif (!empty($toDate)) {
+                $end = Carbon::createFromFormat('Y-m-d', $toDate)->endOfDay();
+                $query->where('created_at', '<=', $end);
+            }
         }
 
         $leads = $query->paginate(15)->withQueryString();
@@ -82,7 +108,7 @@ class LeadController extends Controller
 
         Lead::create($validated);
 
-        return redirect()->back()->with('store', 'Lead created successfully.');
+        return redirect()->route('lead.index')->with('store', 'Lead created successfully.');
     }
 
     public function edit(Lead $lead)

@@ -405,7 +405,7 @@
                 let html = '<option value="">Select Batch</option>';
                 data.forEach(batch => {
                     html +=
-                        `<option value="${batch.id}" data-fee="${batch.course.full_fee}">${batch.title} (${batch.shift})</option>`;
+                        `<option value="${batch.id}" data-fee="${batch.course.min_fee}">${batch.title} (${batch.shift})</option>`;
                 });
                 $('#batch_id').html(html);
             });

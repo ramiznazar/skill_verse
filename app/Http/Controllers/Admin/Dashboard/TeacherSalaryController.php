@@ -88,7 +88,7 @@ class TeacherSalaryController extends Controller
                         'ref_id' => $salary->id,
                     ],
                     [
-                        'title' => 'salary',
+                        'title' => 'Teacher Salary',
                         'amount' => (string) $amount,
                         'date' => now()->toDateString(),
                         'purpose' => "Salary payout for {$teacherName}",

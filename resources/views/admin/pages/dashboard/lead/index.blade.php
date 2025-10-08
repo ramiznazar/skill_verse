@@ -48,8 +48,9 @@
                                 </div>
 
                                 <div class="row" style="margin-top: 15px;">
+
                                     {{-- Course --}}
-                                    <div class="col-md-3 mb-2">
+                                    <div class="col-md-4 mb-2">
                                         <select name="course_id" class="form-control">
                                             <option value="">Filter by Course</option>
                                             @foreach ($courses as $course)
@@ -61,19 +62,8 @@
                                         </select>
                                     </div>
 
-                                    {{-- Lead Type --}}
-                                    <div class="col-md-3 mb-2">
-                                        <select name="lead_type" class="form-control">
-                                            <option value="">All Lead Types</option>
-                                            <option value="admin" {{ request('lead_type') === 'admin' ? 'selected' : '' }}>
-                                                Admin</option>
-                                            <option value="website"
-                                                {{ request('lead_type') === 'website' ? 'selected' : '' }}>Website</option>
-                                        </select>
-                                    </div>
-
                                     {{-- Referral Type --}}
-                                    <div class="col-md-3 mb-2">
+                                    <div class="col-md-4 mb-2">
                                         <select name="referral_type" class="form-control">
                                             <option value="">All Referral Types</option>
                                             <option value="ads"
@@ -87,7 +77,7 @@
                                     </div>
 
                                     {{-- Status --}}
-                                    <div class="col-md-3 mb-2">
+                                    <div class="col-md-4 mb-2">
                                         <select name="status" class="form-control">
                                             <option value="">All Status</option>
                                             <option value="new" {{ request('status') === 'new' ? 'selected' : '' }}>New
@@ -108,9 +98,31 @@
                                                 Interested</option>
                                         </select>
                                     </div>
+
+                                    {{-- 📅 Date Range --}}
+                                    <div class="col-md-3 mb-2">
+                                        <input type="date" name="from_date" class="form-control"
+                                            value="{{ request('from_date') }}" placeholder="From Date">
+                                    </div>
+
+                                    <div class="col-md-3 mb-2">
+                                        <input type="date" name="to_date" class="form-control"
+                                            value="{{ request('to_date') }}" placeholder="To Date">
+                                    </div>
+
+                                    {{-- 🗓️ Month Filter --}}
+                                    <div class="col-md-3 mb-2">
+                                        <input type="month" name="month" class="form-control"
+                                            value="{{ request('month') }}" placeholder="Select Month">
+                                    </div>
+                                    {{-- Reset Button (Right Aligned) --}}
+                                    <div class="col-md-3 text-right mb-2 ml-auto">
+                                        <a href="{{ route('lead.index') }}" class="btn btn-warning" style="width:220px;">
+                                             Reset
+                                        </a>
+                                    </div>
                                 </div>
                             </form>
-
 
                             {{-- 📊 Table --}}
                             <div class="table-responsive">
@@ -236,16 +248,26 @@
                 const form = document.getElementById('filterForm');
                 const search = form.querySelector('input[name="search"]');
                 const selects = form.querySelectorAll('select');
+                const dateInputs = form.querySelectorAll('input[type="date"], input[type="month"]');
 
                 // auto-submit on select change
                 selects.forEach(sel => sel.addEventListener('change', () => form.submit()));
 
+                // auto-submit on date/month change
+                dateInputs.forEach(inp => {
+                    inp.addEventListener('change', () => form.submit());
+                    // (optional) agar browser 'change' late fire kare to blur pe bhi:
+                    inp.addEventListener('blur', () => form.submit());
+                });
+
                 // debounce search typing
                 let t;
-                search && search.addEventListener('input', () => {
-                    clearTimeout(t);
-                    t = setTimeout(() => form.submit(), 500);
-                });
+                if (search) {
+                    search.addEventListener('input', () => {
+                        clearTimeout(t);
+                        t = setTimeout(() => form.submit(), 500);
+                    });
+                }
             });
         </script>
     @endsection

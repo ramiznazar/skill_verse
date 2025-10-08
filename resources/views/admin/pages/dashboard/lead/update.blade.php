@@ -169,6 +169,12 @@
                                             <option value="lost"
                                                 {{ old('status', $lead->status ?? '') == 'lost' ? 'selected' : '' }}>Lost
                                             </option>
+                                            <option value="interested"
+                                                {{ old('status', $lead->status ?? '') == 'interested' ? 'selected' : '' }}>Interested
+                                            </option>
+                                            <option value="not_interested"
+                                                {{ old('status', $lead->status ?? '') == 'not_interested' ? 'selected' : '' }}>Not Interested
+                                            </option>
                                         </select>
                                         @error('status')
                                             <small class="text-danger">{{ $message }}</small>
