@@ -6,6 +6,7 @@ use App\Models\Batch;
 use App\Models\Course;
 use App\Models\User;
 use App\Models\Account;
+use Illuminate\Support\Carbon;
 
 use App\Models\Admission;
 use App\Models\Notification;
@@ -33,13 +34,13 @@ class FeeSubmissionController extends Controller
             'feeSubmissions.account',
         ])->orderBy('joining_date', 'desc');
 
-        // read filters from query string
         $status = $request->get('status', 'all');
         $search = trim((string) $request->get('search'));
         $courseId = $request->get('course_id');
         $payment = $request->get('payment');
+        $month = $request->get('month'); // 🆕 month filter (format: 2025-10)
 
-        // 🔎 server-side search (across ALL pages)
+        // search
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
@@ -48,22 +49,18 @@ class FeeSubmissionController extends Controller
             });
         }
 
-        // 🎯 status filter
         if ($status !== 'all') {
             $query->where('fee_status', $status);
         }
 
-        // 📘 course filter (by id)
         if (!empty($courseId)) {
             $query->where('course_id', $courseId);
         }
 
-        // 💳 payment type filter
         if (!empty($payment)) {
             $query->where('payment_type', $payment);
         }
 
-        // keep filters in pagination links
         $admissions = $query->paginate(15)->withQueryString();
 
         $courses = Course::whereHas('admissions')
@@ -71,11 +68,36 @@ class FeeSubmissionController extends Controller
             ->orderBy('title')
             ->get();
 
-        $totalCollected = FeeSubmission::sum('amount');
-        $totalRemaining = Admission::sum('full_fee') - $totalCollected;
-        return view('admin.pages.dashboard.fee-submission.index', compact('admissions', 'status', 'courses', 'totalCollected', 'totalRemaining'));
-    }
+        // 🧮 Monthly filter calculation
+        if (!empty($month)) {
+            $startOfMonth = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+            $endOfMonth = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
 
+            // Collected in this month
+            $totalCollected = FeeSubmission::whereBetween('submission_date', [$startOfMonth, $endOfMonth])
+                ->sum('amount');
+
+            // Collected till this month (for remaining calculation)
+            $totalCollectedTillMonth = FeeSubmission::where('submission_date', '<=', $endOfMonth)
+                ->sum('amount');
+
+            $totalFee = Admission::sum('full_fee');
+            $totalRemaining = $totalFee - $totalCollectedTillMonth;
+        } else {
+            // Default: all time
+            $totalCollected = FeeSubmission::sum('amount');
+            $totalRemaining = Admission::sum('full_fee') - $totalCollected;
+        }
+
+        return view('admin.pages.dashboard.fee-submission.index', compact(
+            'admissions',
+            'status',
+            'courses',
+            'totalCollected',
+            'totalRemaining',
+            'month'
+        ));
+    }
     public function create($id)
     {
         $admission = Admission::findOrFail($id);
@@ -236,7 +258,7 @@ class FeeSubmissionController extends Controller
 
             $teacherSalary->save();
         }
-        
+
         // 🔔 Create & attach per-user notification (Fee Submission)
         $notification = Notification::create([
             'title' => 'Fee Submitted',

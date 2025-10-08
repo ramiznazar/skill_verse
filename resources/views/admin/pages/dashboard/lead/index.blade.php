@@ -118,7 +118,7 @@
                                     {{-- Reset Button (Right Aligned) --}}
                                     <div class="col-md-3 text-right mb-2 ml-auto">
                                         <a href="{{ route('lead.index') }}" class="btn btn-warning" style="width:220px;">
-                                             Reset
+                                            Reset
                                         </a>
                                     </div>
                                 </div>
@@ -135,8 +135,8 @@
                                             <th>Lead Type</th>
                                             <th>Phone</th>
                                             <th>Referral Type</th>
-                                            <th>Address</th>
                                             <th>Status</th>
+                                            <th>Address</th>
                                             <th>Options</th>
                                         </tr>
                                     </thead>
@@ -155,8 +155,6 @@
                                                 <td><span
                                                         class="badge badge-info">{{ ucfirst($lead->referral_type) }}</span>
                                                 </td>
-                                                <td>{{ $lead->address }}</td>
-
                                                 {{-- Status --}}
                                                 <td>
                                                     @switch($lead->status)
@@ -188,6 +186,7 @@
                                                             <span class="badge badge-light">-</span>
                                                     @endswitch
                                                 </td>
+                                                <td>{{ $lead->address }}</td>
 
                                                 <td class="text-nowrap">
                                                     <div class="d-flex align-items-center" style="column-gap: 5px;">

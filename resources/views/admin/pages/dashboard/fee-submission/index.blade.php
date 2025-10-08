@@ -37,7 +37,7 @@
                                 </div>
 
                                 <div class="row" style="margin-top: 15px">
-                                    <div class="col-md-4 mb-2">
+                                    <div class="col-md-3 mb-2">
                                         <select name="course_id" id="filter-course" class="form-control">
                                             <option value="">Filter by Course</option>
                                             @foreach ($courses as $course)
@@ -49,7 +49,7 @@
                                         </select>
                                     </div>
 
-                                    <div class="col-md-4 mb-2">
+                                    <div class="col-md-3 mb-2">
                                         <select name="status" id="filter-status" class="form-control">
                                             <option value="all"
                                                 {{ request('status', 'all') === 'all' ? 'selected' : '' }}>All Fees Status
@@ -64,7 +64,7 @@
                                         </select>
                                     </div>
 
-                                    <div class="col-md-4 mb-2">
+                                    <div class="col-md-3 mb-2">
                                         <select name="payment" id="filter-payment" class="form-control">
                                             <option value="" {{ request('payment') ? '' : 'selected' }}>All Payment
                                                 Types</option>
@@ -75,6 +75,11 @@
                                                 {{ request('payment') === 'installment' ? 'selected' : '' }}>Installment
                                             </option>
                                         </select>
+                                    </div>
+
+                                    <div class="col-md-3 mb-2">
+                                        <input type="month" name="month" value="{{ request('month') }}"
+                                            class="form-control">
                                     </div>
                                 </div>
                             </form>
@@ -214,7 +219,6 @@
                                                     </td>
                                                 </tr>
                                             @endif
-                                            
                                         @endforeach
                                     </tbody>
                                 </table>
