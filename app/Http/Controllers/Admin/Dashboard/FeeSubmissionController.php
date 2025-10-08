@@ -26,85 +26,95 @@ use App\Mail\FeeSubmissionNotification;
 class FeeSubmissionController extends Controller
 {
     public function index(Request $request)
-{
-    $query = Admission::with([
-        'course',
-        'batch',
-        'feeSubmissions.user',
-        'feeSubmissions.account',
-    ])->orderBy('joining_date', 'desc');
+    {
+        $query = Admission::with([
+            'course',
+            'batch',
+            'feeSubmissions.user',
+            'feeSubmissions.account',
+        ])->orderBy('joining_date', 'desc');
 
-    $status = $request->get('status', 'all');
-    $search = trim((string) $request->get('search'));
-    $courseId = $request->get('course_id');
-    $payment = $request->get('payment');
-    $month = $request->get('month'); // 🆕 month filter (YYYY-MM)
+        $status = $request->get('status', 'all');
+        $search = trim((string) $request->get('search'));
+        $courseId = $request->get('course_id');
+        $payment = $request->get('payment');
+        $month = $request->get('month'); // format: YYYY-MM
 
-    // 🔎 Search
-    if ($search !== '') {
-        $query->where(function ($q) use ($search) {
-            $q->where('name', 'like', "%{$search}%")
-                ->orWhereHas('course', fn($c) => $c->where('title', 'like', "%{$search}%"))
-                ->orWhereHas('batch', fn($b) => $b->where('title', 'like', "%{$search}%"));
-        });
-    }
-
-    // 🎯 Status filter
-    if ($status !== 'all') {
-        $query->where('fee_status', $status);
-    }
-
-    // 📘 Course filter
-    if (!empty($courseId)) {
-        $query->where('course_id', $courseId);
-    }
-
-    // 💳 Payment type filter
-    if (!empty($payment)) {
-        $query->where('payment_type', $payment);
-    }
-
-    // 🗓️ Month filter
-    if (!empty($month)) {
-        try {
-            $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
-            $end = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
-
-            // show only those admissions who paid in that month
-            $query->whereHas('feeSubmissions', function ($q) use ($start, $end) {
-                $q->whereBetween('submission_date', [$start, $end]);
+        // 🔎 Search filter
+        if ($search !== '') {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhereHas('course', fn($c) => $c->where('title', 'like', "%{$search}%"))
+                    ->orWhereHas('batch', fn($b) => $b->where('title', 'like', "%{$search}%"));
             });
+        }
 
-            // totals for that month
-            $totalCollected = FeeSubmission::whereBetween('submission_date', [$start, $end])->sum('amount');
+        // 🎯 Status filter
+        if ($status !== 'all') {
+            $query->where('fee_status', $status);
+        }
 
-            // total remaining till that month
-            $totalCollectedTillMonth = FeeSubmission::where('submission_date', '<=', $end)->sum('amount');
-            $totalFee = Admission::sum('full_fee');
-            $totalRemaining = $totalFee - $totalCollectedTillMonth;
+        // 📘 Course filter
+        if (!empty($courseId)) {
+            $query->where('course_id', $courseId);
+        }
 
-        } catch (\Exception $e) {
-            // fallback if month invalid
+        // 💳 Payment type filter
+        if (!empty($payment)) {
+            $query->where('payment_type', $payment);
+        }
+
+        // 🧮 Totals + Monthly Filter
+        if (!empty($month)) {
+            try {
+                $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+                $end = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
+
+                // 🎯 show only those admissions who paid in that month
+                $query->whereHas('feeSubmissions', function ($q) use ($start, $end) {
+                    $q->whereDate('submission_date', '>=', $start)
+                        ->whereDate('submission_date', '<=', $end);
+                });
+
+                // 💰 collected only in that month
+                $totalCollected = FeeSubmission::whereDate('submission_date', '>=', $start)
+                    ->whereDate('submission_date', '<=', $end)
+                    ->sum('amount');
+
+                // 💰 total collected till this month (for remaining)
+                $totalCollectedTillMonth = FeeSubmission::whereDate('submission_date', '<=', $end)
+                    ->sum('amount');
+
+                $totalFee = Admission::sum('full_fee');
+                $totalRemaining = $totalFee - $totalCollectedTillMonth;
+
+            } catch (\Exception $e) {
+                // invalid month → fallback
+                $totalCollected = FeeSubmission::sum('amount');
+                $totalRemaining = Admission::sum('full_fee') - $totalCollected;
+            }
+        } else {
+            // No month selected → all data
             $totalCollected = FeeSubmission::sum('amount');
             $totalRemaining = Admission::sum('full_fee') - $totalCollected;
         }
-    } else {
-        // no month selected → show all
-        $totalCollected = FeeSubmission::sum('amount');
-        $totalRemaining = Admission::sum('full_fee') - $totalCollected;
+
+        $admissions = $query->paginate(15)->withQueryString();
+
+        $courses = Course::whereHas('admissions')
+            ->select('id', 'title')
+            ->orderBy('title')
+            ->get();
+
+        return view('admin.pages.dashboard.fee-submission.index', compact(
+            'admissions',
+            'status',
+            'courses',
+            'totalCollected',
+            'totalRemaining',
+            'month'
+        ));
     }
-
-    $admissions = $query->paginate(15)->withQueryString();
-
-    $courses = Course::whereHas('admissions')
-        ->select('id', 'title')
-        ->orderBy('title')
-        ->get();
-
-    return view('admin.pages.dashboard.fee-submission.index', compact(
-        'admissions', 'status', 'courses', 'totalCollected', 'totalRemaining', 'month'
-    ));
-}
     public function create($id)
     {
         $admission = Admission::findOrFail($id);
