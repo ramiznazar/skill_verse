@@ -26,78 +26,85 @@ use App\Mail\FeeSubmissionNotification;
 class FeeSubmissionController extends Controller
 {
     public function index(Request $request)
-    {
-        $query = Admission::with([
-            'course',
-            'batch',
-            'feeSubmissions.user',
-            'feeSubmissions.account',
-        ])->orderBy('joining_date', 'desc');
+{
+    $query = Admission::with([
+        'course',
+        'batch',
+        'feeSubmissions.user',
+        'feeSubmissions.account',
+    ])->orderBy('joining_date', 'desc');
 
-        $status = $request->get('status', 'all');
-        $search = trim((string) $request->get('search'));
-        $courseId = $request->get('course_id');
-        $payment = $request->get('payment');
-        $month = $request->get('month'); // 🆕 month filter (format: 2025-10)
+    $status = $request->get('status', 'all');
+    $search = trim((string) $request->get('search'));
+    $courseId = $request->get('course_id');
+    $payment = $request->get('payment');
+    $month = $request->get('month'); // 🆕 month filter (YYYY-MM)
 
-        // search
-        if ($search !== '') {
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhereHas('course', fn($c) => $c->where('title', 'like', "%{$search}%"))
-                    ->orWhereHas('batch', fn($b) => $b->where('title', 'like', "%{$search}%"));
+    // 🔎 Search
+    if ($search !== '') {
+        $query->where(function ($q) use ($search) {
+            $q->where('name', 'like', "%{$search}%")
+                ->orWhereHas('course', fn($c) => $c->where('title', 'like', "%{$search}%"))
+                ->orWhereHas('batch', fn($b) => $b->where('title', 'like', "%{$search}%"));
+        });
+    }
+
+    // 🎯 Status filter
+    if ($status !== 'all') {
+        $query->where('fee_status', $status);
+    }
+
+    // 📘 Course filter
+    if (!empty($courseId)) {
+        $query->where('course_id', $courseId);
+    }
+
+    // 💳 Payment type filter
+    if (!empty($payment)) {
+        $query->where('payment_type', $payment);
+    }
+
+    // 🗓️ Month filter
+    if (!empty($month)) {
+        try {
+            $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
+            $end = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
+
+            // show only those admissions who paid in that month
+            $query->whereHas('feeSubmissions', function ($q) use ($start, $end) {
+                $q->whereBetween('submission_date', [$start, $end]);
             });
-        }
 
-        if ($status !== 'all') {
-            $query->where('fee_status', $status);
-        }
+            // totals for that month
+            $totalCollected = FeeSubmission::whereBetween('submission_date', [$start, $end])->sum('amount');
 
-        if (!empty($courseId)) {
-            $query->where('course_id', $courseId);
-        }
-
-        if (!empty($payment)) {
-            $query->where('payment_type', $payment);
-        }
-
-        $admissions = $query->paginate(15)->withQueryString();
-
-        $courses = Course::whereHas('admissions')
-            ->select('id', 'title')
-            ->orderBy('title')
-            ->get();
-
-        // 🧮 Monthly filter calculation
-        if (!empty($month)) {
-            $startOfMonth = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
-            $endOfMonth = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
-
-            // Collected in this month
-            $totalCollected = FeeSubmission::whereBetween('submission_date', [$startOfMonth, $endOfMonth])
-                ->sum('amount');
-
-            // Collected till this month (for remaining calculation)
-            $totalCollectedTillMonth = FeeSubmission::where('submission_date', '<=', $endOfMonth)
-                ->sum('amount');
-
+            // total remaining till that month
+            $totalCollectedTillMonth = FeeSubmission::where('submission_date', '<=', $end)->sum('amount');
             $totalFee = Admission::sum('full_fee');
             $totalRemaining = $totalFee - $totalCollectedTillMonth;
-        } else {
-            // Default: all time
+
+        } catch (\Exception $e) {
+            // fallback if month invalid
             $totalCollected = FeeSubmission::sum('amount');
             $totalRemaining = Admission::sum('full_fee') - $totalCollected;
         }
-
-        return view('admin.pages.dashboard.fee-submission.index', compact(
-            'admissions',
-            'status',
-            'courses',
-            'totalCollected',
-            'totalRemaining',
-            'month'
-        ));
+    } else {
+        // no month selected → show all
+        $totalCollected = FeeSubmission::sum('amount');
+        $totalRemaining = Admission::sum('full_fee') - $totalCollected;
     }
+
+    $admissions = $query->paginate(15)->withQueryString();
+
+    $courses = Course::whereHas('admissions')
+        ->select('id', 'title')
+        ->orderBy('title')
+        ->get();
+
+    return view('admin.pages.dashboard.fee-submission.index', compact(
+        'admissions', 'status', 'courses', 'totalCollected', 'totalRemaining', 'month'
+    ));
+}
     public function create($id)
     {
         $admission = Admission::findOrFail($id);

@@ -77,10 +77,10 @@
                                         </select>
                                     </div>
 
-                                    <div class="col-md-3 mb-2">
-                                        <input type="month" name="month" value="{{ request('month') }}"
-                                            class="form-control">
-                                    </div>
+                                   <div class="col-md-3 mb-2">
+    <input type="month" name="month" value="{{ request('month') }}" class="form-control">
+</div>
+
                                 </div>
                             </form>
 
