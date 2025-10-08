@@ -280,10 +280,10 @@
         document.addEventListener('DOMContentLoaded', function() {
             const form = document.getElementById('filterForm');
             const search = form.querySelector('input[name="search"]');
-            const selects = form.querySelectorAll('select');
+            const selects = form.querySelectorAll('select, input[type="month"]');
 
-            // auto-submit on select change
-            selects.forEach(sel => sel.addEventListener('change', () => form.submit()));
+            // auto-submit on change (includes month input now)
+            selects.forEach(el => el.addEventListener('change', () => form.submit()));
 
             // debounce search typing → submit after 500ms of inactivity
             let t;
