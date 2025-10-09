@@ -202,10 +202,10 @@
                                                 <td>
                                                     @if ($lead->follow_ups_count > 0)
                                                         <span title="Follow-up Added"
-                                                            style="height:10px;width:10px;background:#28a745;border-radius:50%;display:inline-block;"></span>
+                                                            style="height:10px;width:10px;background:#FEB800;border-radius:50%;display:inline-block;"></span>
                                                     @else
                                                         <span title="No Follow-up Yet"
-                                                            style="height:10px;width:10px;background:#FEB800;border-radius:50%;display:inline-block;"></span>
+                                                            style="height:10px;width:10px;background:#dc3545;border-radius:50%;display:inline-block;"></span>
                                                     @endif
                                                 </td>
 
