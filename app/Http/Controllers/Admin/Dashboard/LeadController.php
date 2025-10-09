@@ -15,7 +15,9 @@ class LeadController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Lead::with('course')->orderBy('created_at', 'desc');
+        $query = Lead::with('course')
+            ->withCount('followUps')
+            ->orderBy('created_at', 'desc');
 
         $search = trim((string) $request->get('search'));
         $courseId = $request->get('course_id');
@@ -151,8 +153,10 @@ class LeadController extends Controller
         return redirect()->route('lead.index')->with('delete', 'Lead deleted successfully.');
     }
 
-    public function show(Lead $lead)
+    public function show($id)
     {
-        return view('lead.show', compact('lead'));
+        $lead = Lead::with(['course', 'followUps'])->findOrFail($id);
+
+        return view('admin.pages.dashboard.lead.show', compact('lead'));
     }
 }

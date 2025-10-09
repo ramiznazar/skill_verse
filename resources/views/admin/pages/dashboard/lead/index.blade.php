@@ -124,7 +124,7 @@
                                 </div>
                             </form>
 
-                            {{-- 📊 Table --}}
+                            {{-- Table --}}
                             <div class="table-responsive">
                                 <table class="table table-hover mb-0">
                                     <thead>
@@ -132,29 +132,40 @@
                                             <th>#</th>
                                             <th>Name</th>
                                             <th>Course</th>
-                                            <th>Lead Type</th>
                                             <th>Phone</th>
-                                            <th>Referral Type</th>
+                                            <th>Type</th>
+                                            <th>Referral</th>
                                             <th>Status</th>
-                                            <th>Address</th>
-                                            <th>Options</th>
+                                            <th>F/U</th>
+                                            <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @forelse ($leads as $lead)
                                             <tr>
+                                                {{-- Sr# --}}
                                                 <td>{{ $loop->iteration + ($leads->currentPage() - 1) * $leads->perPage() }}
                                                 </td>
+
+                                                {{-- Name / Course --}}
                                                 <td>{{ $lead->name }}</td>
                                                 <td>{{ $lead->course->title ?? '-' }}</td>
 
-                                                <td><span
-                                                        class="badge badge-primary">{{ ucfirst($lead->lead_type) }}</span>
-                                                </td>
+                                                {{-- Contact --}}
                                                 <td>{{ $lead->phone }}</td>
-                                                <td><span
-                                                        class="badge badge-info">{{ ucfirst($lead->referral_type) }}</span>
+
+                                                {{-- Lead Type --}}
+                                                <td>
+                                                    <span
+                                                        class="badge badge-primary">{{ ucfirst($lead->lead_type ?? '-') }}</span>
                                                 </td>
+
+                                                {{-- Referral --}}
+                                                <td>
+                                                    <span
+                                                        class="badge badge-info">{{ ucfirst($lead->referral_type ?? '-') }}</span>
+                                                </td>
+
                                                 {{-- Status --}}
                                                 <td>
                                                     @switch($lead->status)
@@ -167,7 +178,7 @@
                                                         @break
 
                                                         @case('converted')
-                                                            <span class="badge badge-success">Converted</span>
+                                                            <span class="badge badge-success">Done</span>
                                                         @break
 
                                                         @case('lost')
@@ -179,40 +190,60 @@
                                                         @break
 
                                                         @case('not_interested')
-                                                            <span class="badge badge-dark">Not Interested</span>
+                                                            <span class="badge badge-dark">No Int.</span>
                                                         @break
 
                                                         @default
                                                             <span class="badge badge-light">-</span>
                                                     @endswitch
                                                 </td>
-                                                <td>{{ $lead->address }}</td>
 
+                                                {{-- Follow-Up Dot --}}
+                                                <td>
+                                                    @if ($lead->follow_ups_count > 0)
+                                                        <span title="Follow-up Added"
+                                                            style="height:10px;width:10px;background:#28a745;border-radius:50%;display:inline-block;"></span>
+                                                    @else
+                                                        <span title="No Follow-up Yet"
+                                                            style="height:10px;width:10px;background:#dc3545;border-radius:50%;display:inline-block;"></span>
+                                                    @endif
+                                                </td>
+
+                                                {{-- Actions --}}
                                                 <td class="text-nowrap">
                                                     <div class="d-flex align-items-center" style="column-gap: 5px;">
-
                                                         <a href="{{ route('lead-followups.index', $lead->id) }}"
                                                             class="btn btn-sm btn-icon btn-pure btn-info"
                                                             title="Follow-ups">
                                                             <i class="fas fa-comments"></i>
                                                         </a>
+
                                                         <a href="{{ route('admission.create', ['lead_id' => $lead->id]) }}"
                                                             class="btn btn-sm btn-icon btn-pure btn-success"
-                                                            data-toggle="tooltip" title="Convert to Admission">
+                                                            title="Convert">
                                                             <i class="fas fa-user-plus"></i>
                                                         </a>
+
+                                                        <a href="{{ route('lead.show', $lead->id) }}"
+                                                            class="btn btn-sm btn-icon btn-pure btn-default"
+                                                            title="View">
+                                                            <i class="icon-eye"></i>
+                                                        </a>
+
                                                         <a href="{{ route('lead.edit', $lead->id) }}"
                                                             class="btn btn-sm btn-icon btn-pure btn-default"
-                                                            data-toggle="tooltip" data-original-title="Edit">
+                                                            title="Edit">
                                                             <i class="icon-pencil"></i>
                                                         </a>
+
                                                         <form action="{{ route('lead.destroy', $lead->id) }}"
-                                                            method="POST" onsubmit="return confirm('Are you sure?')">
+                                                            method="POST" onsubmit="return confirm('Are you sure?')"
+                                                            style="display:inline;">
                                                             @csrf
                                                             @method('DELETE')
                                                             <button type="submit"
                                                                 class="btn btn-sm btn-icon btn-pure btn-default"
-                                                                data-toggle="tooltip" data-original-title="Remove">
+                                                                title="Delete">
                                                                 <i class="icon-trash"></i>
                                                             </button>
                                                         </form>
