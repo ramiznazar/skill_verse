@@ -221,13 +221,47 @@
                                 </div>
 
                                 <div class="row mt-3">
-                                    <div class="col-md-12">
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Last Institute</label>
                                             <input type="text" name="last_institute"
                                                 value="{{ old('last_institute', $lead->last_institute ?? '') }}"
                                                 class="form-control">
                                             @error('last_institute')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Mode</label>
+                                            <select id="mode" name="mode" class="form-control">
+                                                <option value="physical"
+                                                    {{ old('mode', $admission->mode ?? 'physical') == 'physical' ? 'selected' : '' }}>
+                                                    Physical</option>
+                                                <option value="online"
+                                                    {{ old('mode', $admission->mode ?? '') == 'online' ? 'selected' : '' }}>
+                                                    Online</option>
+                                            </select>
+                                            @error('mode')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mt-3">
+                                    <div class="col-md-12" id="online-percentage-wrapper" style="display:none;">
+                                        <div class="form-group">
+                                            <label>Online Fee Percentage (%)</label>
+                                            <input type="number" min="0" max="100" step="1"
+                                                name="online_percentage" class="form-control"
+                                                value="{{ old('online_percentage', $admission->online_percentage ?? 50) }}"
+                                                placeholder="e.g. 50">
+                                            <small class="text-muted">This % of the paid fee goes to the teacher for this
+                                                online student.</small>
+                                            @error('online_percentage')
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>
@@ -334,7 +368,7 @@
                                                         id="apply_additional_charges" name="apply_additional_charges"
                                                         value="1"
                                                         {{ old('apply_additional_charges') ? 'checked' : '' }}>
-                                                    <small class="form-check-label" for="apply_additional_charges" >
+                                                    <small class="form-check-label" for="apply_additional_charges">
                                                         (Apply additional charges — ₨1000 per installment)
                                                     </small>
                                                 </div>
@@ -576,5 +610,21 @@
             // Initial totals render
             autoDistributeInstallments();
         });
+
+        //show fee submission Percentage
+        (function() {
+            function toggleOnlinePercent() {
+                var mode = document.getElementById('mode').value;
+                var w = document.getElementById('online-percentage-wrapper');
+                if (mode === 'online') {
+                    w.style.display = 'block';
+                } else {
+                    w.style.display = 'none';
+                }
+            }
+            document.getElementById('mode').addEventListener('change', toggleOnlinePercent);
+            // initial on load
+            toggleOnlinePercent();
+        })();
     </script>
 @endsection

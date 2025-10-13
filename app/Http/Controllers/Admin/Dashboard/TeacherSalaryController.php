@@ -18,12 +18,31 @@ class TeacherSalaryController extends Controller
     {
         $query = TeacherSalary::with('teacher');
 
-        if ($request->filled('month'))
+        // 🔎 Search by teacher name or email
+        if ($request->filled('search')) {
+            $query->whereHas('teacher', function ($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->search . '%')
+                    ->orWhere('email', 'like', '%' . $request->search . '%');
+            });
+        }
+
+        // 📅 Month filter
+        if ($request->filled('month')) {
             $query->where('month', $request->month);
-        if ($request->filled('year'))
+        }
+
+        // 📅 Year filter
+        if ($request->filled('year')) {
             $query->where('year', $request->year);
+        }
+
+        // 💳 Status filter
+        if ($request->filled('status') && $request->status !== 'all') {
+            $query->where('status', $request->status);
+        }
 
         $salaries = $query->latest()->get();
+
         return view('admin.pages.dashboard.teacher.salary.salary', compact('salaries'));
     }
 
@@ -44,94 +63,141 @@ class TeacherSalaryController extends Controller
     public function StatusPaid($id)
     {
         $salary = TeacherSalary::with('teacher')->findOrFail($id);
-        if ($salary->status === 'paid')
-            return back()->with('paid', 'Already marked as paid.');
+        $teacherName = $salary->teacher->name ?? 'Unknown';
+        $monthName = \Carbon\Carbon::create()->month($salary->month)->format('F');
+        $year = $salary->year;
+        $payType = $salary->pay_type ?? ($salary->teacher->pay_type ?? 'percentage');
 
-        // ✅ Fixed-pay: is month me pahle hi 'paid' ya 'Balance → Paid' ho chuka?
-        $payTypeSnapshot = $salary->pay_type ?? ($salary->teacher->pay_type ?? 'percentage');
-        if ($payTypeSnapshot === 'fixed') {
-            $alreadyPaidThisMonth = TeacherSalaryHistory::where('teacher_id', $salary->teacher_id)
-                ->where('month', $salary->month)
-                ->where('year', $salary->year)
-                ->whereIn('status', ['paid', 'Balance → Paid'])
-                ->exists();
+        DB::transaction(function () use ($salary, $teacherName, $monthName, $year, $payType) {
 
-            if ($alreadyPaidThisMonth) {
-                return back()->with('paid', 'Fixed salary is already paid once for this month.');
+            // 🔹 CASE 1 — Percentage teachers (pay both physical + online together)
+            if ($payType === 'percentage') {
+                $totalAmount = (int) ($salary->salary_amount + $salary->online_bonus);
+                if ($totalAmount <= 0) {
+                    throw new \Exception("No pending amount for this teacher.");
+                }
+
+                // Log history
+                TeacherSalaryHistory::create([
+                    'teacher_id' => $salary->teacher_id,
+                    'teacher_salary_id' => $salary->id,
+                    'month' => $salary->month,
+                    'year' => $salary->year,
+                    'amount' => $totalAmount,
+                    'status' => 'paid',
+                    'performed_by' => auth()->id(),
+                    'performed_at' => now(),
+                    // 'note' => 'Percentage salary with online bonus',
+                ]);
+
+                // Create expense
+                Expense::create([
+                    'ref_type' => 'salary',
+                    'ref_id' => $salary->id,
+                    'title' => 'Teacher Salary',
+                    'amount' => (string) $totalAmount,
+                    'date' => now()->toDateString(),
+                    'purpose' => "Salary payout for {$teacherName} ({$monthName} {$year})",
+                    'type' => 'essential',
+                ]);
+
+                // Reset both
+                $salary->update([
+                    'status' => 'paid',
+                    'salary_amount' => 0,
+                    'online_bonus' => 0,
+                    'total_online_students' => 0,
+                    'total_fee_collected' => 0,
+                ]);
+
+                return;
             }
-        }
 
+            // 🔹 CASE 2 — Fixed teachers
+            if ($payType === 'fixed') {
+                // Check if fixed salary already paid this month
+                $alreadyPaidFixed = TeacherSalaryHistory::where('teacher_id', $salary->teacher_id)
+                    ->where('month', $salary->month)
+                    ->where('year', $salary->year)
+                    // ->where('note', 'Fixed salary payout')
+                    ->exists();
 
-        DB::transaction(function () use ($salary) {
-            $amount = (int) $salary->salary_amount;
-            $teacherName = $salary->teacher->name ?? 'Unknown';
-            $monthName = \Carbon\Carbon::create()->month($salary->month)->format('F');
-            $year = $salary->year;
+                // ✅ (a) Fixed salary not yet paid — pay it now
+                if (!$alreadyPaidFixed && $salary->salary_amount > 0) {
+                    $amount = (int) $salary->salary_amount;
 
-            // History
-            TeacherSalaryHistory::create([
-                'teacher_id' => $salary->teacher_id,
-                'teacher_salary_id' => $salary->id,
-                'month' => $salary->month,
-                'year' => $salary->year,
-                'amount' => $amount,
-                'status' => 'paid',
-                'performed_by' => auth()->id(),
-                'performed_at' => now(),
-            ]);
+                    TeacherSalaryHistory::create([
+                        'teacher_id' => $salary->teacher_id,
+                        'teacher_salary_id' => $salary->id,
+                        'month' => $salary->month,
+                        'year' => $salary->year,
+                        'amount' => $amount,
+                        'status' => 'paid',
+                        'performed_by' => auth()->id(),
+                        'performed_at' => now(),
+                        // 'note' => 'Fixed salary payout',
+                    ]);
 
-            // Expense auto create (Salary → Expense)
-            if ($amount > 0) {
-                $expense = Expense::firstOrCreate(
-                    [
+                    Expense::create([
                         'ref_type' => 'salary',
                         'ref_id' => $salary->id,
-                    ],
-                    [
                         'title' => 'Teacher Salary',
                         'amount' => (string) $amount,
                         'date' => now()->toDateString(),
-                        'purpose' => "Salary payout for {$teacherName}",
+                        'purpose' => "Fixed salary payout for {$teacherName} ({$monthName} {$year})",
                         'type' => 'essential',
-                    ]
-                );
-
-                // 🔔 Notify only when a new expense row was created (avoid duplicates)
-                if ($expense->wasRecentlyCreated) {
-                    $notification = Notification::create([
-                        'title' => 'Salary Expense Logged',
-                        'message' => '₨' . number_format((float) $expense->amount) . " salary payout for {$teacherName}",
-                        'icon' => 'fa fa-credit-card',
-                        'type' => 'expense',
-                        'status' => 1,
                     ]);
 
-                    // Attach to target roles (no Spatie; using users.role column)
-                    $targetRoles = ['admin', 'administrator', 'partner'];
-                    $userIds = \App\Models\User::whereIn('role', $targetRoles)->pluck('id');
+                    $salary->update([
+                        'status' => 'paid',
+                        'salary_amount' => 0,
+                    ]);
 
-                    if ($userIds->isNotEmpty()) {
-                        $now = now();
-                        $attach = [];
-                        foreach ($userIds as $uid) {
-                            $attach[$uid] = ['is_read' => false, 'created_at' => $now, 'updated_at' => $now];
-                        }
-                        $notification->users()->syncWithoutDetaching($attach);
-                    }
+                    return;
                 }
+
+                // ✅ (b) Fixed salary already paid — pay online bonus if available
+                if ($salary->online_bonus > 0) {
+                    $bonusAmount = (int) $salary->online_bonus;
+
+                    TeacherSalaryHistory::create([
+                        'teacher_id' => $salary->teacher_id,
+                        'teacher_salary_id' => $salary->id,
+                        'month' => $salary->month,
+                        'year' => $salary->year,
+                        'amount' => $bonusAmount,
+                        'status' => 'paid',
+                        'performed_by' => auth()->id(),
+                        'performed_at' => now(),
+                        // 'note' => 'Online bonus payout',
+                    ]);
+
+                    Expense::create([
+                        'ref_type' => 'salary_online_bonus',
+                        'ref_id' => $salary->id,
+                        'title' => 'Teacher Online Bonus',
+                        'amount' => (string) $bonusAmount,
+                        'date' => now()->toDateString(),
+                        'purpose' => "Online bonus payout for {$teacherName} ({$monthName} {$year})",
+                        'type' => 'essential',
+                    ]);
+
+                    $salary->update([
+                        'online_bonus' => 0,
+                        'total_online_students' => 0,
+                    ]);
+
+                    return;
+                }
+
+                // ✅ (c) Everything already paid
+                throw new \Exception("Fixed salary and all online bonuses already paid for this month.");
             }
 
-
-            // Close current cycle
-            $salary->update([
-                'status' => 'paid',
-                'salary_amount' => 0,
-                'total_fee_collected' => 0,
-                // 'total_students'       => 0,
-            ]);
+            throw new \Exception("Invalid payment type.");
         });
 
-        return back()->with('paid', 'Salary marked as paid and history logged.');
+        return back()->with('paid', 'Salary marked as paid successfully.');
     }
 
     public function StatusBalance($id)

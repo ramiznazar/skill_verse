@@ -95,9 +95,10 @@
                                     <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Image</th>
+                                            {{-- <th>Image</th> --}}
                                             <th>Name</th>
                                             <th>Course</th>
+                                            <th>Mode</th>
                                             <th>Batch</th>
                                             <th>Payment</th>
                                             <th>Fee</th>
@@ -109,12 +110,18 @@
                                         @forelse ($admissions as $admission)
                                             <tr>
                                                 <td>{{ $loop->iteration + ($admissions->currentPage() - 1) * $admissions->perPage() }}</td>
-                                                <td><img src="{{ asset($admission->image ?? 'default-avatar.png') }}"
+                                                {{-- <td><img src="{{ asset($admission->image ?? 'default-avatar.png') }}"
                                                          width="50" height="50"
-                                                         style="border-radius:50%;object-fit:cover;"></td>
+                                                         style="border-radius:50%;object-fit:cover;"></td> --}}
                                                 <td>{{ $admission->name }}</td>
                                                 <td>{{ $admission->course->title ?? '-' }}</td>
                                                 <td>{{ $admission->batch->title ?? '-' }}</td>
+                                                 <td>
+                                                    <span
+                                                        class="badge badge-{{ $admission->mode === 'physical' ? 'success' : 'warning' }}">
+                                                        {{ ucfirst($admission->mode) }}
+                                                    </span>
+                                                </td>
                                                 <td>
                                                     <span
                                                         class="badge badge-{{ $admission->payment_type === 'full_fee' ? 'success' : 'warning' }}">

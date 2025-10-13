@@ -1,5 +1,7 @@
+@php
+    use App\Models\FeeSubmission;
+@endphp
 @extends('admin.layouts.main')
-
 @section('content')
     <div id="main-content">
         <div class="block-header">
@@ -101,53 +103,104 @@
 
                             <div class="table-responsive">
                                 <table class="table m-b-0">
-                                    <thead class="">
+                                    <thead>
                                         <tr>
                                             <th>#</th>
-                                            <th>Name</th>
+                                            <th>Teacher</th>
                                             <th>Month</th>
                                             <th>Students</th>
                                             <th>Collected</th>
                                             <th>Pay Type</th>
-                                            <th>%</th>
-                                            <th>Fixed</th>
-                                            <th>Payable</th>
+                                            <th>Physical</th>
+                                            <th>Online</th>
+                                            <th>Total Payable</th>
                                             <th>Status</th>
                                             <th>Action</th>
                                         </tr>
                                     </thead>
+
                                     <tbody>
                                         @foreach ($salaries as $salary)
                                             @php
-                                                // Safe defaults + fallbacks for legacy rows
                                                 $teacher = $salary->teacher ?? null;
-                                                $collected = (int) ($salary->total_fee_collected ?? 0);
-
-                                                $payType = $salary->pay_type ?? ($teacher->pay_type ?? 'percentage'); // fallback to teacher if row missing snapshot
-
+                                                $payType = $salary->pay_type ?? ($teacher->pay_type ?? 'percentage');
                                                 $percent = (int) ($salary->percentage ?? 0);
-                                                $pctAmount =
-                                                    (int) ($salary->computed_percentage_amount ??
-                                                        (int) round($collected * ($percent / 100)));
-
                                                 $fixedAmount =
                                                     (int) ($salary->computed_fixed_amount ??
-                                                        (int) ($teacher->fixed_salary ?? 0));
+                                                        ($teacher->fixed_salary ?? 0));
 
-                                                // Actual payable for this row (what your flows use)
-                                                $payable =
-                                                    (int) ($salary->salary_amount ??
-                                                        ($payType === 'fixed' ? $fixedAmount : $pctAmount));
+                                                // Accurate collected breakdown from FeeSubmission (gross physical + online)
+                                                $physicalCollected = FeeSubmission::whereHas('admission', function (
+                                                    $q,
+                                                ) use ($salary) {
+                                                    $q->where('mode', 'physical')->whereHas('batch', function ($b) use (
+                                                        $salary,
+                                                    ) {
+                                                        $b->where('teacher_id', $salary->teacher_id);
+                                                    });
+                                                })
+                                                    ->whereMonth('submission_date', $salary->month)
+                                                    ->whereYear('submission_date', $salary->year)
+                                                    ->sum('amount');
+
+                                                $onlineCollected = FeeSubmission::whereHas('admission', function (
+                                                    $q,
+                                                ) use ($salary) {
+                                                    $q->where('mode', 'online')->whereHas('batch', function ($b) use (
+                                                        $salary,
+                                                    ) {
+                                                        $b->where('teacher_id', $salary->teacher_id);
+                                                    });
+                                                })
+                                                    ->whereMonth('submission_date', $salary->month)
+                                                    ->whereYear('submission_date', $salary->year)
+                                                    ->sum('amount');
+
+                                                // Gross total (for display)
+                                                $collected = (int) ($physicalCollected + $onlineCollected);
+
+                                                // Students
+                                                $physicalStudents = (int) ($salary->total_students ?? 0);
+                                                $onlineStudents = (int) ($salary->total_online_students ?? 0);
+                                                $totalStudents = $physicalStudents + $onlineStudents;
+
+                                                // Online bonus (teacher’s share)
+                                                $onlineBonus = (int) ($salary->online_bonus ?? 0);
+
+                                                // For percentage teachers → compute teacher’s share from physical only
+                                                $physicalPercentAmount = (int) round(
+                                                    $physicalCollected * ($percent / 100),
+                                                );
+
+                                                // Total payable to teacher (main + online)
+                                                $totalPayable = (int) ($salary->salary_amount ?? 0) + $onlineBonus;
                                             @endphp
+
 
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
                                                 <td>{{ $teacher->name ?? 'N/A' }}</td>
-                                                <td>{{ \Carbon\Carbon::create()->month($salary->month)->format('F') }}
-                                                    {{ $salary->year }}</td>
+                                                <td>
+                                                    {{ \Carbon\Carbon::create()->month($salary->month)->format('F') }}
+                                                    {{ $salary->year }}
+                                                </td>
 
-                                                <td>{{ $salary->total_students }}</td>
-                                                <td>{{ number_format($collected) }} PKR</td>
+                                                {{-- Total Students --}}
+                                                <td>
+                                                    {{ $totalStudents }}
+                                                    <small class="text-muted d-block">
+                                                        Phys: {{ $physicalStudents }} | Online: {{ $onlineStudents }}
+                                                    </small>
+                                                </td>
+
+                                                {{-- Total Collected --}}
+                                                <td>
+                                                    ₨{{ number_format($collected) }}
+                                                    <small class="text-muted d-block">
+                                                        Phys: ₨{{ number_format($physicalCollected) }}, Online:
+                                                        ₨{{ number_format($onlineCollected) }}
+                                                    </small>
+                                                </td>
 
                                                 {{-- Pay Type --}}
                                                 <td>
@@ -157,23 +210,39 @@
                                                     </span>
                                                 </td>
 
-                                                {{-- Percentage column: show % and approx computed amount --}}
+                                                {{-- Physical --}}
                                                 <td>
-                                                    {{ $percent }}%
-                                                    @if ($pctAmount > 0)
-                                                        <small class="text-muted d-block">≈ {{ number_format($pctAmount) }}
-                                                            PKR</small>
+                                                    @if ($payType === 'fixed')
+                                                        <span class="text-muted">Fixed
+                                                            ₨{{ number_format($fixedAmount) }}</span>
+                                                    @else
+                                                        {{ $percent }}%
+                                                        <small class="text-muted d-block">
+                                                            ≈ ₨{{ number_format($physicalPercentAmount) }}
+                                                        </small>
                                                     @endif
                                                 </td>
 
-                                                {{-- Fixed column --}}
+                                                {{-- Online --}}
                                                 <td>
-                                                    {{ $fixedAmount > 0 ? number_format($fixedAmount) . ' PKR' : '—' }}
+                                                    @if ($onlineStudents > 0)
+                                                        <span class="text-success">
+                                                            ₨{{ number_format($onlineBonus) }}
+                                                        </span>
+                                                        @if ($payType === 'fixed')
+                                                            <small class="text-muted d-block">
+                                                                {{ $percent }}%
+                                                            </small>
+                                                        @endif
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
                                                 </td>
 
-                                                {{-- Payable (actual) --}}
-                                                <td><strong>{{ number_format($payable) }} PKR</strong></td>
+                                                {{-- Payable --}}
+                                                <td><strong>₨{{ number_format($totalPayable) }}</strong></td>
 
+                                                {{-- Status --}}
                                                 <td>
                                                     <span
                                                         class="badge
@@ -184,28 +253,23 @@
                                                     </span>
                                                 </td>
 
+                                                {{-- Actions --}}
                                                 <td>
-                                                    {{-- Paid --}}
                                                     <form method="POST"
                                                         action="{{ route('teacher-salary.status-paid', $salary->id) }}"
                                                         style="display:inline-block;">
                                                         @csrf @method('PUT')
-                                                        <button type="submit" class="btn btn-sm btn-success">
-                                                            Paid
-                                                        </button>
+                                                        <button type="submit" class="btn btn-sm btn-success">Paid</button>
                                                     </form>
 
-                                                    {{-- Balance --}}
                                                     <form method="POST"
                                                         action="{{ route('teacher-salary.status-balance', $salary->id) }}"
                                                         style="display:inline-block;">
                                                         @csrf @method('PUT')
-                                                        <button type="submit" class="btn btn-sm btn-warning">
-                                                            Balance
-                                                        </button>
+                                                        <button type="submit"
+                                                            class="btn btn-sm btn-warning">Balance</button>
                                                     </form>
 
-                                                    {{-- View History for this teacher --}}
                                                     <a href="{{ route('teacher-salary.history', $salary->teacher_id) }}"
                                                         class="btn btn-sm btn-info">
                                                         History
@@ -215,6 +279,7 @@
                                         @endforeach
                                     </tbody>
                                 </table>
+
                             </div>
                         </div>
                     </div>
@@ -224,23 +289,23 @@
     </div>
 @endsection
 @section('additional-javascript')
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('filterForm');
-    const search = form.querySelector('input[name="search"]');
-    const selects = form.querySelectorAll('select');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('filterForm');
+            const search = form.querySelector('input[name="search"]');
+            const selects = form.querySelectorAll('select');
 
-    // auto-submit on select change
-    selects.forEach(sel => sel.addEventListener('change', () => form.submit()));
+            // auto-submit on select change
+            selects.forEach(sel => sel.addEventListener('change', () => form.submit()));
 
-    // debounce search typing
-    let t;
-    if (search) {
-        search.addEventListener('input', () => {
-            clearTimeout(t);
-            t = setTimeout(() => form.submit(), 500);
+            // debounce search typing
+            let t;
+            if (search) {
+                search.addEventListener('input', () => {
+                    clearTimeout(t);
+                    t = setTimeout(() => form.submit(), 500);
+                });
+            }
         });
-    }
-});
-</script>
+    </script>
 @endsection
