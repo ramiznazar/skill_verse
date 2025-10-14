@@ -2,22 +2,23 @@
 
 namespace App\Http\Controllers\Admin\Dashboard;
 
+use App\Models\User;
 use App\Models\Batch;
 use App\Models\Course;
-use App\Models\User;
 use App\Models\Account;
-use Illuminate\Support\Carbon;
-
 use App\Models\Admission;
-use App\Models\Notification;
-use App\Mail\FeeSubmissionMail;
+
 use Illuminate\Support\Str;
 use App\Models\FeeCollector;
+use App\Models\Notification;
 use Illuminate\Http\Request;
 use App\Models\FeeSubmission;
 use App\Models\TeacherSalary;
+use Illuminate\Support\Carbon;
+use App\Mail\FeeSubmissionMail;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\ReferralCommission;
+use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
@@ -156,7 +157,15 @@ class FeeSubmissionController extends Controller
 
                 // send email
                 if (!empty($admission->email)) {
-                    Mail::to($admission->email)->send(new FeeSubmissionMail($feeSubmission));
+                    try {
+                        Mail::to($admission->email)->send(new FeeSubmissionMail($feeSubmission));
+                    } catch (\Throwable $e) {
+                        // Log the error but don't stop execution
+                        Log::error('Failed to send FeeSubmissionMail for Admission ID: ' . $admission->id, [
+                            'error' => $e->getMessage(),
+                            'email' => $admission->email,
+                        ]);
+                    }
                 }
 
                 // referral commission
