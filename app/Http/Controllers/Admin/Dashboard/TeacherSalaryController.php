@@ -70,14 +70,17 @@ class TeacherSalaryController extends Controller
 
         DB::transaction(function () use ($salary, $teacherName, $monthName, $year, $payType) {
 
-            // 🔹 CASE 1 — Percentage teachers (pay both physical + online together)
+            // 🔹 CASE 1 — Percentage Teachers → Pay both physical salary + online bonus
             if ($payType === 'percentage') {
-                $totalAmount = (int) ($salary->salary_amount + $salary->online_bonus);
+                $mainAmount = (int) ($salary->salary_amount ?? 0);
+                $bonusAmount = (int) ($salary->online_bonus ?? 0);
+                $totalAmount = $mainAmount + $bonusAmount;
+
                 if ($totalAmount <= 0) {
                     throw new \Exception("No pending amount for this teacher.");
                 }
 
-                // Log history
+                // 🔸 History Entry
                 TeacherSalaryHistory::create([
                     'teacher_id' => $salary->teacher_id,
                     'teacher_salary_id' => $salary->id,
@@ -87,10 +90,12 @@ class TeacherSalaryController extends Controller
                     'status' => 'paid',
                     'performed_by' => auth()->id(),
                     'performed_at' => now(),
-                    // 'note' => 'Percentage salary with online bonus',
+                    'note' => $bonusAmount > 0
+                        ? 'Percentage salary (including online bonus)'
+                        : 'Percentage salary payout',
                 ]);
 
-                // Create expense
+                // 🔸 Expense Entry
                 Expense::create([
                     'ref_type' => 'salary',
                     'ref_id' => $salary->id,
@@ -101,7 +106,7 @@ class TeacherSalaryController extends Controller
                     'type' => 'essential',
                 ]);
 
-                // Reset both
+                // 🔸 Reset values
                 $salary->update([
                     'status' => 'paid',
                     'salary_amount' => 0,
@@ -113,16 +118,15 @@ class TeacherSalaryController extends Controller
                 return;
             }
 
-            // 🔹 CASE 2 — Fixed teachers
+            // 🔹 CASE 2 — Fixed Teachers
             if ($payType === 'fixed') {
-                // Check if fixed salary already paid this month
                 $alreadyPaidFixed = TeacherSalaryHistory::where('teacher_id', $salary->teacher_id)
                     ->where('month', $salary->month)
                     ->where('year', $salary->year)
-                    // ->where('note', 'Fixed salary payout')
+                    ->where('note', 'like', '%Fixed salary%')
                     ->exists();
 
-                // ✅ (a) Fixed salary not yet paid — pay it now
+                // (a) Pay fixed salary if not paid
                 if (!$alreadyPaidFixed && $salary->salary_amount > 0) {
                     $amount = (int) $salary->salary_amount;
 
@@ -135,7 +139,7 @@ class TeacherSalaryController extends Controller
                         'status' => 'paid',
                         'performed_by' => auth()->id(),
                         'performed_at' => now(),
-                        // 'note' => 'Fixed salary payout',
+                        'note' => 'Fixed salary payout',
                     ]);
 
                     Expense::create([
@@ -156,7 +160,7 @@ class TeacherSalaryController extends Controller
                     return;
                 }
 
-                // ✅ (b) Fixed salary already paid — pay online bonus if available
+                // (b) Pay online bonus if pending
                 if ($salary->online_bonus > 0) {
                     $bonusAmount = (int) $salary->online_bonus;
 
@@ -169,7 +173,7 @@ class TeacherSalaryController extends Controller
                         'status' => 'paid',
                         'performed_by' => auth()->id(),
                         'performed_at' => now(),
-                        // 'note' => 'Online bonus payout',
+                        'note' => 'Online bonus payout',
                     ]);
 
                     Expense::create([
@@ -190,7 +194,6 @@ class TeacherSalaryController extends Controller
                     return;
                 }
 
-                // ✅ (c) Everything already paid
                 throw new \Exception("Fixed salary and all online bonuses already paid for this month.");
             }
 

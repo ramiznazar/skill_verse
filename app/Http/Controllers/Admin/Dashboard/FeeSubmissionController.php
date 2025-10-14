@@ -155,9 +155,9 @@ class FeeSubmissionController extends Controller
                 $totalAmountThisSubmission += $amount;
 
                 // send email
-                if (!empty($admission->email)) {
-                    Mail::to($admission->email)->send(new FeeSubmissionMail($feeSubmission));
-                }
+                // if (!empty($admission->email)) {
+                //     Mail::to($admission->email)->send(new FeeSubmissionMail($feeSubmission));
+                // }
 
                 // referral commission
                 if (

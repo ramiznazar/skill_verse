@@ -77,6 +77,7 @@
                                             <th>%</th>
                                             <th>Fixed</th>
                                             <th>Amount</th>
+                                            <th>Type</th> {{-- NEW --}}
                                             <th>Performed By</th>
                                             <th>Performed At</th>
                                         </tr>
@@ -157,6 +158,13 @@
 
                                                 {{-- Entry amount for this history row (what was paid/balanced then) --}}
                                                 <td><strong>{{ number_format((int) $history->amount) }} PKR</strong></td>
+                                                <td>
+                                                    @if ($history->note)
+                                                        <span class="badge badge-secondary">{{ $history->note }}</span>
+                                                    @else
+                                                        <span class="text-muted">—</span>
+                                                    @endif
+                                                </td>
 
                                                 <td>{{ $history->performedBy->name ?? '-' }}</td>
                                                 <td>{{ $history->performed_at ? $history->performed_at->format('Y-m-d H:i') : '-' }}
