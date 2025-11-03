@@ -6,11 +6,11 @@
                 <div class="col-md-6 col-sm-12">
                     <h2>Courses</h2>
                 </div>
-                @if (Auth::user()->role !== 'administrator')
+                {{-- @if (Auth::user()->role !== 'administrator') --}}
                     <div class="col-md-6 col-sm-12 text-right">
                         <a href="{{ route('course.create') }}" class="btn btn-sm btn-primary" title="">Create New</a>
                     </div>
-                @endif
+                {{-- @endif --}}
             </div>
         </div>
         {{-- Store --}}
