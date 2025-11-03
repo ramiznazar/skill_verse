@@ -171,11 +171,17 @@ class FeeSubmissionController extends Controller
 
     public function create($id)
     {
-        $admission = Admission::findOrFail($id);
-        $submittedFees = $admission->feeSubmissions()->pluck('payment_type')->toArray();
+        $admission = Admission::with(['feeSubmissions'])->findOrFail($id);
         $accounts = Account::all();
+
+        $submittedFees = $admission->feeSubmissions
+            ->groupBy('course_id')
+            ->map(fn($group) => $group->pluck('payment_type')->toArray())
+            ->toArray();
+
         return view('admin.pages.dashboard.fee-submission.create', compact('admission', 'accounts', 'submittedFees'));
     }
+
 
     public function store(Request $request, $id)
     {
@@ -268,9 +274,6 @@ class FeeSubmissionController extends Controller
         }
 
         // 🧮 update overall fee status
-        // ✅ Step 2: refresh relationship to make sure we have updated pivot data
-        // 🧩 Reload courses to ensure pivot data is fresh
-        // ✅ Refresh relationships after saving FeeSubmission(s)
         $admission->load(['courses', 'feeSubmissions']);
 
         // 🧮 Recalculate paid & expected totals
