@@ -21,7 +21,7 @@ class HomeController extends Controller
     {
         $popularCourses = PopularCourse::all();
         $banners = Banner::all();
-        $courses = Course::with('courseCategory')->latest()->get();
+        $courses = Course::with('courseCategory')->where('is_active', 1)->latest()->get();
         $feedbacks = Testimonial::all();
         $events = Event::all();
         $blogs = Blog::all();

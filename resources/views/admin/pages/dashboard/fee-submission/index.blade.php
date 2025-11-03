@@ -28,7 +28,7 @@
                         </div>
 
                         <div class="body">
-                            {{-- 🔎 Search --}}
+                            {{-- Search --}}
                             <form method="GET" action="{{ route('fee-submission.index') }}" id="filterForm"
                                 class="mb-3">
                                 <div class="input-group mb-2">
@@ -78,8 +78,29 @@
                                     </div>
 
                                     <div class="col-md-3 mb-2">
+                                        <select name="student_status" id="filter-student-status" class="form-control">
+                                            <option value="">All Student Status</option>
+                                            <option value="active"
+                                                {{ request('student_status') === 'active' ? 'selected' : '' }}>Active
+                                            </option>
+                                            <option value="unactive"
+                                                {{ request('student_status') === 'unactive' ? 'selected' : '' }}>Unactive
+                                            </option>
+                                            <option value="completed"
+                                                {{ request('student_status') === 'completed' ? 'selected' : '' }}>Completed
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-9 mb-2">
                                         <input type="month" name="month" value="{{ request('month') }}"
                                             class="form-control">
+                                    </div>
+
+                                      <div class="col-md-3 text-right mb-2 ml-auto">
+                                        <a href="{{ route('fee-submission.index') }}" class="btn btn-warning" style="width:220px;">
+                                            Reset
+                                        </a>
                                     </div>
 
                                 </div>
@@ -98,7 +119,7 @@
                                 </div>
                             </div>
 
-                            {{-- 📊 Table --}}
+                            {{-- Table --}}
                             <div class="table-responsive">
                                 <table class="table table-hover mb-0" id="feeTable">
                                     <thead>
@@ -108,120 +129,318 @@
                                             <th>Course</th>
                                             <th>Fee Type</th>
                                             <th>Status</th>
+                                            <th>Student Status</th>
                                             <th>Options</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach ($admissions as $admission)
+                                            @php
+                                                // prepare course-wise data arrays
+                                                $courseTitles = [];
+                                                $feeTypes = [];
+                                                $statuses = [];
+
+                                                if ($admission->courses && $admission->courses->count() > 0) {
+                                                    foreach ($admission->courses as $course) {
+                                                        // 🧮 Calculate the real total fee correctly (fixes installment issue)
+                                                        $installmentTotal = collect([
+                                                            $course->pivot->installment_1,
+                                                            $course->pivot->installment_2,
+                                                            $course->pivot->installment_3,
+                                                            $course->pivot->installment_4,
+                                                        ])
+                                                            ->filter()
+                                                            ->sum();
+
+                                                        // ✅ Use the total of installments if present, otherwise use course_fee or full_fee
+                                                        $fee =
+                                                            $installmentTotal > 0
+                                                                ? $installmentTotal
+                                                                : ($course->pivot->course_fee ?:
+                                                                $admission->full_fee);
+
+                                                        $type =
+                                                            $course->pivot->payment_type ?? $admission->payment_type;
+
+                                                        // ✅ Find all payments submitted for this course
+                                                        $paidInstallments = $admission->feeSubmissions
+                                                            ->where('course_id', $course->id)
+                                                            ->pluck('payment_type')
+                                                            ->toArray();
+
+                                                        // ✅ Determine expected installments for this course
+                                                        $installmentFields = [
+                                                            'installment_1',
+                                                            'installment_2',
+                                                            'installment_3',
+                                                            'installment_4',
+                                                        ];
+                                                        $expected = [];
+                                                        foreach ($installmentFields as $field) {
+                                                            if (
+                                                                !empty($course->pivot->$field) &&
+                                                                $course->pivot->$field > 0
+                                                            ) {
+                                                                $expected[] = $field;
+                                                            }
+                                                        }
+
+                                                        // ✅ Determine per-course fee status
+                                                        if ($type === 'full_fee') {
+                                                            $courseStatus = !empty($paidInstallments)
+                                                                ? 'complete'
+                                                                : 'pending';
+                                                        } else {
+                                                            if (count($expected) === 0) {
+                                                                $courseStatus = 'pending';
+                                                            } else {
+                                                                $paidCount = count(
+                                                                    array_intersect($expected, $paidInstallments),
+                                                                );
+                                                                $allPaid = $paidCount === count($expected);
+                                                                $nonePaid = $paidCount === 0;
+
+                                                                if ($allPaid) {
+                                                                    $courseStatus = 'complete';
+                                                                } elseif ($nonePaid) {
+                                                                    $courseStatus = 'pending';
+                                                                } else {
+                                                                    $courseStatus = 'uncomplete';
+                                                                }
+                                                            }
+                                                        }
+
+                                                        // 🏷️ Course name + correct fee
+                                                        $courseTitles[] =
+                                                            "<div><span class='text-dark'>{$course->title}</span> 
+        <small class='text-muted'>(₨" .
+                                                            number_format($fee) .
+                                                            ')</small></div>';
+
+                                                        // 💰 Fee Type label
+                                                        $feeTypes[] =
+                                                            "<div><span class='badge badge-" .
+                                                            ($type === 'full_fee' ? 'success' : 'warning') .
+                                                            "'>" .
+                                                            ucfirst($type) .
+                                                            '</span></div>';
+
+                                                        // Course-specific Status label
+                                                        $statuses[] =
+                                                            "<div><span class='badge badge-" .
+                                                            ($courseStatus === 'complete'
+                                                                ? 'success'
+                                                                : ($courseStatus === 'pending'
+                                                                    ? 'danger'
+                                                                    : 'warning')) .
+                                                            "'>" .
+                                                            ucfirst($courseStatus) .
+                                                            '</span></div>';
+                                                    }
+                                                } elseif (isset($admission->course)) {
+                                                    // fallback for single course admission
+                                                    $courseTitles[] =
+                                                        "<div><span class='text-primary'>{$admission->course->title}</span> <small class='text-muted'>(₨" .
+                                                        number_format($admission->full_fee) .
+                                                        ')</small></div>';
+                                                    $feeTypes[] =
+                                                        "<div><span class='badge badge-" .
+                                                        ($admission->payment_type === 'full_fee'
+                                                            ? 'success'
+                                                            : 'warning') .
+                                                        "'>" .
+                                                        ucfirst($admission->payment_type) .
+                                                        '</span></div>';
+                                                    $statuses[] =
+                                                        "<div><span class='badge badge-" .
+                                                        ($admission->fee_status === 'complete'
+                                                            ? 'success'
+                                                            : ($admission->fee_status === 'pending'
+                                                                ? 'danger'
+                                                                : 'warning')) .
+                                                        "'>" .
+                                                        ucfirst($admission->fee_status) .
+                                                        '</span></div>';
+                                                } else {
+                                                    $courseTitles[] =
+                                                        "<div><small class='text-muted'>No course</small></div>";
+                                                    $feeTypes[] = '<div>-</div>';
+                                                    $statuses[] = '<div>-</div>';
+                                                }
+                                            @endphp
+
+
                                             <tr data-status="{{ strtolower($admission->fee_status) }}"
                                                 data-payment="{{ strtolower($admission->payment_type) }}"
-                                                data-course="{{ strtolower($admission->course->title) }}">
+                                                data-course="{{ strtolower(strip_tags(implode(', ', $courseTitles))) }}">
                                                 <td>{{ $loop->iteration + ($admissions->currentPage() - 1) * $admissions->perPage() }}
                                                 </td>
                                                 <td>{{ $admission->name }}</td>
-                                                <td>{{ $admission->course->title }}</td>
+
+                                                {{-- 📘 Courses --}}
+                                                <td>{!! implode('', $courseTitles) !!}</td>
+
+                                                {{-- 💰 Fee Type --}}
+                                                <td style="line-height: 1.9; font-size: 13px;">{!! implode('', $feeTypes) !!}</td>
+
+                                                {{-- 📊 Status --}}
+                                                <td style="line-height: 1.9; font-size: 13px;">{!! implode('', $statuses) !!}</td>
+
                                                 <td>
-                                                    <span
-                                                        class="badge badge-{{ $admission->payment_type === 'full_fee' ? 'success' : 'warning' }}">
-                                                        {{ ucfirst($admission->payment_type) }}
+                                                    @php
+                                                        switch ($admission->student_status) {
+                                                            case 'active':
+                                                                $badge = 'success'; // green
+                                                                break;
+                                                            case 'completed':
+                                                                $badge = 'info'; // blue
+                                                                break;
+                                                            default:
+                                                                $badge = 'secondary'; // gray for unactive
+                                                        }
+                                                    @endphp
+
+                                                    <span class="badge badge-{{ $badge }}">
+                                                        {{ ucfirst($admission->student_status) }}
                                                     </span>
                                                 </td>
+                                                {{-- ⚙️ Actions --}}
                                                 <td>
-                                                    <span
-                                                        class="badge badge-{{ $admission->fee_status === 'complete' ? 'success' : ($admission->fee_status === 'pending' ? 'danger' : 'warning') }}">
-                                                        {{ ucfirst($admission->fee_status) }}
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    {{-- Expand Button --}}
                                                     @if ($admission->payment_type === 'installment')
                                                         <button class="btn btn-sm btn-info toggle-installments">
                                                             <i class="fas fa-plus"></i>
                                                         </button>
                                                     @endif
-
                                                     @include('admin.pages.dashboard.fee-submission.button')
                                                 </td>
                                             </tr>
 
-                                            {{-- Hidden Installments Row --}}
-                                            @if ($admission->payment_type === 'installment')
+                                            {{-- Hidden Installment Details (unchanged logic) --}}
+                                            @if (
+                                                $admission->payment_type === 'installment' ||
+                                                    $admission->courses->where('pivot.payment_type', 'installment')->count() > 0)
                                                 @php
-                                                    // Collect all submissions for this student
-                                                    $paidInstallments = $admission->feeSubmissions
-                                                        ->pluck('payment_type')
-                                                        ->toArray();
+                                                    // gather all course installments (if multiple)
+                                                    $installmentGroups = [];
 
-                                                    // Installments list with label + amount
-                                                    $installments = [];
-                                                    if ($admission->installment_1 > 0) {
-                                                        $installments[] = [
-                                                            'label' => '1st Installment',
-                                                            'amount' => $admission->installment_1,
-                                                            'key' => 'installment_1',
-                                                        ];
-                                                    }
-                                                    if ($admission->installment_2 > 0) {
-                                                        $installments[] = [
-                                                            'label' => '2nd Installment',
-                                                            'amount' => $admission->installment_2,
-                                                            'key' => 'installment_2',
-                                                        ];
-                                                    }
-                                                    if ($admission->installment_3 > 0) {
-                                                        $installments[] = [
-                                                            'label' => '3rd Installment',
-                                                            'amount' => $admission->installment_3,
-                                                            'key' => 'installment_3',
-                                                        ];
-                                                    }
-                                                    if (
-                                                        property_exists($admission, 'installment_4') &&
-                                                        $admission->installment_4 > 0
-                                                    ) {
-                                                        $installments[] = [
-                                                            'label' => '4th Installment',
-                                                            'amount' => $admission->installment_4,
-                                                            'key' => 'installment_4',
+                                                    if ($admission->courses && $admission->courses->count() > 0) {
+                                                        foreach ($admission->courses as $course) {
+                                                            $type =
+                                                                $course->pivot->payment_type ??
+                                                                $admission->payment_type;
+                                                            if ($type !== 'installment') {
+                                                                continue;
+                                                            }
+
+                                                            $fee = $course->pivot->course_fee ?? $admission->full_fee;
+                                                            $paid = $admission->feeSubmissions
+                                                                ->where('course_id', $course->id)
+                                                                ->pluck('payment_type')
+                                                                ->toArray();
+
+                                                            $installments = [];
+                                                            foreach (range(1, 4) as $n) {
+                                                                $field = "installment_$n";
+                                                                if (
+                                                                    !empty($course->pivot->$field) &&
+                                                                    $course->pivot->$field > 0
+                                                                ) {
+                                                                    $label =
+                                                                        $n === 1
+                                                                            ? '1st Installment'
+                                                                            : ($n === 2
+                                                                                ? '2nd Installment'
+                                                                                : ($n === 3
+                                                                                    ? '3rd Installment'
+                                                                                    : "{$n}th Installment"));
+                                                                    $installments[] = [
+                                                                        'label' => $label,
+                                                                        'amount' => $course->pivot->$field,
+                                                                        'key' => $field,
+                                                                    ];
+                                                                }
+                                                            }
+
+                                                            $installmentGroups[] = [
+                                                                'course' => $course->title,
+                                                                'fee' => $fee,
+                                                                'installments' => $installments,
+                                                                'paid' => $paid,
+                                                            ];
+                                                        }
+                                                    } else {
+                                                        // fallback for single course
+                                                        $paid = $admission->feeSubmissions
+                                                            ->pluck('payment_type')
+                                                            ->toArray();
+                                                        $installments = [];
+                                                        foreach (range(1, 4) as $n) {
+                                                            $field = "installment_$n";
+                                                            if (!empty($admission->$field) && $admission->$field > 0) {
+                                                                $label =
+                                                                    $n === 1
+                                                                        ? '1st Installment'
+                                                                        : ($n === 2
+                                                                            ? '2nd Installment'
+                                                                            : ($n === 3
+                                                                                ? '3rd Installment'
+                                                                                : "{$n}th Installment"));
+                                                                $installments[] = [
+                                                                    'label' => $label,
+                                                                    'amount' => $admission->$field,
+                                                                    'key' => $field,
+                                                                ];
+                                                            }
+                                                        }
+
+                                                        $installmentGroups[] = [
+                                                            'course' =>
+                                                                optional($admission->course)->title ?? 'Course Fee',
+                                                            'fee' => $admission->full_fee,
+                                                            'installments' => $installments,
+                                                            'paid' => $paid,
                                                         ];
                                                     }
                                                 @endphp
 
                                                 <tr class="installment-details d-none">
                                                     <td colspan="6">
-                                                        <table class="table table-sm table-bordered mb-0">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Full Fee</th>
-                                                                    @foreach ($installments as $inst)
-                                                                        <th>{{ $inst['label'] }}</th>
-                                                                    @endforeach
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                <tr>
-                                                                    {{-- Full Fee --}}
-                                                                    <td>₨{{ number_format($admission->full_fee) }}</td>
-
-                                                                    {{-- Dynamic Installments --}}
-                                                                    @foreach ($installments as $inst)
-                                                                        <td>
-                                                                            ₨{{ number_format($inst['amount']) }}
-                                                                            <br>
-                                                                            <span
-                                                                                class="badge badge-{{ in_array($inst['key'], $paidInstallments) ? 'success' : 'danger' }}">
-                                                                                {{ in_array($inst['key'], $paidInstallments) ? 'Paid' : 'Unpaid' }}
-                                                                            </span>
-                                                                        </td>
-                                                                    @endforeach
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
+                                                        @foreach ($installmentGroups as $group)
+                                                            <div class="mb-3">
+                                                                {{-- <h6 class="text-primary mb-2">{{ $group['course'] }}</h6> --}}
+                                                                <table class="table table-sm table-bordered mb-0">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Full Fee</th>
+                                                                            @foreach ($group['installments'] as $inst)
+                                                                                <th>{{ $inst['label'] }}</th>
+                                                                            @endforeach
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td>₨{{ number_format($group['fee']) }}</td>
+                                                                            @foreach ($group['installments'] as $inst)
+                                                                                <td>
+                                                                                    ₨{{ number_format($inst['amount']) }}<br>
+                                                                                    <span
+                                                                                        class="badge badge-{{ in_array($inst['key'], $group['paid']) ? 'success' : 'danger' }}">
+                                                                                        {{ in_array($inst['key'], $group['paid']) ? 'PAID' : 'UNPAID' }}
+                                                                                    </span>
+                                                                                </td>
+                                                                            @endforeach
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        @endforeach
                                                     </td>
                                                 </tr>
                                             @endif
                                         @endforeach
                                     </tbody>
+
                                 </table>
                             </div>
 
@@ -237,6 +456,7 @@
         </div>
     </div>
 @endsection
+
 
 @section('additional-javascript')
     <script>

@@ -31,6 +31,9 @@ class Course extends Model
     }
     public function admissions()
     {
-        return $this->hasMany(Admission::class, 'course_id');
+        return $this->belongsToMany(\App\Models\Admission::class, 'admission_course_batch')
+            ->withPivot(['batch_id', 'course_fee'])
+            ->withTimestamps();
     }
+
 }

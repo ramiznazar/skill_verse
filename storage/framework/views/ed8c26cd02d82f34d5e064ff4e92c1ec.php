@@ -7,12 +7,12 @@
                     <h2>Fee Management</h2>
                 </div>
                 <div class="col-md-6 col-sm-12 text-right">
-                    <a href="javascript:void(0);" class="btn btn-sm btn-primary" title="">New</a>
+                    <a href="<?php echo e(route('fee-submission.index')); ?>" class="btn btn-sm btn-primary" title="Back">Back</a>
                 </div>
             </div>
         </div>
-        <div class="container-fluid">
 
+        <div class="container-fluid">
             <div class="row clearfix">
                 <div class="col-md-12">
                     <div class="card">
@@ -24,10 +24,10 @@
                                 method="POST" novalidate>
                                 <?php echo csrf_field(); ?>
 
-                                <div class="form-group">
+                                
+                                <div class="form-group mb-3">
                                     <label><strong>Student Name:</strong> <?php echo e($admission->name); ?></label><br>
-                                    <label><strong>Course:</strong> <?php echo e($admission->course->title); ?></label><br>
-                                    <label><strong>Payment Type:</strong> <?php echo e(ucfirst($admission->payment_type)); ?></label>
+                                    <label><strong>Admission No:</strong> <?php echo e($admission->roll_no ?? '—'); ?></label>
                                 </div>
 
                                 
@@ -38,6 +38,16 @@
                                         <option value="account">By Account</option>
                                         <option value="hand">By Hand</option>
                                     </select>
+                                    <?php $__errorArgs = ['payment_method'];
+$__bag = $errors->getBag($__errorArgs[1] ?? 'default');
+if ($__bag->has($__errorArgs[0])) :
+if (isset($message)) { $__messageOriginal = $message; }
+$message = $__bag->first($__errorArgs[0]); ?>
+                                        <small class="text-danger"><?php echo e($message); ?></small>
+                                    <?php unset($message);
+if (isset($__messageOriginal)) { $message = $__messageOriginal; }
+endif;
+unset($__errorArgs, $__bag); ?>
                                 </div>
 
                                 
@@ -77,7 +87,6 @@ unset($__errorArgs, $__bag); ?>
                                                 <input type="text" id="accountName" class="form-control" readonly>
                                             </div>
                                         </div>
-
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Account Number</label>
@@ -88,37 +97,101 @@ unset($__errorArgs, $__bag); ?>
                                 </div>
 
                                 
-                                <div class="form-group">
+                                <div class="form-group mt-4">
                                     <label><strong>Select Fee to Submit:</strong></label><br>
 
-                                    <?php if($admission->payment_type === 'full_fee'): ?>
-                                        <?php $submitted = in_array('full_fee', $submittedFees); ?>
-                                        <label class="fancy-checkbox">
-                                            <input type="checkbox" name="fees[]" value="full_fee"
-                                                <?php echo e($submitted ? 'checked' : ''); ?>>
-                                            <span>Full Fee - <?php echo e($admission->full_fee); ?> PKR
-                                                <?php if($submitted): ?>
-                                                    <small class="text-success">(Already Submitted)</small>
-                                                <?php endif; ?>
-                                            </span>
-                                        </label>
-                                    <?php else: ?>
-                                        <?php $installments = ['installment_1', 'installment_2', 'installment_3']; ?>
-                                        <?php $__currentLoopData = $installments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                            <?php if($admission->$key): ?>
-                                                <?php $submitted = in_array($key, $submittedFees); ?>
-                                                <label class="fancy-checkbox">
-                                                    <input type="checkbox" name="fees[]" value="<?php echo e($key); ?>"
-                                                        <?php echo e($submitted ? 'checked disabled' : ''); ?>>
-                                                    <span><?php echo e(ucfirst(str_replace('_', ' ', $key))); ?> -
-                                                        <?php echo e($admission->$key); ?> PKR
-                                                        <?php if($submitted): ?>
-                                                            <small class="text-success">(Already Submitted)</small>
+                                    <?php if($admission->courses->isNotEmpty()): ?>
+                                        <?php $__currentLoopData = $admission->courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <div class="border rounded p-3 mb-3">
+                                                <h6 class="text-primary mb-1">
+                                                    🎓 <?php echo e($course->title); ?>
+
+                                                    <small
+                                                        class="text-muted">(<?php echo e($course->pivot->batch->title ?? 'Batch'); ?>)</small>
+                                                </h6>
+                                                <p class="mb-2">Total Fee:
+                                                    ₨<?php echo e(number_format($course->pivot->course_fee)); ?></p>
+
+                                                <?php
+                                                    $submitted = \App\Models\FeeSubmission::where(
+                                                        'admission_id',
+                                                        $admission->id,
+                                                    )
+                                                        ->where('course_id', $course->id)
+                                                        ->pluck('payment_type')
+                                                        ->toArray();
+                                                ?>
+
+                                                
+                                                <?php
+                                                    // $pivotPaymentType = $admission->payment_type;
+                                                    // $pivotPaymentType =
+                                                    //     $course->pivot->payment_type ?? $admission->payment_type;
+                                                    $pivotPaymentType =
+                                                        $course->pivot->payment_type ?:
+                                                        $admission->payment_type ?? 'full_fee';
+
+                                                ?>
+
+                                                <?php if($pivotPaymentType === 'full_fee'): ?>
+                                                    <?php $paid = in_array('full_fee', $submitted); ?>
+                                                    <label class="fancy-checkbox d-block">
+                                                        <input type="checkbox" name="fees[<?php echo e($course->id); ?>][]"
+                                                            value="full_fee" <?php echo e($paid ? 'checked disabled' : ''); ?>>
+                                                        <span>
+                                                            Full Fee
+                                                            —₨<?php echo e(number_format($course->pivot->course_fee ?: $admission->full_fee)); ?>
+
+
+                                                            <?php if($paid): ?>
+                                                                <small class="text-success">(Already Submitted)</small>
+                                                            <?php endif; ?>
+                                                        </span>
+                                                    </label>
+                                                <?php elseif($pivotPaymentType === 'installment'): ?>
+                                                    <?php
+                                                        $installments = [
+                                                            'installment_1' =>
+                                                                $course->pivot->installment_1 ??
+                                                                ($admission->installment_1 ?? 0),
+                                                            'installment_2' =>
+                                                                $course->pivot->installment_2 ??
+                                                                ($admission->installment_2 ?? 0),
+                                                            'installment_3' =>
+                                                                $course->pivot->installment_3 ??
+                                                                ($admission->installment_3 ?? 0),
+                                                        ];
+                                                    ?>
+
+                                                    <?php $__currentLoopData = $installments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $key => $amount): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                        <?php if($amount > 0): ?>
+                                                            <?php $paid = in_array($key, $submitted); ?>
+                                                            <label class="fancy-checkbox d-block">
+                                                                <input type="checkbox" name="fees[<?php echo e($course->id); ?>][]"
+                                                                    value="<?php echo e($key); ?>"
+                                                                    <?php echo e($paid ? 'checked disabled' : ''); ?>>
+                                                                <span>
+                                                                    <?php echo e(ucfirst(str_replace('_', ' ', $key))); ?> —
+                                                                    ₨<?php echo e(number_format($amount)); ?>
+
+                                                                    <?php if($paid): ?>
+                                                                        <small class="text-success">(Already
+                                                                            Submitted)</small>
+                                                                    <?php endif; ?>
+                                                                </span>
+                                                            </label>
                                                         <?php endif; ?>
-                                                    </span>
-                                                </label>
-                                            <?php endif; ?>
+                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                <?php endif; ?>
+
+                                            </div>
                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    <?php else: ?>
+                                        
+                                        <div class="border rounded p-3 mb-3">
+                                            <h6 class="text-primary">🎓 <?php echo e($admission->course->title); ?></h6>
+                                            <p>Full Fee: ₨<?php echo e(number_format($admission->full_fee)); ?></p>
+                                        </div>
                                     <?php endif; ?>
                                 </div>
 
@@ -143,18 +216,16 @@ unset($__errorArgs, $__bag); ?>
             const accountName = document.getElementById('accountName');
             const accountNumber = document.getElementById('accountNumber');
             const collectorIdField = document.getElementById('collectorIdField');
-
-            const loggedInUserId = <?php echo e(auth()->user()->id); ?>; // inject Laravel user ID
+            const loggedInUserId = <?php echo e(auth()->user()->id); ?>;
 
             methodSelect.addEventListener('change', function() {
                 const method = this.value;
-
                 if (method === 'hand') {
                     collectorIdField.value = loggedInUserId;
                     accountDiv.style.display = 'none';
                     accountInfo.style.display = 'none';
                 } else if (method === 'account') {
-                    collectorIdField.value = ''; // clear if account selected
+                    collectorIdField.value = '';
                     accountDiv.style.display = 'block';
                     accountInfo.style.display = 'block';
                 } else {

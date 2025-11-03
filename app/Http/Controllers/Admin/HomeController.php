@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\Admin;
 
 use Carbon\Carbon;
-use App\Http\Controllers\Controller;
-use App\Models\FeeSubmission;
-use App\Models\Admission;
-use App\Models\Expense;
 use App\Models\Lead;
-
+use App\Models\Expense;
+use App\Models\Admission;
 use Illuminate\Http\Request;
+use App\Models\FeeSubmission;
+
+use Illuminate\Support\Facades\DB;
+use App\Http\Controllers\Controller;
 
 class HomeController extends Controller
 {
@@ -41,7 +42,7 @@ class HomeController extends Controller
         $monthlyStudentProgress = ($studentsThisMonth / $monthlyStudentProgressTarget) * 100;
 
         // Total Leads
-        $totalLeads  = Lead::count();
+        $totalLeads = Lead::count();
         $leadGoal = 100;
         $leadProgress = ($totalLeads / $leadGoal) * 100;
 
@@ -85,18 +86,18 @@ class HomeController extends Controller
         ];
 
         // Top 5 Courses by Admissions
-        $topCourses = Admission::selectRaw('course_id, COUNT(*) as total')
-            ->groupBy('course_id')
+        $topCourses = DB::table('admission_course_batch')
+            ->join('courses', 'admission_course_batch.course_id', '=', 'courses.id')
+            ->select('courses.title', DB::raw('COUNT(admission_course_batch.admission_id) as total'))
+            ->groupBy('courses.title')
             ->orderByDesc('total')
             ->take(5)
-            ->with('course') // make sure Admission has course() relation
             ->get();
 
-        $topCourseCategories = $topCourses->map(function ($item) {
-            return $item->course->title ?? 'Unknown'; // fallback if no title
-        });
-
+        // extract data for the chart
+        $topCourseCategories = $topCourses->pluck('title');
         $topCourseSeries = $topCourses->pluck('total');
+
         return view('admin.index', compact(
             'activeStudents',
             'totalStudents',

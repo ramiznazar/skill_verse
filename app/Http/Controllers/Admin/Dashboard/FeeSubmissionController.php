@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
 use App\Mail\FeeSubmissionMail;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\ReferralCommission;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -33,7 +34,9 @@ class FeeSubmissionController extends Controller
             'batch',
             'feeSubmissions.user',
             'feeSubmissions.account',
-        ])->orderBy('joining_date', 'desc');
+        ])
+            // ->where('student_status', 'active')
+            ->orderBy('joining_date', 'desc');
 
         $status = $request->get('status', 'all');
         $search = trim((string) $request->get('search'));
@@ -41,67 +44,116 @@ class FeeSubmissionController extends Controller
         $payment = $request->get('payment');
         $month = $request->get('month'); // format: YYYY-MM
 
-        // 🔎 Search filter
+        // 🔍 SEARCH FILTER
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhereHas('course', fn($c) => $c->where('title', 'like', "%{$search}%"))
-                    ->orWhereHas('batch', fn($b) => $b->where('title', 'like', "%{$search}%"));
+                $q->where('admissions.name', 'like', "%{$search}%")
+                    ->orWhereHas('course', fn($c) => $c->where('courses.title', 'like', "%{$search}%"))
+                    ->orWhereHas('batch', fn($b) => $b->where('batches.title', 'like', "%{$search}%"))
+                    ->orWhereHas('courses', fn($c) => $c->where('courses.title', 'like', "%{$search}%"));
             });
         }
 
-        // 🎯 Status filter
+        // 🎯 STATUS FILTER
         if ($status !== 'all') {
-            $query->where('fee_status', $status);
+            $query->where('admissions.fee_status', $status);
         }
 
-        // 📘 Course filter
+        // 📘 COURSE FILTER
         if (!empty($courseId)) {
-            $query->where('course_id', $courseId);
+            $query->where(function ($q) use ($courseId) {
+                $q->where('admissions.course_id', $courseId)
+                    ->orWhereHas('courses', fn($c) => $c->where('courses.id', $courseId));
+            });
         }
 
-        // 💳 Payment type filter
+        // 💳 PAYMENT TYPE FILTER
         if (!empty($payment)) {
-            $query->where('payment_type', $payment);
+            $query->where('admissions.payment_type', $payment);
         }
 
-        // 🧮 Totals + Monthly Filter
+        // 🧍 STUDENT STATUS FILTER
+        $studentStatus = $request->get('student_status');
+        if (!empty($studentStatus)) {
+            $query->where('admissions.student_status', $studentStatus);
+        }
+
+        // 💳 PAYMENT TYPE FILTER
+        if (!empty($payment)) {
+            $query->where('admissions.payment_type', $payment);
+        }
+
+        // 🧮 TOTALS + MONTHLY FILTER
         if (!empty($month)) {
             try {
                 $start = Carbon::createFromFormat('Y-m', $month)->startOfMonth();
                 $end = Carbon::createFromFormat('Y-m', $month)->endOfMonth();
 
-                // 🎯 show only those admissions who paid in that month
-                $query->whereHas('feeSubmissions', function ($q) use ($start, $end) {
-                    $q->whereDate('submission_date', '>=', $start)
-                        ->whereDate('submission_date', '<=', $end);
-                });
+                // 🎯 Admissions that exist in pivot
+                $admissionIds = DB::table('admission_course_batch')->distinct()->pluck('admission_id');
 
-                // 💰 collected only in that month
-                $totalCollected = FeeSubmission::whereDate('submission_date', '>=', $start)
+                // Filter monthly
+                $query->whereIn('admissions.id', $admissionIds)
+                    ->whereHas('feeSubmissions', function ($q) use ($start, $end) {
+                        $q->whereBetween('submission_date', [$start, $end]);
+                    });
+
+                // 💰 Total collected this month
+                $totalCollected = FeeSubmission::whereIn('admission_id', $admissionIds)
+                    ->whereBetween('submission_date', [$start, $end])
+                    ->sum('amount');
+
+                // 💰 Total collected till this month
+                $totalCollectedTillMonth = FeeSubmission::whereIn('admission_id', $admissionIds)
                     ->whereDate('submission_date', '<=', $end)
                     ->sum('amount');
 
-                // 💰 total collected till this month (for remaining)
-                $totalCollectedTillMonth = FeeSubmission::whereDate('submission_date', '<=', $end)
-                    ->sum('amount');
+                // ✅ FIXED FEE CALCULATION
+                $addedTotal = DB::table('admission_course_batch')
+                    ->whereIn('admission_id', $admissionIds)
+                    ->sum('course_fee');
 
-                $totalFee = Admission::sum('full_fee');
+                $mainTotal = Admission::whereNotIn('id', $admissionIds)->sum('full_fee');
+
+                $totalFee = $mainTotal + $addedTotal;
+
                 $totalRemaining = $totalFee - $totalCollectedTillMonth;
-
             } catch (\Exception $e) {
-                // invalid month → fallback
-                $totalCollected = FeeSubmission::sum('amount');
-                $totalRemaining = Admission::sum('full_fee') - $totalCollected;
+                // fallback if invalid month
+                $admissionIds = DB::table('admission_course_batch')->distinct()->pluck('admission_id');
+                $totalCollected = FeeSubmission::whereIn('admission_id', $admissionIds)->sum('amount');
+
+                $addedTotal = DB::table('admission_course_batch')
+                    ->whereIn('admission_id', $admissionIds)
+                    ->sum('course_fee');
+
+                $mainTotal = Admission::whereNotIn('id', $admissionIds)->sum('full_fee');
+
+                $totalFee = $mainTotal + $addedTotal;
+                $totalRemaining = $totalFee - $totalCollected;
             }
         } else {
-            // No month selected → all data
-            $totalCollected = FeeSubmission::sum('amount');
-            $totalRemaining = Admission::sum('full_fee') - $totalCollected;
+            // 🧾 All Data (no month selected)
+            $admissionIds = DB::table('admission_course_batch')->distinct()->pluck('admission_id');
+            $query->whereIn('admissions.id', $admissionIds);
+
+            $totalCollected = FeeSubmission::whereIn('admission_id', $admissionIds)->sum('amount');
+
+            // ✅ FIXED FEE CALCULATION
+            $addedTotal = DB::table('admission_course_batch')
+                ->whereIn('admission_id', $admissionIds)
+                ->sum('course_fee');
+
+            $mainTotal = Admission::whereNotIn('id', $admissionIds)->sum('full_fee');
+
+            $totalFee = $mainTotal + $addedTotal;
+            $totalRemaining = $totalFee - $totalCollected;
         }
 
+        // 📄 Pagination
         $admissions = $query->paginate(15)->withQueryString();
 
+        // 📚 Available courses
         $courses = Course::whereHas('admissions')
             ->select('id', 'title')
             ->orderBy('title')
@@ -116,6 +168,7 @@ class FeeSubmissionController extends Controller
             'month'
         ));
     }
+
     public function create($id)
     {
         $admission = Admission::findOrFail($id);
@@ -123,27 +176,54 @@ class FeeSubmissionController extends Controller
         $accounts = Account::all();
         return view('admin.pages.dashboard.fee-submission.create', compact('admission', 'accounts', 'submittedFees'));
     }
+
     public function store(Request $request, $id)
     {
+        $request->validate([
+            'payment_method' => 'required|in:account,hand',
+            // 'account_id' => 'required_if:payment_method,account|exists:accounts,id',
+        ]);
         $admission = Admission::findOrFail($id);
         $totalAmountThisSubmission = 0;
+        $latestFeeSubmission = null; // for notification message later
 
-        foreach ($request->fees as $feeType) {
-            $amount = match ($feeType) {
-                'full_fee' => $admission->full_fee,
-                'installment_1' => $admission->installment_1,
-                'installment_2' => $admission->installment_2,
-                'installment_3' => $admission->installment_3,
-                'installment_4' => $admission->installment_4,
-            };
+        // 🧩 fees are now grouped by course_id => [ ['installment_1', 'installment_2'], ... ]
+        foreach ($request->fees as $courseId => $feeTypes) {
 
-            $alreadySubmitted = FeeSubmission::where('admission_id', $admission->id)
-                ->where('payment_type', $feeType)
-                ->exists();
+            // Get course pivot info
+            $pivot = DB::table('admission_course_batch')
+                ->where('admission_id', $admission->id)
+                ->where('course_id', $courseId)
+                ->first();
 
-            if (!$alreadySubmitted) {
+            if (!$pivot) {
+                continue; // skip invalid course ids
+            }
+
+            foreach ($feeTypes as $feeType) {
+                // calculate amount
+                $amount = match ($feeType) {
+                    'full_fee' => $pivot->course_fee,
+                    'installment_1' => $pivot->installment_1 ?? 0,
+                    'installment_2' => $pivot->installment_2 ?? 0,
+                    'installment_3' => $pivot->installment_3 ?? 0,
+                    'installment_4' => $pivot->installment_4 ?? 0,
+                    default => 0,
+                };
+
+                // check if already submitted
+                $alreadySubmitted = FeeSubmission::where('admission_id', $admission->id)
+                    ->where('course_id', $courseId)
+                    ->where('payment_type', $feeType)
+                    ->exists();
+
+                if ($alreadySubmitted)
+                    continue;
+
+                // ✅ Create new fee submission
                 $feeSubmission = FeeSubmission::create([
                     'admission_id' => $admission->id,
+                    'course_id' => $courseId,
                     'payment_method' => $request->payment_method,
                     'account_id' => $request->payment_method === 'account' ? $request->account_id : null,
                     'user_id' => Auth::id(),
@@ -153,14 +233,14 @@ class FeeSubmissionController extends Controller
                     'submission_date' => now(),
                 ]);
 
+                $latestFeeSubmission = $feeSubmission;
                 $totalAmountThisSubmission += $amount;
 
-                // send email
+                // 📨 send email if applicable
                 if (!empty($admission->email)) {
                     try {
                         Mail::to($admission->email)->send(new FeeSubmissionMail($feeSubmission));
                     } catch (\Throwable $e) {
-                        // Log the error but don't stop execution
                         Log::error('Failed to send FeeSubmissionMail for Admission ID: ' . $admission->id, [
                             'error' => $e->getMessage(),
                             'email' => $admission->email,
@@ -168,14 +248,13 @@ class FeeSubmissionController extends Controller
                     }
                 }
 
-                // referral commission
+                // 💰 referral commission
                 if (
                     $admission->referral_source &&
                     $admission->referral_source_commission &&
                     is_numeric($admission->referral_source_commission)
                 ) {
                     $commissionAmount = $amount * (floatval($admission->referral_source_commission) / 100);
-
                     ReferralCommission::create([
                         'admission_id' => $admission->id,
                         'fee_submission_id' => $feeSubmission->id,
@@ -188,11 +267,13 @@ class FeeSubmissionController extends Controller
             }
         }
 
-        // update fee status
+        // 🧮 update overall fee status
         $totalPaid = FeeSubmission::where('admission_id', $admission->id)->sum('amount');
-        $expectedTotal = $admission->payment_type === 'full_fee'
-            ? $admission->full_fee
-            : ($admission->installment_1 + $admission->installment_2 + $admission->installment_3 + $admission->installment_4);
+        $expectedTotal = 0;
+
+        foreach ($admission->courses as $course) {
+            $expectedTotal += $course->pivot->course_fee;
+        }
 
         $admission->fee_status = match (true) {
             $totalPaid == 0 => 'pending',
@@ -201,81 +282,80 @@ class FeeSubmissionController extends Controller
         };
         $admission->save();
 
-        // ✅ TEACHER SALARY HANDLING
-        $batch = Batch::find($admission->batch_id);
-        if ($batch && $batch->teacher_id && $totalAmountThisSubmission > 0) {
-            $teacher = $batch->teacher;
-            $month = now()->month;
-            $year = now()->year;
-
-            $payType = $teacher->pay_type ?? 'percentage';
-            $percent = (int) ($teacher->percentage ?? (is_numeric($teacher->salary) ? $teacher->salary : 0));
-            $fixed = (int) ($teacher->fixed_salary ?? 0);
-
-            $teacherSalary = TeacherSalary::firstOrNew([
-                'teacher_id' => $teacher->id,
-                'month' => $month,
-                'year' => $year,
-            ]);
-
-            // reopen if necessary
-            if (in_array(strtolower($teacherSalary->status ?? 'unpaid'), ['paid', 'balance'], true) && $payType === 'percentage') {
-                $teacherSalary->status = 'unpaid';
-                $teacherSalary->total_fee_collected = 0;
-                $teacherSalary->total_students = 0;
-                $teacherSalary->salary_amount = 0;
-                $teacherSalary->computed_percentage_amount = 0;
-                $teacherSalary->computed_fixed_amount = 0;
-            }
-
-            // ✅ Add fee only if physical
-            if ($admission->mode === 'physical') {
-                $teacherSalary->total_fee_collected = (int) (($teacherSalary->total_fee_collected ?? 0) + $totalAmountThisSubmission);
-            }
-
-            // snapshot teacher config
-            $teacherSalary->pay_type = $payType;
-            $teacherSalary->percentage = $percent;
-
-            // compute salary
-            $computedPercentage = (int) round(($teacherSalary->total_fee_collected ?? 0) * ($percent / 100));
-            $computedFixed = $fixed;
-
-            $teacherSalary->computed_percentage_amount = $computedPercentage;
-            $teacherSalary->computed_fixed_amount = $computedFixed;
-            $teacherSalary->salary_amount = $payType === 'fixed' ? $computedFixed : $computedPercentage;
-
-            // ✅ maintain counts
-            $physicalCount = FeeSubmission::whereHas('admission', function ($q) use ($batch) {
-                $q->where('batch_id', $batch->id)->where('mode', 'physical');
-            })
-                ->whereMonth('submission_date', $month)
-                ->whereYear('submission_date', $year)
-                ->distinct('admission_id')
-                ->count('admission_id');
-
-            $onlineCount = FeeSubmission::whereHas('admission', function ($q) use ($batch) {
-                $q->where('batch_id', $batch->id)->where('mode', 'online');
-            })
-                ->whereMonth('submission_date', $month)
-                ->whereYear('submission_date', $year)
-                ->distinct('admission_id')
-                ->count('admission_id');
-
-            $teacherSalary->total_students = $physicalCount;
-            $teacherSalary->total_online_students = $onlineCount;
-
-            $teacherSalary->save();
-        }
-
-        // ✅ ONLINE STUDENT BONUS (Per admission %)
-        if ($admission->mode === 'online') {
-            $batch = Batch::find($admission->batch_id);
-            if ($batch && $batch->teacher_id) {
+        // ✅ TEACHER SALARY HANDLING (same as before)
+        if (!empty($pivot->batch_id)) {
+            $batch = Batch::find($pivot->batch_id);
+            if ($batch && $batch->teacher_id && $amount > 0) {
                 $teacher = $batch->teacher;
                 $month = now()->month;
                 $year = now()->year;
 
+                $payType = $teacher->pay_type ?? 'percentage';
+                $percent = (int) ($teacher->percentage ?? (is_numeric($teacher->salary) ? $teacher->salary : 0));
+                $fixed = (int) ($teacher->fixed_salary ?? 0);
+
+                $teacherSalary = TeacherSalary::firstOrNew([
+                    'teacher_id' => $teacher->id,
+                    'month' => $month,
+                    'year' => $year,
+                ]);
+
+                if (
+                    in_array(strtolower($teacherSalary->status ?? 'unpaid'), ['paid', 'balance'], true)
+                    && $payType === 'percentage'
+                ) {
+                    $teacherSalary->status = 'unpaid';
+                    $teacherSalary->total_fee_collected = 0;
+                    $teacherSalary->total_students = 0;
+                    $teacherSalary->salary_amount = 0;
+                    $teacherSalary->computed_percentage_amount = 0;
+                    $teacherSalary->computed_fixed_amount = 0;
+                }
+
+                if ($admission->mode === 'physical') {
+                    $teacherSalary->total_fee_collected = (int) (($teacherSalary->total_fee_collected ?? 0) + $amount);
+                }
+
+                $teacherSalary->pay_type = $payType;
+                $teacherSalary->percentage = $percent;
+
+                $computedPercentage = (int) round(($teacherSalary->total_fee_collected ?? 0) * ($percent / 100));
+                $computedFixed = $fixed;
+
+                $teacherSalary->computed_percentage_amount = $computedPercentage;
+                $teacherSalary->computed_fixed_amount = $computedFixed;
+                $teacherSalary->salary_amount = $payType === 'fixed' ? $computedFixed : $computedPercentage;
+
+                $physicalCount = FeeSubmission::whereHas('admission', function ($q) use ($batch) {
+                    $q->where('batch_id', $batch->id)->where('mode', 'physical');
+                })
+                    ->whereMonth('submission_date', $month)
+                    ->whereYear('submission_date', $year)
+                    ->distinct('admission_id')
+                    ->count('admission_id');
+
+                $onlineCount = FeeSubmission::whereHas('admission', function ($q) use ($batch) {
+                    $q->where('batch_id', $batch->id)->where('mode', 'online');
+                })
+                    ->whereMonth('submission_date', $month)
+                    ->whereYear('submission_date', $year)
+                    ->distinct('admission_id')
+                    ->count('admission_id');
+
+                $teacherSalary->total_students = $physicalCount;
+                $teacherSalary->total_online_students = $onlineCount;
+                $teacherSalary->save();
+            }
+        }
+
+        // ✅ ONLINE STUDENT BONUS
+        if ($admission->mode === 'online') {
+            // $batch = Batch::find($admission->batch_id);
+            $batch = Batch::find($pivot->batch_id);
+            if ($batch && $batch->teacher_id) {
+                $teacher = $batch->teacher;
+                $month = now()->month;
+                $year = now()->year;
                 $percent = max(0, min(100, (int) ($admission->online_percentage ?? 50)));
                 $bonusAmount = (int) round($totalAmountThisSubmission * ($percent / 100));
 
@@ -284,11 +364,8 @@ class FeeSubmissionController extends Controller
                     'month' => $month,
                     'year' => $year,
                 ]);
-
-                // ✅ update only online-specific fields
                 $teacherSalary->online_bonus = ($teacherSalary->online_bonus ?? 0) + $bonusAmount;
 
-                // ✅ count distinct online students (avoid double counting installments)
                 $onlineCount = FeeSubmission::whereHas('admission', function ($q) use ($batch) {
                     $q->where('batch_id', $batch->id)->where('mode', 'online');
                 })
@@ -302,25 +379,27 @@ class FeeSubmissionController extends Controller
             }
         }
 
-        // 🔔 Notification
-        $notification = Notification::create([
-            'title' => 'Fee Submitted',
-            'message' => '₨' . number_format($feeSubmission->amount) . ' received from ' . $feeSubmission->admission->name,
-            'icon' => 'fa fa-money',
-            'type' => 'fee',
-            'status' => 1,
-        ]);
+        // 🔔 Notification (uses the last created submission)
+        if ($latestFeeSubmission) {
+            $notification = Notification::create([
+                'title' => 'Fee Submitted',
+                'message' => '₨' . number_format($latestFeeSubmission->amount) . ' received from ' . $admission->name,
+                'icon' => 'fa fa-money',
+                'type' => 'fee',
+                'status' => 1,
+            ]);
 
-        $targetRoles = ['admin', 'administrator', 'partner'];
-        $userIds = User::whereIn('role', $targetRoles)->pluck('id');
+            $targetRoles = ['admin', 'administrator', 'partner'];
+            $userIds = User::whereIn('role', $targetRoles)->pluck('id');
 
-        if ($userIds->isNotEmpty()) {
-            $now = now();
-            $attach = [];
-            foreach ($userIds as $uid) {
-                $attach[$uid] = ['is_read' => false, 'created_at' => $now, 'updated_at' => $now];
+            if ($userIds->isNotEmpty()) {
+                $now = now();
+                $attach = [];
+                foreach ($userIds as $uid) {
+                    $attach[$uid] = ['is_read' => false, 'created_at' => $now, 'updated_at' => $now];
+                }
+                $notification->users()->syncWithoutDetaching($attach);
             }
-            $notification->users()->syncWithoutDetaching($attach);
         }
 
         return redirect()->route('fee-submission.index')->with('success', 'Fee submitted successfully.');

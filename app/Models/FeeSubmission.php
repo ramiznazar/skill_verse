@@ -9,13 +9,20 @@ class FeeSubmission extends Model
 {
     use HasFactory;
     protected $guarded = [];
-    public function admission(){
+    public function admission()
+    {
         return $this->belongsTo(Admission::class);
     }
-    public function account(){
+    public function account()
+    {
         return $this->belongsTo(Account::class);
     }
-    public function user(){
-        return $this->belongsTo(User::class,'user_id');
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+    public function course()
+    {
+        return $this->belongsTo(Course::class);
     }
 }

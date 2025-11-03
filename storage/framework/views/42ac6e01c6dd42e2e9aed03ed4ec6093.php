@@ -9,13 +9,13 @@
                                                     ?>
 
                                                     
-                                                    <?php if(strtolower($admission->fee_status) !== 'complete'): ?>
+                                                    
                                                         <a href="<?php echo e(route('fee-submission.create', $admission->id)); ?>"
                                                             class="btn btn-sm btn-default" data-toggle="tooltip"
                                                             title="Submit Fee">
                                                             <i class="fas fa-money-check-alt"></i>
                                                         </a>
-                                                    <?php endif; ?>
+                                                    
 
                                                     
                                                     <button type="button" class="btn btn-sm btn-secondary mt-1"

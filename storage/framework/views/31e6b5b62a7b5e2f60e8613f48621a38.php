@@ -26,18 +26,25 @@
 
                                 
                                 <div class="row">
-                                    <div class="col-md-6">
+                                    
+                                    <div class="col-md-12">
                                         <div class="form-group">
-                                            <label>Course</label>
-                                            <select name="course_id" id="course_id" class="form-control" required>
-                                                <option value="">Select Course</option>
+                                            <label class="font-weight-bold">Select Course(s)</label>
+                                            <select name="course_ids[]" id="course_id" class="form-control selectpicker"
+                                                multiple required data-live-search="true"
+                                                title="Choose one or more courses">
                                                 <?php $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                     <option value="<?php echo e($course->id); ?>"
-                                                        <?php echo e(old('course_id', $lead->course_id ?? '') == $course->id ? 'selected' : ''); ?>>
-                                                        <?php echo e($course->title); ?></option>
+                                                        <?php echo e(collect(old('course_ids', []))->contains($course->id) ? 'selected' : ''); ?>>
+                                                        <?php echo e($course->title); ?>
+
+                                                    </option>
                                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                             </select>
-                                            <?php $__errorArgs = ['course_id'];
+                                            <small class="form-text text-muted">
+                                                Hold <b>CTRL</b> (Windows) or <b>CMD</b> (Mac) to select multiple.
+                                            </small>
+                                            <?php $__errorArgs = ['course_ids'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -50,13 +57,14 @@ unset($__errorArgs, $__bag); ?>
                                         </div>
                                     </div>
 
-                                    <div class="col-md-6">
+                                    
+                                    <div class="col-md-12">
                                         <div class="form-group">
-                                            <label>Batch</label>
-                                            <select name="batch_id" id="batch_id" class="form-control" required>
-                                                <option value="">Select Batch</option>
-                                            </select>
-                                            <?php $__errorArgs = ['batch_id'];
+                                            <label class="font-weight-bold">Batch & Fee Details</label>
+                                            <div id="batch-container" class="row">
+                                                <!-- Dynamic course + batch + fee cards will load here -->
+                                            </div>
+                                            <?php $__errorArgs = ['batch_ids'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
 if (isset($message)) { $__messageOriginal = $message; }
@@ -69,8 +77,6 @@ unset($__errorArgs, $__bag); ?>
                                         </div>
                                     </div>
                                 </div>
-
-                                <hr class="mt-4">
 
                                 
                                 <div class="row">
@@ -528,7 +534,6 @@ unset($__errorArgs, $__bag); ?>
                                         <input type="text" id="calculated_total" class="form-control" value="0"
                                             readonly>
                                         
-                                        
                                         <div class="row mb-2">
                                             <div class="col-md-12">
                                                 <div class="form-check">
@@ -620,38 +625,115 @@ unset($__errorArgs, $__bag); ?>
 <?php $__env->stopSection(); ?>
 <?php $__env->startSection('additional-javascript'); ?>
     <script>
-        // Load batches by course
+        // Load batches for each selected course
         $('#course_id').on('change', function() {
-            let courseId = $(this).val();
-            $('#batch_id').html('<option>Loading...</option>');
-            $.get(`get-batches/${courseId}`, function(data) {
-                let html = '<option value="">Select Batch</option>';
-                data.forEach(batch => {
-                    html +=
-                        `<option value="${batch.id}" data-fee="${batch.course.min_fee}">${batch.title} (${batch.shift})</option>`;
-                });
-                $('#batch_id').html(html);
-            });
+            let selectedCourses = $(this).val() || [];
+            renderCourseBlocks(selectedCourses);
         });
 
-        let fullFee = 0;
+        // render course blocks based on number of courses
+        function renderCourseBlocks(selectedCourses) {
+            $('#batch-container').empty();
+            if (selectedCourses.length === 0) return;
+
+            let colSize = selectedCourses.length === 1 ? 'col-12' : 'col-md-6';
+
+            selectedCourses.forEach(courseId => {
+                const courseTitle = $('#course_id option[value="' + courseId + '"]').text();
+
+                let courseBlock = $(`
+            <div class="${colSize} mb-3 course-col" data-course="${courseId}">
+                <div class="course-block p-3 border rounded">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="mb-0 font-weight-bold">${courseTitle}</label>
+                        <button type="button" class="btn btn-link text-danger p-0 remove-course-btn" data-course="${courseId}">
+                            ✕ Remove
+                        </button>
+                    </div>
+                    <select name="batch_ids[]" class="form-control batch-select mb-2" required>
+                        <option value="">Loading...</option>
+                    </select>
+                    <input type="number" name="course_fees[]" class="form-control course-fee-input" placeholder="Auto or manual entry" readonly>
+                </div>
+            </div>
+        `);
+
+                $('#batch-container').append(courseBlock);
+
+                // load batches dynamically
+                $.get(`<?php echo e(url('admin/admission/get-batches')); ?>/${courseId}`, function(data) {
+                    let options = '<option value="">Select Batch</option>';
+                    if (data.length === 0) options += '<option disabled>No batches available</option>';
+                    data.forEach(batch => {
+                        options += `<option value="${batch.id}" data-fee="${batch.course.min_fee}">
+                    ${batch.title} (${batch.shift})
+                </option>`;
+                    });
+                    courseBlock.find('select').html(options);
+                }).fail(function(xhr) {
+                    console.error('Error loading batches:', xhr.responseText);
+                    courseBlock.find('select').html('<option disabled>Error loading batches</option>');
+                });
+            });
+
+            adjustBatchLayout();
+        }
+
+        // remove course dynamically and re-adjust layout
+        $(document).on('click', '.remove-course-btn', function() {
+            const courseId = $(this).data('course');
+            $(`.course-col[data-course="${courseId}"]`).remove();
+
+            // refresh selected course list
+            let selectedCourses = $('#course_id').val().filter(id => id != courseId);
+            $('#course_id').val(selectedCourses);
+
+            adjustBatchLayout();
+        });
+
+        // adjust columns dynamically
+        function adjustBatchLayout() {
+            const totalCourses = $('#batch-container .course-col').length;
+            const newCol = totalCourses === 1 ? 'col-12' : 'col-md-6';
+            $('#batch-container .course-col').removeClass('col-12 col-md-6').addClass(newCol);
+        }
+
+
+          let fullFee = 0;
         const PER_INSTALLMENT_CHARGE = 1000;
 
-        // When batch is selected, set fee value
-        $('#batch_id').on('change', function() {
-            let fee = $(this).find(':selected').data('fee') || 0;
-            fullFee = parseInt(fee) || 0;
-            $('#full_fee').val(fullFee);
-            autoDistributeInstallments();
+        // 🔹 When any batch is selected, update that course fee and total fee
+        $(document).on('change', '.batch-select', function() {
+            const block = $(this).closest('.course-block');
+            const fee = parseInt($(this).find(':selected').data('fee')) || 0;
+            block.find('.course-fee-input').val(fee).prop('readonly', false); // allow manual override
+
+            calculateTotalFee();
         });
 
-        // When admin edits the fee manually
+        // 🔹 When admin edits any individual course fee manually
+        $(document).on('input', '.course-fee-input', function() {
+            calculateTotalFee();
+        });
+
+        // 🔹 Sum all course fees
+        function calculateTotalFee() {
+            let totalFee = 0;
+            $('.course-fee-input').each(function() {
+                totalFee += parseInt($(this).val()) || 0;
+            });
+            $('#full_fee').val(totalFee);
+            fullFee = totalFee;
+            autoDistributeInstallments();
+        }
+
+        // 🔹 Manual override of total fee (still allowed)
         $('#full_fee').on('input', function() {
             fullFee = parseInt($(this).val() || 0);
             autoDistributeInstallments();
         });
 
-        // Toggle section on payment type
+        // 🔹 Payment Type Toggle
         $('input[name="payment_type"]').on('change', function() {
             if ($(this).val() === 'installment') {
                 $('#installment-section').show();
@@ -660,11 +742,11 @@ unset($__errorArgs, $__bag); ?>
             } else {
                 $('#installment-section').hide();
                 $('#apply_additional_charges').prop('checked', false).prop('disabled', true);
-                renderTotal(); // refresh calculated total for full payment
+                renderTotal();
             }
         });
 
-        // Handle installment count dropdown change
+        // 🔹 Installment count
         $('#installment_count').on('change', function() {
             let count = parseInt($(this).val());
             if (count === 2) {
@@ -676,12 +758,12 @@ unset($__errorArgs, $__bag); ?>
             autoDistributeInstallments();
         });
 
-        // Recalc when additional charges checkbox is toggled
+        // 🔹 Additional charges
         $(document).on('change', '#apply_additional_charges', function() {
             autoDistributeInstallments();
         });
 
-        // Manual edit of installments (1 and 2) triggers recalculation of remaining
+        // 🔹 Manual installment edit
         $('#installment_1, #installment_2').on('input', function() {
             adjustRemainingInstallments();
         });
@@ -710,15 +792,8 @@ unset($__errorArgs, $__bag); ?>
         function renderTotal() {
             const p = computeTotalParts();
             $('#calculated_total').val(p.total);
-            if (p.applyExtra && p.isInstallment) {
-                $('#calculated_breakdown').text(
-                    `Base: ₨${p.base} + Extra: ₨${PER_INSTALLMENT_CHARGE} × ${p.count} = ₨${p.extra}`);
-            } else {
-                $('#calculated_breakdown').text(`Base: ₨${p.base}`);
-            }
         }
 
-        // Distribute fee across installments
         function autoDistributeInstallments() {
             const count = parseInt($('#installment_count').val());
             const total = computeTotalParts().total;
@@ -738,11 +813,9 @@ unset($__errorArgs, $__bag); ?>
             renderTotal();
         }
 
-        // Re-adjust remaining amount based on admin input
         function adjustRemainingInstallments() {
             const count = parseInt($('#installment_count').val());
             const total = computeTotalParts().total;
-
             const inst1 = parseInt($('#installment_1').val()) || 0;
             const inst2 = parseInt($('#installment_2').val()) || 0;
 
@@ -756,7 +829,7 @@ unset($__errorArgs, $__bag); ?>
             renderTotal();
         }
 
-        // Referral logic toggle
+        // Referral logic
         document.addEventListener('DOMContentLoaded', function() {
             const referralType = document.getElementById('referral_type');
             const referralDetails = document.getElementById('referral_details_section');
@@ -774,11 +847,7 @@ unset($__errorArgs, $__bag); ?>
             toggleReferralFields();
             referralType.addEventListener('change', toggleReferralFields);
 
-            // Initialize payment section visibility/state
-            const paymentType = $('input[name="payment_type"]:checked').length ?
-                $('input[name="payment_type"]:checked').val() :
-                null;
-
+            const paymentType = $('input[name="payment_type"]:checked').val();
             if (paymentType === 'installment') {
                 $('#installment-section').show();
                 $('#apply_additional_charges').prop('disabled', false);
@@ -787,20 +856,17 @@ unset($__errorArgs, $__bag); ?>
                 $('#apply_additional_charges').prop('checked', false).prop('disabled', true);
             }
 
-            // Respect current count for visibility of installment 3
             const count = parseInt($('#installment_count').val());
             if (count === 2) {
                 $('#installment_3_wrapper').hide();
-                $('#installment_3').val('');
             } else {
                 $('#installment_3_wrapper').show();
             }
 
-            // Initial totals render
             autoDistributeInstallments();
         });
 
-        //show fee submission Percentage
+        // Show Online Percentage toggle
         (function() {
             function toggleOnlinePercent() {
                 var mode = document.getElementById('mode').value;
@@ -812,9 +878,13 @@ unset($__errorArgs, $__bag); ?>
                 }
             }
             document.getElementById('mode').addEventListener('change', toggleOnlinePercent);
-            // initial on load
             toggleOnlinePercent();
         })();
+        // Remove course block
+        $(document).on('click', '.remove-course-btn', function() {
+            $(this).closest('.course-block').remove();
+            calculateTotalFee();
+        });
     </script>
 <?php $__env->stopSection(); ?>
 

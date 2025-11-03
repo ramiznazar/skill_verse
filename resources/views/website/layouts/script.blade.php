@@ -1,10 +1,7 @@
  <!-- Footer Scripts -->
     <!-- JS | Custom script for all pages -->
     <script src="{{ asset('assets/website/js/custom.js') }}"></script>
-
-    <!-- SLIDER REVOLUTION 5.0 EXTENSIONS
-      (Load Extensions only on Local File Systems !
-       The following part can be removed on Server for On Demand Loading) -->
+    
     <script type="text/javascript"
         src="{{ asset('assets/website/js/revolution-slider/js/extensions/revolution.extension.actions.min.js') }}">
     </script>

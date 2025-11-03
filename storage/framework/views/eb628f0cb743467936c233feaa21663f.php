@@ -42,7 +42,6 @@
                     </div>
                 </div>
             </div>
-            
             <div class="header-nav">
                 <div class="header-nav-wrapper navbar-scrolltofixed bg-theme-colored border-bottom-theme-color-2-1px">
                     <div class="container">
@@ -74,11 +73,6 @@
                                 <li class="<?php echo e(request()->routeIs('contact') ? 'active' : ''); ?>">
                                     <a href="<?php echo e(route('contact')); ?>">Contact</a>
                                 </li>
-
-
-
-                                
-
                             </ul>
                             <ul class="pull-right flip hidden-sm hidden-xs">
                                 <li>

@@ -44,16 +44,16 @@
                             <form method="GET" action="<?php echo e(route('admission.index')); ?>" id="filterForm" class="mb-3">
                                 <div class="input-group mb-2">
                                     <input type="text" name="search" value="<?php echo e(request('search')); ?>"
-                                           class="form-control" placeholder="Search student..." autocomplete="off">
+                                        class="form-control" placeholder="Search student..." autocomplete="off">
                                 </div>
 
-                                <div class="row" style="margin-top: 15px;" >
+                                <div class="row" style="margin-top: 15px;">
                                     <div class="col-md-3 mb-2">
                                         <select name="course_id" class="form-control">
                                             <option value="">Filter by Course</option>
                                             <?php $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <option value="<?php echo e($course->id); ?>"
-                                                    <?php echo e((string)request('course_id') === (string)$course->id ? 'selected' : ''); ?>>
+                                                    <?php echo e((string) request('course_id') === (string) $course->id ? 'selected' : ''); ?>>
                                                     <?php echo e($course->title); ?>
 
                                                 </option>
@@ -66,7 +66,7 @@
                                             <option value="">Filter by Batch</option>
                                             <?php $__currentLoopData = $batches; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $batch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                                 <option value="<?php echo e($batch->id); ?>"
-                                                    <?php echo e((string)request('batch_id') === (string)$batch->id ? 'selected' : ''); ?>>
+                                                    <?php echo e((string) request('batch_id') === (string) $batch->id ? 'selected' : ''); ?>>
                                                     <?php echo e($batch->title); ?>
 
                                                 </option>
@@ -76,17 +76,26 @@
 
                                     <div class="col-md-3 mb-2">
                                         <select name="status" class="form-control">
-                                            <option value="all" <?php echo e(request('status', 'all') === 'all' ? 'selected' : ''); ?>>All Student Status</option>
-                                            <option value="active" <?php echo e(request('status') === 'active' ? 'selected' : ''); ?>>Active</option>
-                                            <option value="unactive" <?php echo e(request('status') === 'unactive' ? 'selected' : ''); ?>>Unactive</option>
+                                            <option value="all"
+                                                <?php echo e(request('status', 'all') === 'all' ? 'selected' : ''); ?>>All Student
+                                                Status</option>
+                                            <option value="active" <?php echo e(request('status') === 'active' ? 'selected' : ''); ?>>
+                                                Active</option>
+                                            <option value="unactive"
+                                                <?php echo e(request('status') === 'unactive' ? 'selected' : ''); ?>>Unactive</option>
                                         </select>
                                     </div>
 
                                     <div class="col-md-3 mb-2">
                                         <select name="payment" class="form-control">
-                                            <option value="" <?php echo e(request('payment') ? '' : 'selected'); ?>>All Payment Types</option>
-                                            <option value="full_fee" <?php echo e(request('payment') === 'full_fee' ? 'selected' : ''); ?>>Full Payment</option>
-                                            <option value="installment" <?php echo e(request('payment') === 'installment' ? 'selected' : ''); ?>>Installment</option>
+                                            <option value="" <?php echo e(request('payment') ? '' : 'selected'); ?>>All Payment
+                                                Types</option>
+                                            <option value="full_fee"
+                                                <?php echo e(request('payment') === 'full_fee' ? 'selected' : ''); ?>>Full Payment
+                                            </option>
+                                            <option value="installment"
+                                                <?php echo e(request('payment') === 'installment' ? 'selected' : ''); ?>>Installment
+                                            </option>
                                         </select>
                                     </div>
                                 </div>
@@ -101,8 +110,8 @@
                                             
                                             <th>Name</th>
                                             <th>Course</th>
-                                            <th>Mode</th>
                                             <th>Batch</th>
+                                            <th>Mode</th>
                                             <th>Payment</th>
                                             <th>Fee</th>
                                             <th>Status</th>
@@ -112,12 +121,50 @@
                                     <tbody>
                                         <?php $__empty_1 = true; $__currentLoopData = $admissions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $admission): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
                                             <tr>
-                                                <td><?php echo e($loop->iteration + ($admissions->currentPage() - 1) * $admissions->perPage()); ?></td>
+                                                <td><?php echo e($loop->iteration + ($admissions->currentPage() - 1) * $admissions->perPage()); ?>
+
+                                                </td>
                                                 
                                                 <td><?php echo e($admission->name); ?></td>
-                                                <td><?php echo e($admission->course->title ?? '-'); ?></td>
-                                                <td><?php echo e($admission->batch->title ?? '-'); ?></td>
-                                                 <td>
+                                                <td>
+                                                    <?php if($admission->courses->isNotEmpty()): ?>
+                                                        <?php $__currentLoopData = $admission->courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                            <div>
+                                                                <?php echo e($course->title); ?>
+
+                                                                <?php
+                                                                    $fee =
+                                                                        $course->pivot->course_fee ??
+                                                                        $admission->full_fee;
+                                                                ?>
+                                                                <?php if($fee): ?>
+                                                                    <small
+                                                                        class="text-muted">(₨<?php echo e(number_format($fee)); ?>)</small>
+                                                                <?php endif; ?>
+                                                            </div>
+                                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                    <?php else: ?>
+                                                        <?php echo e($admission->course->title ?? '-'); ?>
+
+                                                        <?php if($admission->full_fee): ?>
+                                                            <small
+                                                                class="text-muted">(₨<?php echo e(number_format($admission->full_fee)); ?>)</small>
+                                                        <?php endif; ?>
+                                                    <?php endif; ?>
+                                                </td>
+
+                                                <td>
+                                                    <?php if($admission->batches->isNotEmpty()): ?>
+                                                        <?php $__currentLoopData = $admission->batches; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $batch): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                            <div><?php echo e($batch->title); ?></div>
+                                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                    <?php else: ?>
+                                                        <?php echo e($admission->batch->title ?? '-'); ?>
+
+                                                    <?php endif; ?>
+                                                </td>
+
+                                                <td>
                                                     <span
                                                         class="badge badge-<?php echo e($admission->mode === 'physical' ? 'success' : 'warning'); ?>">
                                                         <?php echo e(ucfirst($admission->mode)); ?>
@@ -151,37 +198,54 @@
                                                     <?php endif; ?>
                                                 </td>
                                                 <td>
-                                                    <span
-                                                        class="badge badge-<?php echo e($admission->student_status === 'active' ? 'success' : 'secondary'); ?>">
+                                                    <?php
+                                                        switch ($admission->student_status) {
+                                                            case 'active':
+                                                                $badge = 'success'; // green
+                                                                break;
+                                                            case 'completed':
+                                                                $badge = 'info'; // blue
+                                                                break;
+                                                            default:
+                                                                $badge = 'secondary'; // gray for unactive
+                                                        }
+                                                    ?>
+
+                                                    <span class="badge badge-<?php echo e($badge); ?>">
                                                         <?php echo e(ucfirst($admission->student_status)); ?>
 
                                                     </span>
                                                 </td>
+
                                                 <td class="text-nowrap">
                                                     <div class="d-flex align-items-center" style="column-gap: 5px;">
+                                                        <a href="<?php echo e(route('admission.addCourse', $admission->id)); ?>"
+                                                            class="btn btn-sm btn-icon btn-pure btn-success"
+                                                            data-toggle="tooltip" data-original-title="Add New Course">
+                                                            <i class="fas fa-plus"></i>
+                                                        </a>
                                                         <a href="<?php echo e(route('fee-submission.create', $admission->id)); ?>"
-                                                           class="btn btn-sm btn-icon btn-pure btn-default"
-                                                           data-toggle="tooltip" data-original-title="Submit Fee">
+                                                            class="btn btn-sm btn-icon btn-pure btn-default"
+                                                            data-toggle="tooltip" data-original-title="Submit Fee">
                                                             <i class="fas fa-money-check-alt"></i>
                                                         </a>
                                                         <a href="<?php echo e(route('admission.show', $admission->id)); ?>"
-                                                           class="btn btn-sm btn-icon btn-pure btn-default"
-                                                           data-toggle="tooltip" data-original-title="View">
+                                                            class="btn btn-sm btn-icon btn-pure btn-default"
+                                                            data-toggle="tooltip" data-original-title="View">
                                                             <i class="icon-eye"></i>
                                                         </a>
                                                         <a href="<?php echo e(route('admission.edit', $admission->id)); ?>"
-                                                           class="btn btn-sm btn-icon btn-pure btn-default"
-                                                           data-toggle="tooltip" data-original-title="Edit">
+                                                            class="btn btn-sm btn-icon btn-pure btn-default"
+                                                            data-toggle="tooltip" data-original-title="Edit">
                                                             <i class="icon-pencil"></i>
                                                         </a>
                                                         <form action="<?php echo e(route('admission.destroy', $admission->id)); ?>"
-                                                              method="POST"
-                                                              onsubmit="return confirm('Are you sure?')">
+                                                            method="POST" onsubmit="return confirm('Are you sure?')">
                                                             <?php echo csrf_field(); ?>
                                                             <?php echo method_field('DELETE'); ?>
                                                             <button type="submit"
-                                                                    class="btn btn-sm btn-icon btn-pure btn-default"
-                                                                    data-toggle="tooltip" data-original-title="Remove">
+                                                                class="btn btn-sm btn-icon btn-pure btn-default"
+                                                                data-toggle="tooltip" data-original-title="Remove">
                                                                 <i class="icon-trash"></i>
                                                             </button>
                                                         </form>
@@ -190,7 +254,8 @@
                                             </tr>
                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
                                             <tr>
-                                                <td colspan="9" class="text-center text-muted">No admissions found.</td>
+                                                <td colspan="9" class="text-center text-muted">No admissions found.
+                                                </td>
                                             </tr>
                                         <?php endif; ?>
                                     </tbody>
@@ -212,23 +277,23 @@
 <?php $__env->stopSection(); ?>
 
 <?php $__env->startSection('additional-javascript'); ?>
-<script>
-document.addEventListener('DOMContentLoaded', function () {
-    const form = document.getElementById('filterForm');
-    const search = form.querySelector('input[name="search"]');
-    const selects = form.querySelectorAll('select');
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('filterForm');
+            const search = form.querySelector('input[name="search"]');
+            const selects = form.querySelectorAll('select');
 
-    // auto-submit on select change
-    selects.forEach(sel => sel.addEventListener('change', () => form.submit()));
+            // auto-submit on select change
+            selects.forEach(sel => sel.addEventListener('change', () => form.submit()));
 
-    // debounce search typing
-    let t;
-    search && search.addEventListener('input', () => {
-        clearTimeout(t);
-        t = setTimeout(() => form.submit(), 500);
-    });
-});
-</script>
+            // debounce search typing
+            let t;
+            search && search.addEventListener('input', () => {
+                clearTimeout(t);
+                t = setTimeout(() => form.submit(), 500);
+            });
+        });
+    </script>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('admin.layouts.main', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH E:\projects\codezy\zain-changes\codezy\resources\views/admin/pages/dashboard/admission/index.blade.php ENDPATH**/ ?>

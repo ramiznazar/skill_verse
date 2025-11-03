@@ -146,7 +146,7 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Full Fee</label>
                                             <input type="text" name="full_fee" class="form-control"
@@ -157,7 +157,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Discount (%)</label>
                                             <input type="text" name="discount" class="form-control"
@@ -168,7 +168,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Min Fee</label>
                                             <input type="text" name="min_fee" class="form-control"
@@ -178,6 +178,26 @@
                                             @enderror
                                         </div>
                                     </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Status</label>
+                                            <select name="is_active" class="form-control">
+                                                <option value="1"
+                                                    {{ old('is_active', $course->is_active) == 1 ? 'selected' : '' }}>
+                                                    Active
+                                                </option>
+                                                <option value="0"
+                                                    {{ old('is_active', $course->is_active) == 0 ? 'selected' : '' }}>
+                                                    Inactive
+                                                </option>
+                                            </select>
+                                            @error('is_active')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+
                                 </div>
 
                                 <div class="form-group">

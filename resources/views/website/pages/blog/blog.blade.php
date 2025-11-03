@@ -62,8 +62,7 @@
                                                     <div class="media-body pl-15">
                                                         <div class="event-content pull-left flip">
                                                             <h4 class="entry-title text-white text-uppercase m-0 mt-5">
-                                                                <a
-                                                                    href="#">{{ $blog->title }}</a>
+                                                                <a href="#">{{ $blog->title }}</a>
                                                             </h4>
 
                                                             <span class="mb-10 text-gray-darkgray mr-10 font-13">
@@ -89,9 +88,6 @@
                                                 <p class="mt-10">
                                                     {{ $blog->description }}
                                                 </p>
-
-                                                {{-- <a href="{{ route('blog.show', $blog->id) }}" class="btn-read-more">Read
-                                                    more</a> --}}
 
                                                 <div class="clearfix"></div>
                                             </div>

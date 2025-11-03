@@ -7,12 +7,12 @@
                     <h2>Fee Management</h2>
                 </div>
                 <div class="col-md-6 col-sm-12 text-right">
-                    <a href="javascript:void(0);" class="btn btn-sm btn-primary" title="">New</a>
+                    <a href="{{ route('fee-submission.index') }}" class="btn btn-sm btn-primary" title="Back">Back</a>
                 </div>
             </div>
         </div>
-        <div class="container-fluid">
 
+        <div class="container-fluid">
             <div class="row clearfix">
                 <div class="col-md-12">
                     <div class="card">
@@ -24,10 +24,10 @@
                                 method="POST" novalidate>
                                 @csrf
 
-                                <div class="form-group">
+                                {{-- Student Info --}}
+                                <div class="form-group mb-3">
                                     <label><strong>Student Name:</strong> {{ $admission->name }}</label><br>
-                                    <label><strong>Course:</strong> {{ $admission->course->title }}</label><br>
-                                    <label><strong>Payment Type:</strong> {{ ucfirst($admission->payment_type) }}</label>
+                                    <label><strong>Admission No:</strong> {{ $admission->roll_no ?? '—' }}</label>
                                 </div>
 
                                 {{-- Payment Method --}}
@@ -38,6 +38,9 @@
                                         <option value="account">By Account</option>
                                         <option value="hand">By Hand</option>
                                     </select>
+                                    @error('payment_method')
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
                                 </div>
 
                                 {{-- Hidden Collector Field (auto-fill current user ID) --}}
@@ -69,7 +72,6 @@
                                                 <input type="text" id="accountName" class="form-control" readonly>
                                             </div>
                                         </div>
-
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label>Account Number</label>
@@ -79,38 +81,99 @@
                                     </div>
                                 </div>
 
-                                {{-- Fee Selection --}}
-                                <div class="form-group">
+                                {{-- Multi-Course Fee Selection --}}
+                                <div class="form-group mt-4">
                                     <label><strong>Select Fee to Submit:</strong></label><br>
 
-                                    @if ($admission->payment_type === 'full_fee')
-                                        @php $submitted = in_array('full_fee', $submittedFees); @endphp
-                                        <label class="fancy-checkbox">
-                                            <input type="checkbox" name="fees[]" value="full_fee"
-                                                {{ $submitted ? 'checked' : '' }}>
-                                            <span>Full Fee - {{ $admission->full_fee }} PKR
-                                                @if ($submitted)
-                                                    <small class="text-success">(Already Submitted)</small>
-                                                @endif
-                                            </span>
-                                        </label>
-                                    @else
-                                        @php $installments = ['installment_1', 'installment_2', 'installment_3']; @endphp
-                                        @foreach ($installments as $key)
-                                            @if ($admission->$key)
-                                                @php $submitted = in_array($key, $submittedFees); @endphp
-                                                <label class="fancy-checkbox">
-                                                    <input type="checkbox" name="fees[]" value="{{ $key }}"
-                                                        {{ $submitted ? 'checked disabled' : '' }}>
-                                                    <span>{{ ucfirst(str_replace('_', ' ', $key)) }} -
-                                                        {{ $admission->$key }} PKR
-                                                        @if ($submitted)
-                                                            <small class="text-success">(Already Submitted)</small>
+                                    @if ($admission->courses->isNotEmpty())
+                                        @foreach ($admission->courses as $course)
+                                            <div class="border rounded p-3 mb-3">
+                                                <h6 class="text-primary mb-1">
+                                                    🎓 {{ $course->title }}
+                                                    <small
+                                                        class="text-muted">({{ $course->pivot->batch->title ?? 'Batch' }})</small>
+                                                </h6>
+                                                <p class="mb-2">Total Fee:
+                                                    ₨{{ number_format($course->pivot->course_fee) }}</p>
+
+                                                @php
+                                                    $submitted = \App\Models\FeeSubmission::where(
+                                                        'admission_id',
+                                                        $admission->id,
+                                                    )
+                                                        ->where('course_id', $course->id)
+                                                        ->pluck('payment_type')
+                                                        ->toArray();
+                                                @endphp
+
+                                                {{-- Full fee or installment options --}}
+                                                @php
+                                                    // $pivotPaymentType = $admission->payment_type;
+                                                    // $pivotPaymentType =
+                                                    //     $course->pivot->payment_type ?? $admission->payment_type;
+                                                    $pivotPaymentType =
+                                                        $course->pivot->payment_type ?:
+                                                        $admission->payment_type ?? 'full_fee';
+
+                                                @endphp
+
+                                                @if ($pivotPaymentType === 'full_fee')
+                                                    @php $paid = in_array('full_fee', $submitted); @endphp
+                                                    <label class="fancy-checkbox d-block">
+                                                        <input type="checkbox" name="fees[{{ $course->id }}][]"
+                                                            value="full_fee" {{ $paid ? 'checked disabled' : '' }}>
+                                                        <span>
+                                                            Full Fee
+                                                            —₨{{ number_format($course->pivot->course_fee ?: $admission->full_fee) }}
+
+                                                            @if ($paid)
+                                                                <small class="text-success">(Already Submitted)</small>
+                                                            @endif
+                                                        </span>
+                                                    </label>
+                                                @elseif ($pivotPaymentType === 'installment')
+                                                    @php
+                                                        $installments = [
+                                                            'installment_1' =>
+                                                                $course->pivot->installment_1 ??
+                                                                ($admission->installment_1 ?? 0),
+                                                            'installment_2' =>
+                                                                $course->pivot->installment_2 ??
+                                                                ($admission->installment_2 ?? 0),
+                                                            'installment_3' =>
+                                                                $course->pivot->installment_3 ??
+                                                                ($admission->installment_3 ?? 0),
+                                                        ];
+                                                    @endphp
+
+                                                    @foreach ($installments as $key => $amount)
+                                                        @if ($amount > 0)
+                                                            @php $paid = in_array($key, $submitted); @endphp
+                                                            <label class="fancy-checkbox d-block">
+                                                                <input type="checkbox" name="fees[{{ $course->id }}][]"
+                                                                    value="{{ $key }}"
+                                                                    {{ $paid ? 'checked disabled' : '' }}>
+                                                                <span>
+                                                                    {{ ucfirst(str_replace('_', ' ', $key)) }} —
+                                                                    ₨{{ number_format($amount) }}
+                                                                    @if ($paid)
+                                                                        <small class="text-success">(Already
+                                                                            Submitted)</small>
+                                                                    @endif
+                                                                </span>
+                                                            </label>
                                                         @endif
-                                                    </span>
-                                                </label>
-                                            @endif
+                                                    @endforeach
+                                                @endif
+
+                                            </div>
                                         @endforeach
+                                    @else
+                                        {{-- Fallback for legacy single-course admissions --}}
+                                        <div class="border rounded p-3 mb-3">
+                                            <h6 class="text-primary">🎓 {{ $admission->course->title }}</h6>
+                                            <p>Full Fee: ₨{{ number_format($admission->full_fee) }}</p>
+                                        </div>
                                     @endif
                                 </div>
 
@@ -135,18 +198,16 @@
             const accountName = document.getElementById('accountName');
             const accountNumber = document.getElementById('accountNumber');
             const collectorIdField = document.getElementById('collectorIdField');
-
-            const loggedInUserId = {{ auth()->user()->id }}; // inject Laravel user ID
+            const loggedInUserId = {{ auth()->user()->id }};
 
             methodSelect.addEventListener('change', function() {
                 const method = this.value;
-
                 if (method === 'hand') {
                     collectorIdField.value = loggedInUserId;
                     accountDiv.style.display = 'none';
                     accountInfo.style.display = 'none';
                 } else if (method === 'account') {
-                    collectorIdField.value = ''; // clear if account selected
+                    collectorIdField.value = '';
                     accountDiv.style.display = 'block';
                     accountInfo.style.display = 'block';
                 } else {

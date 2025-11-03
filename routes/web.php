@@ -113,7 +113,7 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
     Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
     //Notification Table
-     Route::get('notifications/all', [NotificationTableController::class, 'index'])->name('admin.notifications.table');
+    Route::get('notifications/all', [NotificationTableController::class, 'index'])->name('admin.notifications.table');
     Route::get('notifications/{notification}', [NotificationTableController::class, 'show'])->name('admin.notifications.show');
     // (optional) bulk actions
     Route::post('notifications/bulk/status', [NotificationTableController::class, 'bulkStatus'])->name('admin.notifications.bulkStatus');
@@ -182,6 +182,8 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
         'account' => AccountController::class,
         'expense' => ExpenseController::class,
     ]);
+    Route::get('admission/{admission}/add-course', [AdmissionController::class, 'addCourseForm'])->name('admission.addCourse');
+    Route::post('admission/{admission}/add-course', [AdmissionController::class, 'storeNewCourse'])->name('admission.storeNewCourse');
 
     // Popular Course
     Route::resource('popular-course', PopularCourseController::class);
@@ -261,15 +263,15 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
 });
 
 Route::get('/optimize-app', function () {
-    Artisan::call('optimize:clear'); // Clears cache, config, route, and view caches
-    Artisan::call('cache:clear');    // Clears application cache
-    Artisan::call('config:clear');   // Clears configuration cache
-    Artisan::call('route:clear');    // Clears route cache
-    Artisan::call('view:clear');     // Clears compiled Blade views
-    Artisan::call('config:cache');   // Rebuilds configuration cache
-    Artisan::call('route:cache');    // Rebuilds route cache
-    Artisan::call('view:cache');     // Precompiles Blade templates
-    Artisan::call('optimize');       // Optimizes class loading
+    Artisan::call('optimize:clear');
+    Artisan::call('cache:clear');
+    Artisan::call('config:clear');
+    Artisan::call('route:clear');
+    Artisan::call('view:clear');
+    Artisan::call('config:cache');
+    Artisan::call('route:cache');
+    Artisan::call('view:cache');
+    Artisan::call('optimize');
 
     return "Application optimized and caches cleared successfully!";
 });

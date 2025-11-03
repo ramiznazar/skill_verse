@@ -16,7 +16,7 @@ class CourseController extends Controller
     {
         // NEW: read query params for server-side filtering
         $categoryId = $request->query('category'); // e.g. ?category=3
-        $q          = $request->query('q');        // e.g. ?q=react
+        $q = $request->query('q');        // e.g. ?q=react
 
         // Base query
         $coursesQuery = Course::with('courseCategory');
@@ -33,23 +33,26 @@ class CourseController extends Controller
         }
 
         // Keep filters in pagination links
-        $courses = $coursesQuery->latest()->paginate(6)->withQueryString();
+        $courses = $coursesQuery->where('is_active', 1)->latest()->paginate(6)->withQueryString();
 
         // Keep your existing "withCount('course')" naming to match $category->course_count in Blade
         // (Optionally filter counts by search text, but NOT by category so user sees total per category for that search)
-        $categories = CourseCategory::withCount(['course' => function ($q2) use ($q) {
-            if (!empty($q)) {
-                $q2->where(function ($sub) use ($q) {
-                    $sub->where('title', 'like', "%{$q}%")
-                        ->orWhere('short_description', 'like', "%{$q}%");
-                });
+        $categories = CourseCategory::withCount([
+            'course' => function ($q2) use ($q) {
+                $q2->where('is_active', 1); // ✅ only active
+                if (!empty($q)) {
+                    $q2->where(function ($sub) use ($q) {
+                        $sub->where('title', 'like', "%{$q}%")
+                            ->orWhere('short_description', 'like', "%{$q}%");
+                    });
+                }
             }
-        }])->get();
+        ])->get();
 
         $popularCourses = PopularCourse::all();
-        $generativeAi   = Course::where('title', 'Generative Ai')->first();
-        $freelancing    = Course::where('title', 'Freelancing')->first();
-        $development    = Course::where('title', 'Web Development')->first();
+        $generativeAi = Course::where('title', 'Generative Ai')->first();
+        $freelancing = Course::where('title', 'Freelancing')->first();
+        $development = Course::where('title', 'Web Development')->first();
 
         // Pass current filters to view for active state + preserving on search
         return view(

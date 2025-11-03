@@ -35,18 +35,7 @@
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>
-                                    </div>
-                                    {{-- Type --}}
-                                    {{-- <div class="col-md-6">
-                                        <div class="form-group">
-                                            <label>Type</label>
-                                            <input type="text" name="ref_type" class="form-control"
-                                                value="{{ old('ref_type', $expense->ref_type) }}">
-                                            @error('ref_type')
-                                                <small class="text-danger">{{ $message }}</small>
-                                            @enderror
-                                        </div>
-                                    </div> --}}
+                                    </div>                                  
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Type</label>

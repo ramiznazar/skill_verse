@@ -31,7 +31,7 @@ class LeadController extends Controller
         if ($search !== '') {
             $query->where(function ($q) use ($search) {
                 $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%") 
                     ->orWhere('address', 'like', "%{$search}%")
                     ->orWhereHas('course', fn($c) => $c->where('title', 'like', "%{$search}%"));
             });

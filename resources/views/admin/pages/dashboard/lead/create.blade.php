@@ -146,14 +146,6 @@
                                         @enderror
                                     </div>
 
-                                    {{-- <div class="col-md-4">
-                                        <label>Last Institute</label>
-                                        <input type="text" name="last_institute" class="form-control"
-                                            value="{{ old('last_institute') }}">
-                                        @error('last_institute')
-                                            <small class="text-danger">{{ $message }}</small>
-                                        @enderror
-                                    </div> --}}
                                     <div class="col-md-4">
                                         <label>Lead Status</label>
                                         <select name="status" class="form-control">

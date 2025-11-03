@@ -87,9 +87,7 @@
                                             {{ intval($studentProgress) }}%
                                         </div>
                                     </div>
-                                    {{-- <small class="text-muted">Target: {{ $studentTarget }} students</small> --}}
 
-                                    {{-- <small class="text-muted">Total Enrollments</small> --}}
                                 </div>
                             </div>
 
@@ -211,6 +209,7 @@
         });
     </script>
     {{-- Graph 3 --}}
+    {{-- Top 5 Courses by Admissions --}}
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
         let chart;
@@ -309,6 +308,7 @@
     </script>
 
     {{-- Graph 1 --}}
+    {{-- Financial Overview --}}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             new Chartist.Bar('#chart-top-products', {
@@ -332,7 +332,8 @@
         });
     </script>
 
-    {{-- Lead Source Breakdown --}}
+    {{-- Graph 2 --}}
+    {{-- Student Sources --}}
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
         let leadChart;
@@ -391,13 +392,18 @@
         });
     </script>
 
+    {{-- Graph 3 --}}
+    {{-- Top 5 Courses by Admissions --}}
     <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
     <script>
         function renderTopCoursesChart(categories, series) {
-            let options = {
+            const options = {
                 chart: {
                     type: 'bar',
-                    height: 300
+                    height: 300,
+                    toolbar: {
+                        show: false
+                    }
                 },
                 series: [{
                     name: 'Admissions',
@@ -407,7 +413,22 @@
                     categories: categories,
                     labels: {
                         style: {
-                            fontSize: '12px'
+                            fontSize: '12px',
+                            colors: '#555'
+                        }
+                    },
+                    axisBorder: {
+                        color: '#ccc'
+                    },
+                    axisTicks: {
+                        color: '#ccc'
+                    }
+                },
+                yaxis: {
+                    labels: {
+                        style: {
+                            fontSize: '12px',
+                            colors: '#555'
                         }
                     }
                 },
@@ -416,27 +437,48 @@
                     bar: {
                         distributed: true,
                         horizontal: false,
-                        columnWidth: '50%'
+                        columnWidth: '50%',
+                        borderRadius: 4
                     }
                 },
                 dataLabels: {
-                    enabled: true
+                    enabled: true,
+                    style: {
+                        fontSize: '11px',
+                        colors: ['#fff']
+                    },
+                },
+                grid: {
+                    borderColor: '#eee',
+                    strokeDashArray: 4
+                },
+                tooltip: {
+                    theme: 'light',
+                    y: {
+                        formatter: function(val) {
+                            return val + " Admissions";
+                        }
+                    }
                 },
                 legend: {
                     show: false
                 }
             };
 
-            let chart = new ApexCharts(document.querySelector("#chart-top-courses"), options);
+            const chartElement = document.querySelector("#chart-top-courses");
+
+            // Clear any previous chart instance
+            chartElement.innerHTML = '';
+
+            const chart = new ApexCharts(chartElement, options);
             chart.render();
         }
 
-        // Load chart with PHP data
+        // Load chart with PHP data (already includes multi-course logic from controller)
         renderTopCoursesChart(@json($topCourseCategories), @json($topCourseSeries));
 
-        // Refresh on click
+        // Refresh chart when clicking refresh icon
         document.getElementById('refreshTopCourses').addEventListener('click', function() {
-            document.querySelector("#chart-top-courses").innerHTML = '';
             renderTopCoursesChart(@json($topCourseCategories), @json($topCourseSeries));
         });
     </script>

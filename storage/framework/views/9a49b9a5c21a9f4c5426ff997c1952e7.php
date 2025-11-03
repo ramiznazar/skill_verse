@@ -97,8 +97,7 @@ unset($__errorArgs, $__bag); ?>
                                 </div>
 
                                 <button type="submit" class="btn btn-primary btn-lg btn-block">LOGIN</button>
-                                
-                                
+                              
                             </form>
                         </div>
                     </div>

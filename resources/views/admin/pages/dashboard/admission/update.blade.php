@@ -158,6 +158,9 @@
                                             <option value="unactive"
                                                 {{ old('student_status', $admission->student_status) == 'unactive' ? 'selected' : '' }}>
                                                 UnActive</option>
+                                            <option value="completed"
+                                                {{ old('student_status', $admission->student_status) == 'completed' ? 'selected' : '' }}>
+                                                Completed</option>
                                         </select>
                                         @error('student_status')
                                             <small class="text-danger">{{ $message }}</small>

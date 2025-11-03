@@ -67,6 +67,7 @@ class CourseController extends Controller
             'full_fee' => $request->full_fee,
             'discount' => $request->discount,
             'min_fee' => $request->min_fee,
+            'is_active' => $request->is_active,
         ]);
 
         return redirect()->route('course.index')->with('store', 'Course Added Successfully');
@@ -140,6 +141,7 @@ class CourseController extends Controller
         $course->full_fee = $request->full_fee;
         $course->discount = $request->discount;
         $course->min_fee = $request->min_fee;
+        $course->is_active = $request->is_active;
 
         $course->save();
 

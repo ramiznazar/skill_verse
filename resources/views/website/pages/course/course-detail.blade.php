@@ -12,7 +12,6 @@
                             <h2 class="title text-white">Course Details</h2>
                             <ol class="breadcrumb text-left text-black mt-10">
                                 <li><a href="{{ route('home') }}">Home</a></li>
-                                {{-- <li><a href="#">Pages</a></li> --}}
                                 <li class="active text-gray-silver">Course Details</li>
                             </ol>
                         </div>
@@ -32,12 +31,6 @@
                             <h3 class="text-theme-colored line-bottom text-theme-colored">{{ $course->title }}</h3>
                             <h4 class="mt-0"><span class="text-theme-color-2">Duration :</span> {{ $course->duration }}
                             </h4>
-                            {{-- <ul class="review_text list-inline">
-                                <li>
-                                    <div class="star-rating" title="Rated 4.50 out of 5"><span
-                                            style="width: 90%;">4.50</span></div>
-                                </li>
-                            </ul> --}}
                             <h5>{{ $course->description }}</p>
                                 <h4 class="line-bottom mt-20 mb-20 text-theme-colored">Course Outline</h4>
 
@@ -95,7 +88,8 @@
                                     <ul class="list list-border angle-double-right">
                                         @foreach ($courses as $item)
                                             <li class="{{ $item->id == $course->id ? 'active' : '' }}">
-                                                <a href="{{ route('course.detail', $item->slug) }}">{{ $item->title }}</a>
+                                                <a
+                                                    href="{{ route('course.detail', $item->slug) }}">{{ $item->title }}</a>
                                             </li>
                                         @endforeach
                                     </ul>
@@ -124,25 +118,6 @@
                                 </div>
                             </div>
                             <div class="widget">
-                                {{-- <h4 class="widget-title line-bottom">Quick <span class="text-theme-color-2">Contact</span>
-                                </h4>
-                                <form id="quick_contact_form_sidebar" name="footer_quick_contact_form"
-                                    class="quick-contact-form" action="includes/quickcontact.php" method="post">
-                                    <div class="form-group">
-                                        <input name="form_email" class="form-control" type="text" required=""
-                                            placeholder="Enter Email">
-                                    </div>
-                                    <div class="form-group">
-                                        <textarea name="form_message" class="form-control" required="" placeholder="Enter Message" rows="3"></textarea>
-                                    </div>
-                                    <div class="form-group">
-                                        <input name="form_botcheck" class="form-control" type="hidden" value="" />
-                                        <button type="submit"
-                                            class="btn btn-theme-colored btn-flat btn-xs btn-quick-contact text-white pt-5 pb-5"
-                                            data-loading-text="Please wait...">Send Message</button>
-                                    </div>
-                                </form> --}}
-
                                 <!-- Quick Contact Form Validation-->
                                 <script type="text/javascript">
                                     $("#quick_contact_form_sidebar").validate({

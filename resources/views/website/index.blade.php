@@ -537,24 +537,6 @@
             </div>
         </section>
 
-        <!-- Section: Divider -->
-        {{-- <section>
-            <div class="container pb-40">
-                <div class="pt-20 pb-20 bg-theme-color-2" data-margin-top="-115px">
-                    <div class="row">
-                        <div class="col-md-9">
-                            <h3 class="mt-5 ml-50 ml-sm-0 text-white sm-text-center font-weight-600">Edupress The
-                                Best Education & University HTML Template Ever!</h3>
-                        </div>
-                        <div class="col-md-3 sm-text-center">
-                            <a class="btn btn-flat btn-theme-colored btn-lg mt-5 ml-30 ml-sm-0" href="#">Purchase
-                                Now<i class="fa fa-angle-double-right font-16 ml-10"></i></a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section> --}}
-
         <!-- Section: COURSES -->
         <section class="bg-lighter" id="course">
             <div class="container pb-40">
@@ -676,133 +658,9 @@
                         </div>
                     @endforeach
 
-                    {{-- <div class="col-xs-12 col-sm-6 col-md-3 mb-md-50">
-                        <div class="funfact text-center">
-                            <i class="pe-7s-note2 mt-5 text-theme-color-2"></i>
-                            <h2 data-animation-duration="2000" data-value="675"
-                                class="animate-number text-white mt-0 font-38 font-weight-500">0</h2>
-                            <h5 class="text-white text-uppercase mb-0">Our Courses</h5>
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-6 col-md-3 mb-md-50">
-                        <div class="funfact text-center">
-                            <i class="pe-7s-users mt-5 text-theme-color-2"></i>
-                            <h2 data-animation-duration="2000" data-value="248"
-                                class="animate-number text-white mt-0 font-38 font-weight-500">0</h2>
-                            <h5 class="text-white text-uppercase mb-0">Our Teachers</h5>
-                        </div>
-                    </div>
-                    <div class="col-xs-12 col-sm-6 col-md-3 mb-md-0">
-                        <div class="funfact text-center">
-                            <i class="pe-7s-cup mt-5 text-theme-color-2"></i>
-                            <h2 data-animation-duration="2000" data-value="24"
-                                class="animate-number text-white mt-0 font-38 font-weight-500">0</h2>
-                            <h5 class="text-white text-uppercase mb-0">Awards Won</h5>
-                        </div>
-                    </div> --}}
                 </div>
             </div>
         </section>
-
-        <!-- Section: team -->
-        {{-- <section>
-            <div class="container pt-60">
-                <div class="section-title mb-0">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <h2 class="mt-0 text-uppercase font-28 line-bottom">Our <span
-                                    class="text-theme-color-2 font-weight-400">Teachers</span></h2>
-                            <h4 class="pb-20">Lorem ipsum dolor sit amet, consectetur adipisicing elit.</h4>
-                        </div>
-                    </div>
-                </div>
-                <div class="section-content">
-                    <div class="row multi-row-clearfix">
-                        <div class="col-sm-6 col-md-3 mb-sm-30 sm-text-center">
-                            <div class="team maxwidth400">
-                                <div class="thumb"><img class="img-fullwidth" src="images/team/team5.jpg"
-                                        alt=""></div>
-                                <div class="content border-1px p-15 bg-light clearfix">
-                                    <h4 class="name text-theme-color-2 mt-0">David Jakaria -
-                                        <small>Teacher</small>
-                                    </h4>
-                                    <p class="mb-20">Lorem ipsum dolor sit amet, con amit sectetur adipisicing
-                                        elit.</p>
-                                    <ul
-                                        class="styled-icons icon-dark icon-circled icon-theme-colored icon-sm pull-left flip">
-                                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-google-plus"></i></a></li>
-                                    </ul>
-                                    <a class="btn btn-theme-colored btn-sm pull-right flip"
-                                        href="page-teachers-details.html">view details</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-md-3 mb-sm-30 sm-text-center">
-                            <div class="team maxwidth400">
-                                <div class="thumb"><img class="img-fullwidth" src="images/team/team6.jpg"
-                                        alt=""></div>
-                                <div class="content border-1px p-15 bg-light clearfix">
-                                    <h4 class="name mt-0 text-theme-color-2">Sakib Smith - <small>Teacher</small>
-                                    </h4>
-                                    <p class="mb-20">Lorem ipsum dolor sit amet, con amit sectetur adipisicing
-                                        elit.</p>
-                                    <ul
-                                        class="styled-icons icon-dark icon-circled icon-theme-colored icon-sm pull-left flip">
-                                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-google-plus"></i></a></li>
-                                    </ul>
-                                    <a class="btn btn-theme-colored btn-sm pull-right flip"
-                                        href="page-teachers-details.html">view details</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-md-3 mb-sm-30 sm-text-center">
-                            <div class="team maxwidth400">
-                                <div class="thumb"><img class="img-fullwidth" src="images/team/team7.jpg"
-                                        alt=""></div>
-                                <div class="content border-1px p-15 bg-light clearfix">
-                                    <h4 class="name mt-0 text-theme-color-2">Ismail Jon - <small>Teacher</small>
-                                    </h4>
-                                    <p class="mb-20">Lorem ipsum dolor sit amet, con amit sectetur adipisicing
-                                        elit.</p>
-                                    <ul
-                                        class="styled-icons icon-dark icon-circled icon-theme-colored icon-sm pull-left flip">
-                                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-google-plus"></i></a></li>
-                                    </ul>
-                                    <a class="btn btn-theme-colored btn-sm pull-right flip"
-                                        href="page-teachers-details.html">view details</a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-sm-6 col-md-3 sm-text-center">
-                            <div class="team maxwidth400">
-                                <div class="thumb"><img class="img-fullwidth" src="images/team/team8.jpg"
-                                        alt=""></div>
-                                <div class="content border-1px p-15 bg-light clearfix">
-                                    <h4 class="name mt-0 text-theme-color-2">Andre Smith - <small>Teacher</small>
-                                    </h4>
-                                    <p class="mb-20">Lorem ipsum dolor sit amet, con amit sectetur adipisicing
-                                        elit.</p>
-                                    <ul
-                                        class="styled-icons icon-dark icon-circled icon-theme-colored icon-sm pull-left flip">
-                                        <li><a href="#"><i class="fa fa-facebook"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-twitter"></i></a></li>
-                                        <li><a href="#"><i class="fa fa-google-plus"></i></a></li>
-                                    </ul>
-                                    <a class="btn btn-theme-colored btn-sm pull-right flip"
-                                        href="page-teachers-details.html">view details</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section> --}}
 
         <!-- Section: Gallery -->
         <section id="gallery" class="bg-lighter">
@@ -973,60 +831,6 @@
                 </div>
             </div>
         </section>
-
-        <!-- Divider: Call To Action -->
-        {{-- <section class="bg-theme-color-2">
-            <div class="container pt-10 pb-20">
-                <div class="row">
-                    <div class="call-to-action">
-                        <div class="col-md-6">
-                            <h3 class="mt-5 mb-5 text-white vertical-align-middle"><i
-                                    class="pe-7s-mail mr-10 font-48 vertical-align-middle"></i> SUBSCRIBE TO OUR
-                                NEWSLETTER</h3>
-                        </div>
-                        <div class="col-md-6">
-                            <!-- Mailchimp Subscription Form Starts Here -->
-                            <form id="mailchimp-subscription-form" class="newsletter-form mt-10">
-                                <div class="input-group">
-                                    <input type="email" value="" name="EMAIL" placeholder="Your Email"
-                                        class="form-control input-lg font-16" data-height="45px" id="mce-EMAIL-call">
-                                    <span class="input-group-btn">
-                                        <button data-height="45px"
-                                            class="btn bg-theme-colored text-white btn-xs m-0 font-14"
-                                            type="submit">Subscribe</button>
-                                    </span>
-                                </div>
-                            </form>
-                            <!-- Mailchimp Subscription Form Validation-->
-                            <script type="text/javascript">
-                                $('#mailchimp-subscription-form').ajaxChimp({
-                                    callback: mailChimpCallBack,
-                                    url: '//thememascot.us9.list-manage.com/subscribe/post?u=a01f440178e35febc8cf4e51f&amp;id=49d6d30e1e'
-                                });
-
-                                function mailChimpCallBack(resp) {
-                                    // Hide any previous response text
-                                    var $mailchimpform = $('#mailchimp-subscription-form'),
-                                        $response = '';
-                                    $mailchimpform.children(".alert").remove();
-                                    if (resp.result === 'success') {
-                                        $response =
-                                            '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
-                                            resp.msg + '</div>';
-                                    } else if (resp.result === 'error') {
-                                        $response =
-                                            '<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
-                                            resp.msg + '</div>';
-                                    }
-                                    $mailchimpform.prepend($response);
-                                }
-                            </script>
-                            <!-- Mailchimp Subscription Form Ends Here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section> --}}
 
         <!-- end main-content -->
     </div>

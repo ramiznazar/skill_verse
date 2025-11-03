@@ -59,7 +59,7 @@
                                         </div>
                                     </div>
 
-                                      <div class="col-md-4">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Duration</label>
                                             <input type="text" name="duration" class="form-control"
@@ -91,9 +91,9 @@
                                         <div class="form-group">
                                             <label>Mode</label>
                                             <select name="mode" class="form-control">
-                                                    <option value="Online">Online</option>
-                                                    <option value="On-campus">On-campus</option>
-                                                    <option value="Hybrid">Hybrid</option>
+                                                <option value="Online">Online</option>
+                                                <option value="On-campus">On-campus</option>
+                                                <option value="Hybrid">Hybrid</option>
                                             </select>
                                             @error('mode')
                                                 <small class="text-danger">{{ $message }}</small>
@@ -105,9 +105,9 @@
                                         <div class="form-group">
                                             <label>Level</label>
                                             <select name="level" class="form-control">
-                                                    <option value="Intermediate">Intermediate</option>
-                                                    <option value="Beginner">Beginner</option>
-                                                    <option value="Advanced">Advanced</option>
+                                                <option value="Intermediate">Intermediate</option>
+                                                <option value="Beginner">Beginner</option>
+                                                <option value="Advanced">Advanced</option>
                                             </select>
                                             @error('level')
                                                 <small class="text-danger">{{ $message }}</small>
@@ -117,7 +117,7 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Full Fee</label>
                                             <input type="text" name="full_fee" class="form-control"
@@ -128,7 +128,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Discount</label>
                                             <input type="text" name="discount" class="form-control"
@@ -139,7 +139,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Min Fee</label>
                                             <input type="text" name="min_fee" class="form-control"
@@ -149,6 +149,26 @@
                                             @enderror
                                         </div>
                                     </div>
+
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>Status</label>
+                                            <select name="is_active" class="form-control">
+                                                <option value="1"
+                                                    {{ old('is_active') }}>
+                                                    Active
+                                                </option>
+                                                <option value="0"
+                                                    {{ old('is_active')}}>
+                                                    Inactive
+                                                </option>
+                                            </select>
+                                            @error('is_active')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+
                                 </div>
 
                                 <div class="form-group">

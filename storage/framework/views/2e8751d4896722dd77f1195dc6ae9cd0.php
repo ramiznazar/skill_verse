@@ -533,9 +533,6 @@
             </div>
         </section>
 
-        <!-- Section: Divider -->
-        
-
         <!-- Section: COURSES -->
         <section class="bg-lighter" id="course">
             <div class="container pb-40">
@@ -657,13 +654,9 @@
                         </div>
                     <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
 
-                    
                 </div>
             </div>
         </section>
-
-        <!-- Section: team -->
-        
 
         <!-- Section: Gallery -->
         <section id="gallery" class="bg-lighter">
@@ -836,9 +829,6 @@
                 </div>
             </div>
         </section>
-
-        <!-- Divider: Call To Action -->
-        
 
         <!-- end main-content -->
     </div>

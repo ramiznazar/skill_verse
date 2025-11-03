@@ -3,7 +3,6 @@
         <li class="nav-item"><a class="nav-link active" data-toggle="tab" href="#setting">Settings</a></li>
         <li class="nav-item"><a class="nav-link" data-toggle="tab" href="#chat">Chat</a></li>
     </ul>
-    
 </div>
 
 <div id="left-sidebar" class="sidebar">
@@ -117,8 +116,6 @@
 
                         <li><a href="<?php echo e(route('fee-submission.index')); ?>"><i class="fas fa-money-check-alt"></i><span>Fee
                                     Submission</span></a></li>
-
-                        
 
                         <li> <a href="<?php echo e(route('referral-commission.index')); ?>">
                                 <i class="fas fa-handshake"></i><span>Referral Commission</span></a></li>
@@ -309,14 +306,9 @@
                                     class="fas fa-chalkboard-teacher"></i><span>Courses</span></a></li>
                         <li><a href="<?php echo e(route('message.index')); ?>"><i class="icon-bubbles"></i><span>Messages</span></a>
                         </li>
-                        
-                        
+                       
                     <?php endif; ?>
 
-
-                    
-                    
-                    
                 <?php endif; ?>
 
             </ul>

@@ -119,12 +119,16 @@ class BatchController extends Controller
         return redirect()->route('batch.index')->with('delete', 'Batch deleted successfully.');
     }
 
-    public function getByCourse($id)
+    public function getByCourse($courseId)
     {
-        $batches = Batch::with('course')
-            ->where('course_id', $id)
-            ->get();
+        try {
+            $batches = Batch::with('course:id,title,min_fee')
+                ->where('course_id', $courseId)
+                ->get(['id', 'title', 'shift', 'course_id']);
 
-        return response()->json($batches);
+            return response()->json($batches);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }

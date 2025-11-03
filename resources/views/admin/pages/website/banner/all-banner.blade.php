@@ -92,16 +92,7 @@
                                                         </form>
                                                     </div>
                                                 </td>
-                                                
-                                                                                            
-                                                
-                                                {{-- <td>
-                                                <button type="button" class="btn btn-info" title="Edit"><i
-                                                        class="fa fa-edit"></i></button>
-                                                <button type="button" data-type="confirm"
-                                                    class="btn btn-danger js-sweetalert" title="Delete"><i
-                                                        class="fa fa-trash-o"></i></button>
-                                            </td> --}}
+                                               
                                             </tr>
                                         @endforeach
                                     </tbody>

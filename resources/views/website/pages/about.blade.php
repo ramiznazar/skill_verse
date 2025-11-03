@@ -209,11 +209,6 @@
                         <div class="col-md-6">
                             <h3 class="line-bottom mt-0 line-height-1">Why <span class="text-theme-color-2">Choose
                                     Us?</span></h3>
-                            {{-- <p class="mb-10">
-                                Our institute stands out by offering tech-advanced, career-focused courses with hands-on
-                                training, discounted fees, and guaranteed internship opportunities — all in a fully
-                                professional learning environment.
-                            </p> --}}
                             <div id="accordion1" class="panel-group accordion">
                                 <div class="panel">
                                     <div class="panel-title">
@@ -302,58 +297,5 @@
             </div>
         </section>
         
-        <!-- Divider: Call To Action -->
-        {{-- <section class="bg-theme-color-2">
-            <div class="container pt-10 pb-20">
-                <div class="row">
-                    <div class="call-to-action">
-                        <div class="col-md-6">
-                            <h3 class="mt-5 mb-5 text-white vertical-align-middle"><i
-                                    class="pe-7s-mail mr-10 font-48 vertical-align-middle"></i> SUBSCRIBE TO OUR NEWSLETTER
-                            </h3>
-                        </div>
-                        <div class="col-md-6">
-                            <!-- Mailchimp Subscription Form Starts Here -->
-                            <form id="mailchimp-subscription-form" class="newsletter-form mt-10">
-                                <div class="input-group">
-                                    <input type="email" value="" name="EMAIL" placeholder="Your Email"
-                                        class="form-control input-lg font-16" data-height="45px" id="mce-EMAIL-footer">
-                                    <span class="input-group-btn">
-                                        <button data-height="45px"
-                                            class="btn bg-theme-colored text-white btn-xs m-0 font-14"
-                                            type="submit">Subscribe</button>
-                                    </span>
-                                </div>
-                            </form>
-                            <!-- Mailchimp Subscription Form Validation-->
-                            <script type="text/javascript">
-                                $('#mailchimp-subscription-form').ajaxChimp({
-                                    callback: mailChimpCallBack,
-                                    url: '//thememascot.us9.list-manage.com/subscribe/post?u=a01f440178e35febc8cf4e51f&amp;id=49d6d30e1e'
-                                });
-
-                                function mailChimpCallBack(resp) {
-                                    // Hide any previous response text
-                                    var $mailchimpform = $('#mailchimp-subscription-form'),
-                                        $response = '';
-                                    $mailchimpform.children(".alert").remove();
-                                    if (resp.result === 'success') {
-                                        $response =
-                                            '<div class="alert alert-success"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
-                                            resp.msg + '</div>';
-                                    } else if (resp.result === 'error') {
-                                        $response =
-                                            '<div class="alert alert-danger"><button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>' +
-                                            resp.msg + '</div>';
-                                    }
-                                    $mailchimpform.prepend($response);
-                                }
-                            </script>
-                            <!-- Mailchimp Subscription Form Ends Here -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section> --}}
     </div>
 @endsection

@@ -83,14 +83,7 @@
                                 </div>
 
                                 <button type="submit" class="btn btn-primary btn-lg btn-block">LOGIN</button>
-                                
-                                {{-- <div class="bottom mt-3 text-center">
-                                    <span class="helper-text m-b-10"><i class="fa fa-lock"></i> <a href="">Forgot
-                                            password?</a></span><br>
-
-                                    <span><a href="">Register New User</a></span>
-
-                                </div> --}}
+                              
                             </form>
                         </div>
                     </div>

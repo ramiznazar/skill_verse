@@ -79,8 +79,29 @@
                                     </div>
 
                                     <div class="col-md-3 mb-2">
+                                        <select name="student_status" id="filter-student-status" class="form-control">
+                                            <option value="">All Student Status</option>
+                                            <option value="active"
+                                                <?php echo e(request('student_status') === 'active' ? 'selected' : ''); ?>>Active
+                                            </option>
+                                            <option value="unactive"
+                                                <?php echo e(request('student_status') === 'unactive' ? 'selected' : ''); ?>>Unactive
+                                            </option>
+                                            <option value="completed"
+                                                <?php echo e(request('student_status') === 'completed' ? 'selected' : ''); ?>>Completed
+                                            </option>
+                                        </select>
+                                    </div>
+
+                                    <div class="col-md-9 mb-2">
                                         <input type="month" name="month" value="<?php echo e(request('month')); ?>"
                                             class="form-control">
+                                    </div>
+
+                                      <div class="col-md-3 text-right mb-2 ml-auto">
+                                        <a href="<?php echo e(route('fee-submission.index')); ?>" class="btn btn-warning" style="width:220px;">
+                                            Reset
+                                        </a>
                                     </div>
 
                                 </div>
@@ -111,125 +132,321 @@
                                             <th>Course</th>
                                             <th>Fee Type</th>
                                             <th>Status</th>
+                                            <th>Student Status</th>
                                             <th>Options</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <?php $__currentLoopData = $admissions; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $admission): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <?php
+                                                // prepare course-wise data arrays
+                                                $courseTitles = [];
+                                                $feeTypes = [];
+                                                $statuses = [];
+
+                                                if ($admission->courses && $admission->courses->count() > 0) {
+                                                    foreach ($admission->courses as $course) {
+                                                        // 🧮 Calculate the real total fee correctly (fixes installment issue)
+                                                        $installmentTotal = collect([
+                                                            $course->pivot->installment_1,
+                                                            $course->pivot->installment_2,
+                                                            $course->pivot->installment_3,
+                                                            $course->pivot->installment_4,
+                                                        ])
+                                                            ->filter()
+                                                            ->sum();
+
+                                                        // ✅ Use the total of installments if present, otherwise use course_fee or full_fee
+                                                        $fee =
+                                                            $installmentTotal > 0
+                                                                ? $installmentTotal
+                                                                : ($course->pivot->course_fee ?:
+                                                                $admission->full_fee);
+
+                                                        $type =
+                                                            $course->pivot->payment_type ?? $admission->payment_type;
+
+                                                        // ✅ Find all payments submitted for this course
+                                                        $paidInstallments = $admission->feeSubmissions
+                                                            ->where('course_id', $course->id)
+                                                            ->pluck('payment_type')
+                                                            ->toArray();
+
+                                                        // ✅ Determine expected installments for this course
+                                                        $installmentFields = [
+                                                            'installment_1',
+                                                            'installment_2',
+                                                            'installment_3',
+                                                            'installment_4',
+                                                        ];
+                                                        $expected = [];
+                                                        foreach ($installmentFields as $field) {
+                                                            if (
+                                                                !empty($course->pivot->$field) &&
+                                                                $course->pivot->$field > 0
+                                                            ) {
+                                                                $expected[] = $field;
+                                                            }
+                                                        }
+
+                                                        // ✅ Determine per-course fee status
+                                                        if ($type === 'full_fee') {
+                                                            $courseStatus = !empty($paidInstallments)
+                                                                ? 'complete'
+                                                                : 'pending';
+                                                        } else {
+                                                            if (count($expected) === 0) {
+                                                                $courseStatus = 'pending';
+                                                            } else {
+                                                                $paidCount = count(
+                                                                    array_intersect($expected, $paidInstallments),
+                                                                );
+                                                                $allPaid = $paidCount === count($expected);
+                                                                $nonePaid = $paidCount === 0;
+
+                                                                if ($allPaid) {
+                                                                    $courseStatus = 'complete';
+                                                                } elseif ($nonePaid) {
+                                                                    $courseStatus = 'pending';
+                                                                } else {
+                                                                    $courseStatus = 'uncomplete';
+                                                                }
+                                                            }
+                                                        }
+
+                                                        // 🏷️ Course name + correct fee
+                                                        $courseTitles[] =
+                                                            "<div><span class='text-dark'>{$course->title}</span> 
+        <small class='text-muted'>(₨" .
+                                                            number_format($fee) .
+                                                            ')</small></div>';
+
+                                                        // 💰 Fee Type label
+                                                        $feeTypes[] =
+                                                            "<div><span class='badge badge-" .
+                                                            ($type === 'full_fee' ? 'success' : 'warning') .
+                                                            "'>" .
+                                                            ucfirst($type) .
+                                                            '</span></div>';
+
+                                                        // Course-specific Status label
+                                                        $statuses[] =
+                                                            "<div><span class='badge badge-" .
+                                                            ($courseStatus === 'complete'
+                                                                ? 'success'
+                                                                : ($courseStatus === 'pending'
+                                                                    ? 'danger'
+                                                                    : 'warning')) .
+                                                            "'>" .
+                                                            ucfirst($courseStatus) .
+                                                            '</span></div>';
+                                                    }
+                                                } elseif (isset($admission->course)) {
+                                                    // fallback for single course admission
+                                                    $courseTitles[] =
+                                                        "<div><span class='text-primary'>{$admission->course->title}</span> <small class='text-muted'>(₨" .
+                                                        number_format($admission->full_fee) .
+                                                        ')</small></div>';
+                                                    $feeTypes[] =
+                                                        "<div><span class='badge badge-" .
+                                                        ($admission->payment_type === 'full_fee'
+                                                            ? 'success'
+                                                            : 'warning') .
+                                                        "'>" .
+                                                        ucfirst($admission->payment_type) .
+                                                        '</span></div>';
+                                                    $statuses[] =
+                                                        "<div><span class='badge badge-" .
+                                                        ($admission->fee_status === 'complete'
+                                                            ? 'success'
+                                                            : ($admission->fee_status === 'pending'
+                                                                ? 'danger'
+                                                                : 'warning')) .
+                                                        "'>" .
+                                                        ucfirst($admission->fee_status) .
+                                                        '</span></div>';
+                                                } else {
+                                                    $courseTitles[] =
+                                                        "<div><small class='text-muted'>No course</small></div>";
+                                                    $feeTypes[] = '<div>-</div>';
+                                                    $statuses[] = '<div>-</div>';
+                                                }
+                                            ?>
+
+
                                             <tr data-status="<?php echo e(strtolower($admission->fee_status)); ?>"
                                                 data-payment="<?php echo e(strtolower($admission->payment_type)); ?>"
-                                                data-course="<?php echo e(strtolower($admission->course->title)); ?>">
+                                                data-course="<?php echo e(strtolower(strip_tags(implode(', ', $courseTitles)))); ?>">
                                                 <td><?php echo e($loop->iteration + ($admissions->currentPage() - 1) * $admissions->perPage()); ?>
 
                                                 </td>
                                                 <td><?php echo e($admission->name); ?></td>
-                                                <td><?php echo e($admission->course->title); ?></td>
+
+                                                
+                                                <td><?php echo implode('', $courseTitles); ?></td>
+
+                                                
+                                                <td style="line-height: 1.9; font-size: 13px;"><?php echo implode('', $feeTypes); ?></td>
+
+                                                
+                                                <td style="line-height: 1.9; font-size: 13px;"><?php echo implode('', $statuses); ?></td>
+
                                                 <td>
-                                                    <span
-                                                        class="badge badge-<?php echo e($admission->payment_type === 'full_fee' ? 'success' : 'warning'); ?>">
-                                                        <?php echo e(ucfirst($admission->payment_type)); ?>
+                                                    <?php
+                                                        switch ($admission->student_status) {
+                                                            case 'active':
+                                                                $badge = 'success'; // green
+                                                                break;
+                                                            case 'completed':
+                                                                $badge = 'info'; // blue
+                                                                break;
+                                                            default:
+                                                                $badge = 'secondary'; // gray for unactive
+                                                        }
+                                                    ?>
+
+                                                    <span class="badge badge-<?php echo e($badge); ?>">
+                                                        <?php echo e(ucfirst($admission->student_status)); ?>
 
                                                     </span>
                                                 </td>
+                                                
                                                 <td>
-                                                    <span
-                                                        class="badge badge-<?php echo e($admission->fee_status === 'complete' ? 'success' : ($admission->fee_status === 'pending' ? 'danger' : 'warning')); ?>">
-                                                        <?php echo e(ucfirst($admission->fee_status)); ?>
-
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    
                                                     <?php if($admission->payment_type === 'installment'): ?>
                                                         <button class="btn btn-sm btn-info toggle-installments">
                                                             <i class="fas fa-plus"></i>
                                                         </button>
                                                     <?php endif; ?>
-
                                                     <?php echo $__env->make('admin.pages.dashboard.fee-submission.button', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                                                 </td>
                                             </tr>
 
                                             
-                                            <?php if($admission->payment_type === 'installment'): ?>
+                                            <?php if(
+                                                $admission->payment_type === 'installment' ||
+                                                    $admission->courses->where('pivot.payment_type', 'installment')->count() > 0): ?>
                                                 <?php
-                                                    // Collect all submissions for this student
-                                                    $paidInstallments = $admission->feeSubmissions
-                                                        ->pluck('payment_type')
-                                                        ->toArray();
+                                                    // gather all course installments (if multiple)
+                                                    $installmentGroups = [];
 
-                                                    // Installments list with label + amount
-                                                    $installments = [];
-                                                    if ($admission->installment_1 > 0) {
-                                                        $installments[] = [
-                                                            'label' => '1st Installment',
-                                                            'amount' => $admission->installment_1,
-                                                            'key' => 'installment_1',
-                                                        ];
-                                                    }
-                                                    if ($admission->installment_2 > 0) {
-                                                        $installments[] = [
-                                                            'label' => '2nd Installment',
-                                                            'amount' => $admission->installment_2,
-                                                            'key' => 'installment_2',
-                                                        ];
-                                                    }
-                                                    if ($admission->installment_3 > 0) {
-                                                        $installments[] = [
-                                                            'label' => '3rd Installment',
-                                                            'amount' => $admission->installment_3,
-                                                            'key' => 'installment_3',
-                                                        ];
-                                                    }
-                                                    if (
-                                                        property_exists($admission, 'installment_4') &&
-                                                        $admission->installment_4 > 0
-                                                    ) {
-                                                        $installments[] = [
-                                                            'label' => '4th Installment',
-                                                            'amount' => $admission->installment_4,
-                                                            'key' => 'installment_4',
+                                                    if ($admission->courses && $admission->courses->count() > 0) {
+                                                        foreach ($admission->courses as $course) {
+                                                            $type =
+                                                                $course->pivot->payment_type ??
+                                                                $admission->payment_type;
+                                                            if ($type !== 'installment') {
+                                                                continue;
+                                                            }
+
+                                                            $fee = $course->pivot->course_fee ?? $admission->full_fee;
+                                                            $paid = $admission->feeSubmissions
+                                                                ->where('course_id', $course->id)
+                                                                ->pluck('payment_type')
+                                                                ->toArray();
+
+                                                            $installments = [];
+                                                            foreach (range(1, 4) as $n) {
+                                                                $field = "installment_$n";
+                                                                if (
+                                                                    !empty($course->pivot->$field) &&
+                                                                    $course->pivot->$field > 0
+                                                                ) {
+                                                                    $label =
+                                                                        $n === 1
+                                                                            ? '1st Installment'
+                                                                            : ($n === 2
+                                                                                ? '2nd Installment'
+                                                                                : ($n === 3
+                                                                                    ? '3rd Installment'
+                                                                                    : "{$n}th Installment"));
+                                                                    $installments[] = [
+                                                                        'label' => $label,
+                                                                        'amount' => $course->pivot->$field,
+                                                                        'key' => $field,
+                                                                    ];
+                                                                }
+                                                            }
+
+                                                            $installmentGroups[] = [
+                                                                'course' => $course->title,
+                                                                'fee' => $fee,
+                                                                'installments' => $installments,
+                                                                'paid' => $paid,
+                                                            ];
+                                                        }
+                                                    } else {
+                                                        // fallback for single course
+                                                        $paid = $admission->feeSubmissions
+                                                            ->pluck('payment_type')
+                                                            ->toArray();
+                                                        $installments = [];
+                                                        foreach (range(1, 4) as $n) {
+                                                            $field = "installment_$n";
+                                                            if (!empty($admission->$field) && $admission->$field > 0) {
+                                                                $label =
+                                                                    $n === 1
+                                                                        ? '1st Installment'
+                                                                        : ($n === 2
+                                                                            ? '2nd Installment'
+                                                                            : ($n === 3
+                                                                                ? '3rd Installment'
+                                                                                : "{$n}th Installment"));
+                                                                $installments[] = [
+                                                                    'label' => $label,
+                                                                    'amount' => $admission->$field,
+                                                                    'key' => $field,
+                                                                ];
+                                                            }
+                                                        }
+
+                                                        $installmentGroups[] = [
+                                                            'course' =>
+                                                                optional($admission->course)->title ?? 'Course Fee',
+                                                            'fee' => $admission->full_fee,
+                                                            'installments' => $installments,
+                                                            'paid' => $paid,
                                                         ];
                                                     }
                                                 ?>
 
                                                 <tr class="installment-details d-none">
                                                     <td colspan="6">
-                                                        <table class="table table-sm table-bordered mb-0">
-                                                            <thead>
-                                                                <tr>
-                                                                    <th>Full Fee</th>
-                                                                    <?php $__currentLoopData = $installments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $inst): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                                        <th><?php echo e($inst['label']); ?></th>
-                                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                                                </tr>
-                                                            </thead>
-                                                            <tbody>
-                                                                <tr>
-                                                                    
-                                                                    <td>₨<?php echo e(number_format($admission->full_fee)); ?></td>
+                                                        <?php $__currentLoopData = $installmentGroups; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $group): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                            <div class="mb-3">
+                                                                
+                                                                <table class="table table-sm table-bordered mb-0">
+                                                                    <thead>
+                                                                        <tr>
+                                                                            <th>Full Fee</th>
+                                                                            <?php $__currentLoopData = $group['installments']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $inst): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                                                <th><?php echo e($inst['label']); ?></th>
+                                                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                                        </tr>
+                                                                    </thead>
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <td>₨<?php echo e(number_format($group['fee'])); ?></td>
+                                                                            <?php $__currentLoopData = $group['installments']; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $inst): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                                                <td>
+                                                                                    ₨<?php echo e(number_format($inst['amount'])); ?><br>
+                                                                                    <span
+                                                                                        class="badge badge-<?php echo e(in_array($inst['key'], $group['paid']) ? 'success' : 'danger'); ?>">
+                                                                                        <?php echo e(in_array($inst['key'], $group['paid']) ? 'PAID' : 'UNPAID'); ?>
 
-                                                                    
-                                                                    <?php $__currentLoopData = $installments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $inst): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                                        <td>
-                                                                            ₨<?php echo e(number_format($inst['amount'])); ?>
-
-                                                                            <br>
-                                                                            <span
-                                                                                class="badge badge-<?php echo e(in_array($inst['key'], $paidInstallments) ? 'success' : 'danger'); ?>">
-                                                                                <?php echo e(in_array($inst['key'], $paidInstallments) ? 'Paid' : 'Unpaid'); ?>
-
-                                                                            </span>
-                                                                        </td>
-                                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                                                </tr>
-                                                            </tbody>
-                                                        </table>
+                                                                                    </span>
+                                                                                </td>
+                                                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
+                                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                                     </td>
                                                 </tr>
                                             <?php endif; ?>
                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                     </tbody>
+
                                 </table>
                             </div>
 
@@ -246,6 +463,7 @@
         </div>
     </div>
 <?php $__env->stopSection(); ?>
+
 
 <?php $__env->startSection('additional-javascript'); ?>
     <script>
