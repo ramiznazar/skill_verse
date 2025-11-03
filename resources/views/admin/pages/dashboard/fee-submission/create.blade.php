@@ -101,7 +101,11 @@
                                                         'admission_id',
                                                         $admission->id,
                                                     )
-                                                        ->where('course_id', $course->id)
+                                                        ->where(function ($q) use ($course) {
+                                                            $q->where('course_id', $course->id)->orWhereNull(
+                                                                'course_id',
+                                                            );
+                                                        })
                                                         ->pluck('payment_type')
                                                         ->toArray();
                                                 @endphp
