@@ -9,9 +9,6 @@ class FeeSubmission extends Model
 {
     use HasFactory;
     protected $guarded = [];
-    protected $casts = [
-        'amount' => 'float',
-    ];
     public function admission()
     {
         return $this->belongsTo(Admission::class);
