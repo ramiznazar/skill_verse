@@ -268,29 +268,33 @@ class FeeSubmissionController extends Controller
         }
 
         // 🧮 update overall fee status
+        // ✅ Step 2: refresh relationship to make sure we have updated pivot data
+        // 🧩 Reload courses to ensure pivot data is fresh
+        $admission->load('courses');
+
+        // 🧮 Recalculate totals
         $totalPaid = FeeSubmission::where('admission_id', $admission->id)->sum('amount');
 
-        // gather expected fees
         $expectedTotal = 0;
-
         if ($admission->courses->count() > 0) {
-            // if pivot-based, sum course_fee from all related records
             foreach ($admission->courses as $course) {
                 $expectedTotal += (int) ($course->pivot->course_fee ?? 0);
             }
         } else {
-            // fallback for legacy single-course admissions
             $expectedTotal = (int) $admission->full_fee;
         }
 
-        // prevent division by zero
+        // Avoid zero division or accidental 0 comparisons
         $expectedTotal = max($expectedTotal, 1);
 
-        $admission->fee_status = match (true) {
-            $totalPaid <= 0 => 'pending',
-            $totalPaid < $expectedTotal => 'uncomplete',
-            default => 'complete',
-        };
+        // 🏁 Determine correct fee_status
+        if ($totalPaid <= 0) {
+            $admission->fee_status = 'pending';
+        } elseif ($totalPaid < $expectedTotal) {
+            $admission->fee_status = 'uncomplete';
+        } else {
+            $admission->fee_status = 'complete';
+        }
 
         $admission->save();
 
