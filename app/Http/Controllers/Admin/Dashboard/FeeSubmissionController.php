@@ -286,15 +286,13 @@ class FeeSubmissionController extends Controller
         // prevent division by zero
         $expectedTotal = max($expectedTotal, 1);
 
-        if ($admission->fee_status !== 'complete') {
-            $admission->fee_status = match (true) {
-                $totalPaid <= 0 => 'pending',
-                $totalPaid < $expectedTotal => 'uncomplete',
-                default => 'complete',
-            };
-            $admission->save();
-        }
+        $admission->fee_status = match (true) {
+            $totalPaid <= 0 => 'pending',
+            $totalPaid < $expectedTotal => 'uncomplete',
+            default => 'complete',
+        };
 
+        $admission->save();
 
 
         // ✅ TEACHER SALARY HANDLING (same as before)
