@@ -9,13 +9,13 @@
                                                     @endphp
 
                                                     {{-- Show Submit Fee button ONLY if not complete --}}
-                                                    @if (strtolower($admission->fee_status) !== 'complete')
+                                                    {{-- @if (strtolower($admission->fee_status) !== 'complete') --}}
                                                         <a href="{{ route('fee-submission.create', $admission->id) }}"
                                                             class="btn btn-sm btn-default" data-toggle="tooltip"
                                                             title="Submit Fee">
                                                             <i class="fas fa-money-check-alt"></i>
                                                         </a>
-                                                    @endif
+                                                    {{-- @endif --}}
 
                                                     {{-- View History --}}
                                                     <button type="button" class="btn btn-sm btn-secondary mt-1"
