@@ -19,7 +19,6 @@
                             <h2>Add New Student</h2>
                         </div>
                         <div class="body">
-
                             <form id="admission-form" action="{{ route('admission.store') }}" method="POST"
                                 enctype="multipart/form-data">
                                 @csrf
@@ -429,7 +428,6 @@
 
                                 <button type="submit" class="btn btn-primary mt-4">Submit Admission</button>
                             </form>
-
                         </div>
                     </div>
                 </div>
