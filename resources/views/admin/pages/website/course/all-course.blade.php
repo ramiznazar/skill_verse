@@ -96,11 +96,11 @@
                                                 <td class="actions">
                                                     <div class="d-flex align-items-center" style="column-gap: 5px;">
                                                         {{-- Add LMS --}}
-                                                        <a href="{{ route('course-lms.index', $course->id) }}"
+                                                        {{-- <a href="{{ route('course-lms.index', $course->id) }}"
                                                             class="btn btn-sm btn-icon btn-pure btn-default on-default button-edit"
                                                             data-toggle="tooltip" data-original-title="Add LMS Course">
                                                             <i class="fas fa-graduation-cap" aria-hidden="true"></i>
-                                                        </a>
+                                                        </a> --}}
 
                                                         {{-- Add Language --}}
                                                         <a href="{{ route('course-outline.index', $course->id) }}"
