@@ -305,6 +305,8 @@ class FeeSubmissionController extends Controller
         }
 
         $admission->save();
+        $admission->recalcFeeStatus();
+
 
         // ✅ TEACHER SALARY HANDLING (same as before)
         if (!empty($pivot->batch_id)) {
