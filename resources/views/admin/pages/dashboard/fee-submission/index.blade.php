@@ -97,8 +97,9 @@
                                             class="form-control">
                                     </div>
 
-                                      <div class="col-md-3 text-right mb-2 ml-auto">
-                                        <a href="{{ route('fee-submission.index') }}" class="btn btn-warning" style="width:220px;">
+                                    <div class="col-md-3 text-right mb-2 ml-auto">
+                                        <a href="{{ route('fee-submission.index') }}" class="btn btn-warning"
+                                            style="width:220px;">
                                             Reset
                                         </a>
                                     </div>
@@ -285,7 +286,23 @@
                                                 <td style="line-height: 1.9; font-size: 13px;">{!! implode('', $feeTypes) !!}</td>
 
                                                 {{-- 📊 Status --}}
-                                                <td style="line-height: 1.9; font-size: 13px;">{!! implode('', $statuses) !!}</td>
+                                                {{-- <td style="line-height: 1.9; font-size: 13px;">{!! implode('', $statuses) !!}</td> --}}
+                                                {{-- 📊 Status --}}
+                                                <td>
+                                                    @php
+                                                        $status = strtolower($admission->fee_status);
+                                                        $badgeClass = match ($status) {
+                                                            'complete' => 'success',
+                                                            'uncomplete' => 'warning',
+                                                            'pending' => 'danger',
+                                                            default => 'secondary',
+                                                        };
+                                                    @endphp
+
+                                                    <span class="badge badge-{{ $badgeClass }}">
+                                                        {{ ucfirst($status) }}
+                                                    </span>
+                                                </td>
 
                                                 <td>
                                                     @php
