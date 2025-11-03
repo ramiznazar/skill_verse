@@ -270,24 +270,29 @@ class FeeSubmissionController extends Controller
         // 🧮 update overall fee status
         // ✅ Step 2: refresh relationship to make sure we have updated pivot data
         // 🧩 Reload courses to ensure pivot data is fresh
-        $admission->load('courses');
+        // ✅ Refresh relationships after saving FeeSubmission(s)
+        $admission->load(['courses', 'feeSubmissions']);
 
-        // 🧮 Recalculate totals
-        $totalPaid = FeeSubmission::where('admission_id', $admission->id)->sum('amount');
+        // 🧮 Recalculate paid & expected totals
+        $totalPaid = $admission->feeSubmissions->sum('amount');
 
+        // calculate expected total
         $expectedTotal = 0;
+
         if ($admission->courses->count() > 0) {
+            // multi-course admission
             foreach ($admission->courses as $course) {
-                $expectedTotal += (int) ($course->pivot->course_fee ?? 0);
+                $expectedTotal += (float) ($course->pivot->course_fee ?? 0);
             }
         } else {
-            $expectedTotal = (int) $admission->full_fee;
+            // legacy single-course admission
+            $expectedTotal = (float) ($admission->full_fee ?? 0);
         }
 
-        // Avoid zero division or accidental 0 comparisons
+        // prevent divide-by-zero or negative fee
         $expectedTotal = max($expectedTotal, 1);
 
-        // 🏁 Determine correct fee_status
+        // 🟢 Decide status
         if ($totalPaid <= 0) {
             $admission->fee_status = 'pending';
         } elseif ($totalPaid < $expectedTotal) {
@@ -297,7 +302,6 @@ class FeeSubmissionController extends Controller
         }
 
         $admission->save();
-
 
         // ✅ TEACHER SALARY HANDLING (same as before)
         if (!empty($pivot->batch_id)) {
