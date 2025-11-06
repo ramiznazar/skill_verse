@@ -93,8 +93,12 @@
                                                     <small
                                                         class="text-muted">({{ $course->pivot->batch->title ?? 'Batch' }})</small>
                                                 </h6>
-                                                <p class="mb-2">Total Fee:
-                                                    ₨{{ number_format($course->pivot->course_fee) }}</p>
+                                                @php
+                                                    $totalFee = $course->pivot->course_fee ?? 0;
+                                                @endphp
+                                                <p class="mb-2">
+                                                    Total Fee: ₨{{ number_format($totalFee) }}
+                                                </p>
 
                                                 @php
                                                     $submitted = \App\Models\FeeSubmission::where(
@@ -137,17 +141,21 @@
                                                     </label>
                                                 @elseif ($pivotPaymentType === 'installment')
                                                     @php
+                                                        // ✅ Only use the course pivot installments — do not fall back to admission ones
                                                         $installments = [
-                                                            'installment_1' =>
-                                                                $course->pivot->installment_1 ??
-                                                                ($admission->installment_1 ?? 0),
-                                                            'installment_2' =>
-                                                                $course->pivot->installment_2 ??
-                                                                ($admission->installment_2 ?? 0),
-                                                            'installment_3' =>
-                                                                $course->pivot->installment_3 ??
-                                                                ($admission->installment_3 ?? 0),
+                                                            'installment_1' => $course->pivot->installment_1 ?: 0,
+                                                            'installment_2' => $course->pivot->installment_2 ?: 0,
+                                                            'installment_3' => $course->pivot->installment_3 ?: 0,
                                                         ];
+
+                                                        // ✅ If all three are 0 (e.g., older single-course admissions), then fallback to admission's data
+if (array_sum($installments) === 0) {
+    $installments = [
+        'installment_1' => $admission->installment_1 ?? 0,
+        'installment_2' => $admission->installment_2 ?? 0,
+        'installment_3' => $admission->installment_3 ?? 0,
+                                                            ];
+                                                        }
                                                     @endphp
 
                                                     @foreach ($installments as $key => $amount)

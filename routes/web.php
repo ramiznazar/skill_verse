@@ -84,7 +84,7 @@ Route::post('/user/message', [ContactController::class, 'userMessage'])->name('u
 | Admin Panel Routes (No Middleware / No Auth)
 |--------------------------------------------------------------------------
 */
-Route::get('/register-123', [AuthController::class, 'register'])->name('auth.register');
+Route::get('/register-2468', [AuthController::class, 'register'])->name('auth.register');
 Route::post('/register/store', [AuthController::class, 'registerStore'])->name('auth.register.store');
 Route::get('/login', [AuthController::class, 'login'])->name('auth.login');
 Route::post('/login/store', [AuthController::class, 'loginStore'])->name('auth.login.store');

@@ -98,8 +98,9 @@
                                             class="form-control">
                                     </div>
 
-                                      <div class="col-md-3 text-right mb-2 ml-auto">
-                                        <a href="<?php echo e(route('fee-submission.index')); ?>" class="btn btn-warning" style="width:220px;">
+                                    <div class="col-md-3 text-right mb-2 ml-auto">
+                                        <a href="<?php echo e(route('fee-submission.index')); ?>" class="btn btn-warning"
+                                            style="width:220px;">
                                             Reset
                                         </a>
                                     </div>
@@ -289,7 +290,24 @@
                                                 <td style="line-height: 1.9; font-size: 13px;"><?php echo implode('', $feeTypes); ?></td>
 
                                                 
-                                                <td style="line-height: 1.9; font-size: 13px;"><?php echo implode('', $statuses); ?></td>
+                                                
+                                                
+                                                <td>
+                                                    <?php
+                                                        $status = strtolower($admission->fee_status);
+                                                        $badgeClass = match ($status) {
+                                                            'complete' => 'success',
+                                                            'uncomplete' => 'warning',
+                                                            'pending' => 'danger',
+                                                            default => 'secondary',
+                                                        };
+                                                    ?>
+
+                                                    <span class="badge badge-<?php echo e($badgeClass); ?>">
+                                                        <?php echo e(ucfirst($status)); ?>
+
+                                                    </span>
+                                                </td>
 
                                                 <td>
                                                     <?php

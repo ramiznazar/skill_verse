@@ -284,10 +284,8 @@ class AdmissionController extends Controller
     {
         $admission = Admission::findOrFail($id);
 
-        // infer installment_count from saved data (3 if a third installment exists)
+        // Infer installment count and additional charge info
         $preCount = ($admission->installment_3 ?? 0) > 0 ? 3 : 2;
-
-        // infer whether extra charges were applied previously (1000 × count)
         $savedFee = (int) $admission->full_fee;
         $inst1 = (int) $admission->installment_1;
         $inst2 = (int) $admission->installment_2;
@@ -296,7 +294,6 @@ class AdmissionController extends Controller
         $expectedIfExtra = $savedFee + (1000 * $preCount);
         $applyExtraDefault = ($sumInst === $expectedIfExtra);
 
-        // load $courses, $batches as you already do
         $courses = Course::all();
         $batches = Batch::all();
 
@@ -308,6 +305,7 @@ class AdmissionController extends Controller
             'applyExtraDefault'
         ));
     }
+
 
     public function update(Request $request, $id)
     {
@@ -325,7 +323,7 @@ class AdmissionController extends Controller
             'cnic' => 'nullable|string|max:20',
             'dob' => 'nullable|date',
             'email' => 'nullable|email|max:255',
-            'phone' => 'nullable|string|max:20',
+            'phone' => 'required|string|max:20',
             'joining_date' => 'nullable|date',
             'student_status' => 'required',
             'gender' => 'nullable|in:male,female',
@@ -335,26 +333,20 @@ class AdmissionController extends Controller
             'referral_source_contact' => 'nullable|string|max:255',
             'referral_source_commission' => 'nullable|string|max:255',
             'address' => 'nullable|string',
-
+            'referral_type' => 'nullable|in:ads,referral,other',
             'payment_type' => 'required|in:full_fee,installment',
             'full_fee' => 'required|numeric|min:0',
-
             'installment_count' => 'nullable|in:2,3',
             'installment_1' => 'nullable|numeric|min:0',
             'installment_2' => 'nullable|numeric|min:0',
             'installment_3' => 'nullable|numeric|min:0',
-            'apply_additional_charges' => 'nullable',
-
-            'referral_type' => 'nullable|in:ads,referral,other',
-            'calculated_total' => 'nullable|numeric|min:0',
+            'apply_additional_charges' => 'nullable|boolean',
         ]);
 
-        // --- Payment logic ---
+        // ----- Payment Type Logic -----
         if ($request->payment_type === 'installment') {
             $count = (int) $request->input('installment_count', 3);
-            if (!in_array($count, [2, 3], true))
-                $count = 3;
-
+            $count = in_array($count, [2, 3]) ? $count : 3;
             $base = (int) $request->input('full_fee', 0);
             $applyExtra = $request->boolean('apply_additional_charges');
             $extra = $applyExtra ? (1000 * $count) : 0;
@@ -368,11 +360,10 @@ class AdmissionController extends Controller
 
             if ($sum !== $expected) {
                 return back()->withInput()->withErrors([
-                    'installment_1' => "Installments must total to {$expected} (full fee + applicable extras)."
+                    'installment_1' => "Installment total must equal full fee + extras (expected: {$expected})."
                 ]);
             }
         } else {
-            // ✅ Full payment: DO NOT error. Just clear/zero installment fields.
             $request->merge([
                 'installment_count' => null,
                 'installment_1' => 0,
@@ -382,18 +373,18 @@ class AdmissionController extends Controller
             ]);
         }
 
-        // --- Image replace (optional) ---
+        // ----- Image Upload -----
         if ($request->hasFile('image')) {
             if ($admission->image && file_exists(public_path($admission->image))) {
                 @unlink(public_path($admission->image));
             }
             $image = $request->file('image');
-            $name = time() . '_' . $image->getClientOriginalName();
-            $image->move(public_path('assets/admin/images/code/admission/'), $name);
-            $admission->image = 'assets/admin/images/code/admission/' . $name;
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $image->move(public_path('assets/admin/images/code/admission/'), $imageName);
+            $admission->image = 'assets/admin/images/code/admission/' . $imageName;
         }
 
-        // --- Save ---
+        // ----- Update Admission Record -----
         $admission->update([
             'course_id' => $request->course_id,
             'batch_id' => $request->batch_id,
@@ -415,15 +406,34 @@ class AdmissionController extends Controller
             'referral_source_contact' => $request->referral_source_contact,
             'referral_source_commission' => $request->referral_source_commission,
             'address' => $request->address,
-
+            'referral_type' => $request->referral_type,
             'payment_type' => $request->payment_type,
             'full_fee' => (int) $request->full_fee,
             'installment_1' => (int) $request->installment_1,
             'installment_2' => (int) $request->installment_2,
-            'installment_3' => (int) $request->installment_3, // safe: merged to 0 on full payment
-            'referral_type' => $request->referral_type,
-            // 'calculated_total' => (int) $request->input('calculated_total', $request->full_fee),
+            'installment_3' => (int) $request->installment_3,
         ]);
+
+        // ----- 🔹 Sync Pivot Table (this fixes Fee Submission issue) -----
+        $courseId = $request->course_id;
+
+        if ($admission->courses()->where('course_id', $courseId)->exists()) {
+            $admission->courses()->updateExistingPivot($courseId, [
+                'course_fee'    => (int) $request->full_fee,
+                'installment_1' => (int) $request->installment_1,
+                'installment_2' => (int) $request->installment_2,
+                'installment_3' => (int) $request->installment_3,
+                'payment_type'  => $request->payment_type,
+            ]);
+        } else {
+            $admission->courses()->attach($courseId, [
+                'course_fee'    => (int) $request->full_fee,
+                'installment_1' => (int) $request->installment_1,
+                'installment_2' => (int) $request->installment_2,
+                'installment_3' => (int) $request->installment_3,
+                'payment_type'  => $request->payment_type,
+            ]);
+        }
 
         return redirect()->route('admission.index')->with('update', 'Admission updated successfully.');
     }
@@ -511,5 +521,4 @@ class AdmissionController extends Controller
             ->route('admission.index')
             ->with('store', 'New course added successfully!');
     }
-
 }
