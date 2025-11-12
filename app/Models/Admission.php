@@ -23,6 +23,7 @@ class Admission extends Model
     {
         return $this->belongsToMany(Course::class, 'admission_course_batch')
             ->withPivot([
+                'id',
                 'batch_id',
                 'course_fee',
                 'payment_type',

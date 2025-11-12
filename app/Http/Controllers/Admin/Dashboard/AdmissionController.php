@@ -306,7 +306,6 @@ class AdmissionController extends Controller
         ));
     }
 
-
     public function update(Request $request, $id)
     {
         $admission = Admission::findOrFail($id);
@@ -520,5 +519,45 @@ class AdmissionController extends Controller
         return redirect()
             ->route('admission.index')
             ->with('store', 'New course added successfully!');
+    }
+
+    public function editCourse($admissionId, $courseId)
+    {
+        $admission = Admission::findOrFail($admissionId);
+        $course = $admission->courses()->where('course_id', $courseId)->firstOrFail();
+        $pivot = $course->pivot;
+        $batches = Batch::all();
+        $courses = Course::all();
+
+        return view('admin.pages.dashboard.admission.edit-new-course', compact('admission', 'course', 'pivot', 'courses', 'batches'));
+    }
+
+    public function updateCourse(Request $request, $admissionId, $courseId)
+    {
+        $admission = Admission::findOrFail($admissionId);
+
+        $validated = $request->validate([
+            'batch_id' => 'required|exists:batches,id',
+            'course_fee' => 'required|numeric|min:0',
+            'payment_type' => 'required|in:full_fee,installment',
+            'installment_count' => 'nullable|in:2,3',
+            'installment_1' => 'nullable|numeric|min:0',
+            'installment_2' => 'nullable|numeric|min:0',
+            'installment_3' => 'nullable|numeric|min:0',
+            'apply_additional_charges' => 'nullable|boolean',
+        ]);
+
+        $admission->courses()->updateExistingPivot($courseId, [
+            'batch_id' => $validated['batch_id'],
+            'course_fee' => $validated['course_fee'],
+            'payment_type' => $validated['payment_type'],
+            'installment_count' => $validated['installment_count'] ?? null,
+            'installment_1' => $validated['installment_1'] ?? 0,
+            'installment_2' => $validated['installment_2'] ?? 0,
+            'installment_3' => $validated['installment_3'] ?? 0,
+            'apply_additional_charges' => $request->has('apply_additional_charges'),
+        ]);
+
+        return redirect()->route('admission.index')->with('update', 'Course updated successfully!');
     }
 }

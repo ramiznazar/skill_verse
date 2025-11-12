@@ -184,6 +184,11 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
     ]);
     Route::get('admission/{admission}/add-course', [AdmissionController::class, 'addCourseForm'])->name('admission.addCourse');
     Route::post('admission/{admission}/add-course', [AdmissionController::class, 'storeNewCourse'])->name('admission.storeNewCourse');
+    Route::get('admin/admission/{admission}/course/{course}/edit', [AdmissionController::class, 'editCourse'])
+        ->name('admission.editCourse');
+    Route::put('admin/admission/{admission}/course/{course}', [AdmissionController::class, 'updateCourse'])
+        ->name('admission.updateCourse');
+
 
     // Popular Course
     Route::resource('popular-course', PopularCourseController::class);

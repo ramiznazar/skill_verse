@@ -127,16 +127,28 @@
                                                 <td>
                                                     @if ($admission->courses->isNotEmpty())
                                                         @foreach ($admission->courses as $course)
-                                                            <div>
-                                                                {{ $course->title }}
-                                                                @php
-                                                                    $fee =
-                                                                        $course->pivot->course_fee ??
-                                                                        $admission->full_fee;
-                                                                @endphp
-                                                                @if ($fee)
-                                                                    <small
-                                                                        class="text-muted">(₨{{ number_format($fee) }})</small>
+                                                            <div class="d-flex align-items-center justify-content-between"
+                                                                style="gap: 5px;">
+                                                                <div>
+                                                                    {{ $course->title }}
+                                                                    @php
+                                                                        $fee =
+                                                                            $course->pivot->course_fee ??
+                                                                            $admission->full_fee;
+                                                                    @endphp
+                                                                    @if ($fee)
+                                                                        <small
+                                                                            class="text-muted">(₨{{ number_format($fee) }})</small>
+                                                                    @endif
+                                                                </div>
+
+                                                                {{-- ✏️ Show edit icon only if course was added via pivot (Add New Course) --}}
+                                                                @if ($course->pivot && $course->pivot->id)
+                                                                    <a href="{{ route('admission.editCourse', [$admission->id, $course->id]) }}"
+                                                                        class="btn btn-sm btn-link text-warning"
+                                                                        title="Edit This Course">
+                                                                        <i class="icon-pencil"></i>
+                                                                    </a>
                                                                 @endif
                                                             </div>
                                                         @endforeach

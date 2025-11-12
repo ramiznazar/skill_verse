@@ -129,17 +129,29 @@
                                                 <td>
                                                     <?php if($admission->courses->isNotEmpty()): ?>
                                                         <?php $__currentLoopData = $admission->courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                            <div>
-                                                                <?php echo e($course->title); ?>
+                                                            <div class="d-flex align-items-center justify-content-between"
+                                                                style="gap: 5px;">
+                                                                <div>
+                                                                    <?php echo e($course->title); ?>
 
-                                                                <?php
-                                                                    $fee =
-                                                                        $course->pivot->course_fee ??
-                                                                        $admission->full_fee;
-                                                                ?>
-                                                                <?php if($fee): ?>
-                                                                    <small
-                                                                        class="text-muted">(₨<?php echo e(number_format($fee)); ?>)</small>
+                                                                    <?php
+                                                                        $fee =
+                                                                            $course->pivot->course_fee ??
+                                                                            $admission->full_fee;
+                                                                    ?>
+                                                                    <?php if($fee): ?>
+                                                                        <small
+                                                                            class="text-muted">(₨<?php echo e(number_format($fee)); ?>)</small>
+                                                                    <?php endif; ?>
+                                                                </div>
+
+                                                                
+                                                                <?php if($course->pivot && $course->pivot->id): ?>
+                                                                    <a href="<?php echo e(route('admission.editCourse', [$admission->id, $course->id])); ?>"
+                                                                        class="btn btn-sm btn-link text-warning"
+                                                                        title="Edit This Course">
+                                                                        <i class="icon-pencil"></i>
+                                                                    </a>
                                                                 <?php endif; ?>
                                                             </div>
                                                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
