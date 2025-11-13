@@ -131,6 +131,7 @@
                                             <th>Fee Type</th>
                                             <th>Status</th>
                                             <th>Student Status</th>
+                                            <th>Fee</th>
                                             <th>Options</th>
                                         </tr>
                                     </thead>
@@ -271,7 +272,6 @@
                                                 }
                                             @endphp
 
-
                                             <tr data-status="{{ strtolower($admission->fee_status) }}"
                                                 data-payment="{{ strtolower($admission->payment_type) }}"
                                                 data-course="{{ strtolower(strip_tags(implode(', ', $courseTitles))) }}">
@@ -282,12 +282,9 @@
                                                 {{-- 📘 Courses --}}
                                                 <td>{!! implode('', $courseTitles) !!}</td>
 
-                                                {{-- 💰 Fee Type --}}
+                                                {{-- Fee Type --}}
                                                 <td style="line-height: 1.9; font-size: 13px;">{!! implode('', $feeTypes) !!}</td>
 
-                                                {{-- 📊 Status --}}
-                                                {{-- <td style="line-height: 1.9; font-size: 13px;">{!! implode('', $statuses) !!}</td> --}}
-                                                {{-- 📊 Status --}}
                                                 <td>
                                                     @php
                                                         $status = strtolower($admission->fee_status);
@@ -322,6 +319,58 @@
                                                         {{ ucfirst($admission->student_status) }}
                                                     </span>
                                                 </td>
+
+                                                <td>
+                                                    @foreach ($admission->courses as $course)
+                                                        @php
+                                                            // if installments exist, sum them
+                                                            $instTotal = collect([
+                                                                $course->pivot->installment_1,
+                                                                $course->pivot->installment_2,
+                                                                $course->pivot->installment_3,
+                                                            ])
+                                                                ->filter()
+                                                                ->sum();
+
+                                                            // real course fee
+                                                            $fee =
+                                                                $instTotal > 0
+                                                                    ? $instTotal
+                                                                    : $course->pivot->course_fee ?? 0;
+
+                                                            $isInstallment =
+                                                                $course->pivot->payment_type === 'installment';
+                                                        @endphp
+
+                                                        {{-- Course Fee --}}
+                                                        <div style="margin-bottom: 6px;">
+                                                            <div>₨{{ number_format($fee) }}</div>
+
+                                                            @if ($isInstallment)
+                                                                <small class="text-muted">
+
+                                                                    @if (!empty($course->pivot->installment_1) && $course->pivot->installment_1 > 0)
+                                                                        1st:
+                                                                        {{ number_format($course->pivot->installment_1) }}
+                                                                    @endif
+
+                                                                    @if (!empty($course->pivot->installment_2) && $course->pivot->installment_2 > 0)
+                                                                        | 2nd:
+                                                                        {{ number_format($course->pivot->installment_2) }}
+                                                                    @endif
+
+                                                                    @if (!empty($course->pivot->installment_3) && $course->pivot->installment_3 > 0)
+                                                                        | 3rd:
+                                                                        {{ number_format($course->pivot->installment_3) }}
+                                                                    @endif
+
+                                                                </small>
+                                                            @endif
+
+                                                        </div>
+                                                    @endforeach
+                                                </td>
+
                                                 {{-- ⚙️ Actions --}}
                                                 <td>
                                                     @if ($admission->payment_type === 'installment')

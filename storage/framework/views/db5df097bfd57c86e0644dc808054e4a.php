@@ -113,7 +113,7 @@
                                             <th>Batch</th>
                                             <th>Mode</th>
                                             <th>Payment</th>
-                                            <th>Fee</th>
+                                            
                                             <th>Status</th>
                                             <th>Options</th>
                                         </tr>
@@ -190,25 +190,8 @@
 
                                                     </span>
                                                 </td>
-                                                <td>
-                                                    <div>₨<?php echo e(number_format($admission->full_fee)); ?></div>
-                                                    <?php if($admission->payment_type === 'installment'): ?>
-                                                        <small class="text-muted">
-                                                            <?php if($admission->installment_1 > 0): ?>
-                                                                1st: <?php echo e($admission->installment_1); ?>
+                                                
 
-                                                            <?php endif; ?>
-                                                            <?php if($admission->installment_2 > 0): ?>
-                                                                | 2nd: <?php echo e($admission->installment_2); ?>
-
-                                                            <?php endif; ?>
-                                                            <?php if($admission->installment_3 > 0): ?>
-                                                                | 3rd: <?php echo e($admission->installment_3); ?>
-
-                                                            <?php endif; ?>
-                                                        </small>
-                                                    <?php endif; ?>
-                                                </td>
                                                 <td>
                                                     <?php
                                                         switch ($admission->student_status) {

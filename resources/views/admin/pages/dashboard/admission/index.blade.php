@@ -110,7 +110,7 @@
                                             <th>Batch</th>
                                             <th>Mode</th>
                                             <th>Payment</th>
-                                            <th>Fee</th>
+                                            {{-- <th>Fee</th> --}}
                                             <th>Status</th>
                                             <th>Options</th>
                                         </tr>
@@ -142,7 +142,7 @@
                                                                     @endif
                                                                 </div>
 
-                                                                {{-- ✏️ Show edit icon only if course was added via pivot (Add New Course) --}}
+                                                                {{-- Show edit icon only if course was added via pivot (Add New Course) --}}
                                                                 @if ($course->pivot && $course->pivot->id)
                                                                     <a href="{{ route('admission.editCourse', [$admission->id, $course->id]) }}"
                                                                         class="btn btn-sm btn-link text-warning"
@@ -183,8 +183,9 @@
                                                         {{ ucfirst($admission->payment_type) }}
                                                     </span>
                                                 </td>
-                                                <td>
-                                                    <div>₨{{ number_format($admission->full_fee) }}</div>
+                                                {{-- <td>
+                                                    <div>₨{{ number_format($admission->full_fee ?? 0) }}</div>
+
                                                     @if ($admission->payment_type === 'installment')
                                                         <small class="text-muted">
                                                             @if ($admission->installment_1 > 0)
@@ -198,7 +199,8 @@
                                                             @endif
                                                         </small>
                                                     @endif
-                                                </td>
+                                                </td> --}}
+
                                                 <td>
                                                     @php
                                                         switch ($admission->student_status) {

@@ -134,6 +134,7 @@
                                             <th>Fee Type</th>
                                             <th>Status</th>
                                             <th>Student Status</th>
+                                            <th>Fee</th>
                                             <th>Options</th>
                                         </tr>
                                     </thead>
@@ -274,7 +275,6 @@
                                                 }
                                             ?>
 
-
                                             <tr data-status="<?php echo e(strtolower($admission->fee_status)); ?>"
                                                 data-payment="<?php echo e(strtolower($admission->payment_type)); ?>"
                                                 data-course="<?php echo e(strtolower(strip_tags(implode(', ', $courseTitles)))); ?>">
@@ -289,9 +289,6 @@
                                                 
                                                 <td style="line-height: 1.9; font-size: 13px;"><?php echo implode('', $feeTypes); ?></td>
 
-                                                
-                                                
-                                                
                                                 <td>
                                                     <?php
                                                         $status = strtolower($admission->fee_status);
@@ -328,6 +325,61 @@
 
                                                     </span>
                                                 </td>
+
+                                                <td>
+                                                    <?php $__currentLoopData = $admission->courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                        <?php
+                                                            // if installments exist, sum them
+                                                            $instTotal = collect([
+                                                                $course->pivot->installment_1,
+                                                                $course->pivot->installment_2,
+                                                                $course->pivot->installment_3,
+                                                            ])
+                                                                ->filter()
+                                                                ->sum();
+
+                                                            // real course fee
+                                                            $fee =
+                                                                $instTotal > 0
+                                                                    ? $instTotal
+                                                                    : $course->pivot->course_fee ?? 0;
+
+                                                            $isInstallment =
+                                                                $course->pivot->payment_type === 'installment';
+                                                        ?>
+
+                                                        
+                                                        <div style="margin-bottom: 6px;">
+                                                            <div>₨<?php echo e(number_format($fee)); ?></div>
+
+                                                            <?php if($isInstallment): ?>
+                                                                <small class="text-muted">
+
+                                                                    <?php if(!empty($course->pivot->installment_1) && $course->pivot->installment_1 > 0): ?>
+                                                                        1st:
+                                                                        <?php echo e(number_format($course->pivot->installment_1)); ?>
+
+                                                                    <?php endif; ?>
+
+                                                                    <?php if(!empty($course->pivot->installment_2) && $course->pivot->installment_2 > 0): ?>
+                                                                        | 2nd:
+                                                                        <?php echo e(number_format($course->pivot->installment_2)); ?>
+
+                                                                    <?php endif; ?>
+
+                                                                    <?php if(!empty($course->pivot->installment_3) && $course->pivot->installment_3 > 0): ?>
+                                                                        | 3rd:
+                                                                        <?php echo e(number_format($course->pivot->installment_3)); ?>
+
+                                                                    <?php endif; ?>
+
+                                                                </small>
+                                                            <?php endif; ?>
+
+                                                        </div>
+                                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                </td>
+
                                                 
                                                 <td>
                                                     <?php if($admission->payment_type === 'installment'): ?>
