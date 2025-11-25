@@ -45,35 +45,15 @@
                     <?php if(Auth::user()->role === 'admin'): ?>
                         <li class=""><a href="<?php echo e(route('admin')); ?>"><i
                                     class="icon-home"></i><span>Dashboard</span></a> </li>
-                        <li>
-                            <a href="#uiElements" class="has-arrow"><i class="fas fa-user-tie"></i><span>Teachers</span></a>
-                            <ul>
-                                <li><a href="<?php echo e(route('teacher.index')); ?>">All Teacher</a></li>
-                                <li><a href="<?php echo e(route('teacher.create')); ?>">Add New Teacher</a></li>
-                                <li><a href="<?php echo e(route('teacher-salary.index')); ?>">Teachers Salary</a></li>
-                            </ul>
-                        </li>
-                        <li>
-                            <a href="#" class="has-arrow"><i class="fas fa-coins"></i><span>My Profits</span></a>
-                            <ul>
-                                <li><a href="<?php echo e(route('admin.partner_profits.index')); ?>">Partner Profits</a>
-                                </li>
-                                <li><a href="<?php echo e(route('admin.partner_profits.partner_balances.index')); ?>">My
-                                        Balance</a></li>
-                            </ul>
-                        </li>
+
+                        
 
                         <li>
-                            <a href="#" class="has-arrow text-nowrap">
-                                <i class="fas fa-user-friends me-2"></i>
-                                <span>Partners</span>
-                            </a>
+                            <a href="#uiElements" class="has-arrow"><i class="fas fa-user-plus"></i>
+                                <span>Leads</span></a>
                             <ul>
-                                <li><a href="<?php echo e(route('admin.partners.index')); ?>">All Partners</a></li>
-                                <li><a href="<?php echo e(route('admin.partner_profits.index')); ?>">All Profits</a></li>
-                                <li><a href="<?php echo e(route('admin.partner_profits.partner_balances.index')); ?>">All
-                                        Balances</a></li>
-                                <li><a href="<?php echo e(route('admin.partner_profits.full_history')); ?>">Profit History</a></li>
+                                <li><a href="<?php echo e(route('lead.index')); ?>">All Leads</a></li>
+                                <li><a href="<?php echo e(route('lead.create')); ?>">Add New Lead</a></li>
                             </ul>
                         </li>
 
@@ -86,20 +66,11 @@
                         </li>
 
                         <li>
-                            <a href="#uiElements" class="has-arrow"><i class="fas fa-user-plus"></i>
-                                <span>Leads</span></a>
+                            <a href="#uiElements" class="has-arrow"><i class="fas fa-user-tie"></i><span>Teachers</span></a>
                             <ul>
-                                <li><a href="<?php echo e(route('lead.index')); ?>">All Leads</a></li>
-                                <li><a href="<?php echo e(route('lead.create')); ?>">Add New Lead</a></li>
-                            </ul>
-                        </li>
-
-                        <li>
-                            <a href="#uiElements" class="has-arrow"><i
-                                    class="fas fa-file-signature"></i><span>Addmissions</span></a>
-                            <ul>
-                                <li><a href="<?php echo e(route('admission.index')); ?>">All Addmissions</a></li>
-                                <li><a href="<?php echo e(route('admission.create')); ?>">Add New Addmission</a></li>
+                                <li><a href="<?php echo e(route('teacher.index')); ?>">All Teacher</a></li>
+                                <li><a href="<?php echo e(route('teacher.create')); ?>">Add New Teacher</a></li>
+                                <li><a href="<?php echo e(route('teacher-salary.index')); ?>">Teachers Salary</a></li>
                             </ul>
                         </li>
 
@@ -114,8 +85,29 @@
                             </ul>
                         </li>
 
+                        <li>
+                            <a href="#uiElements" class="has-arrow"><i
+                                    class="fas fa-file-signature"></i><span>Addmissions</span></a>
+                            <ul>
+                                <li><a href="<?php echo e(route('admission.index')); ?>">All Addmissions</a></li>
+                                <li><a href="<?php echo e(route('admission.create')); ?>">Add New Addmission</a></li>
+                            </ul>
+                        </li>
+
                         <li><a href="<?php echo e(route('fee-submission.index')); ?>"><i class="fas fa-money-check-alt"></i><span>Fee
                                     Submission</span></a></li>
+
+                        <li>
+                            <a href="#testMenu" class="has-arrow">
+                                <i class="fas fa-clipboard-check"></i>
+                                <span>Test System</span>
+                            </a>
+                            <ul>
+                                <li><a href="<?php echo e(route('test.settings')); ?>">Global Settings</a></li>
+                                <li><a href="<?php echo e(route('test.days')); ?>">Test Days</a></li>
+                                <li><a href="<?php echo e(route('test.bookings.index')); ?>">Test Bookings</a></li>
+                            </ul>
+                        </li>
 
                         <li> <a href="<?php echo e(route('referral-commission.index')); ?>">
                                 <i class="fas fa-handshake"></i><span>Referral Commission</span></a></li>
@@ -261,11 +253,10 @@
                     <?php if(Auth::user()->role === 'administrator'): ?>
                         <li><a href="<?php echo e(route('admin')); ?>"><i class="icon-home"></i><span>Dashboard</span></a></li>
                         <li>
-                            <a href="#" class="has-arrow"><i class="fas fa-user-tie"></i><span>Teachers</span></a>
+                            <a href="#" class="has-arrow"><i class="fas fa-user-plus"></i><span>Leads</span></a>
                             <ul>
-                                <li><a href="<?php echo e(route('teacher.index')); ?>">All Teacher</a></li>
-                                <li><a href="<?php echo e(route('teacher.create')); ?>">Add New Teacher</a></li>
-                                <li><a href="<?php echo e(route('teacher-salary.index')); ?>">Teachers Salary</a></li>
+                                <li><a href="<?php echo e(route('lead.index')); ?>">All Leads</a></li>
+                                <li><a href="<?php echo e(route('lead.create')); ?>">Add New Lead</a></li>
                             </ul>
                         </li>
                         <li>
@@ -276,10 +267,22 @@
                             </ul>
                         </li>
                         <li>
-                            <a href="#" class="has-arrow"><i class="fas fa-user-plus"></i><span>Leads</span></a>
+                            <a href="#" class="has-arrow"><i class="fas fa-user-tie"></i><span>Teachers</span></a>
                             <ul>
-                                <li><a href="<?php echo e(route('lead.index')); ?>">All Leads</a></li>
-                                <li><a href="<?php echo e(route('lead.create')); ?>">Add New Lead</a></li>
+                                <li><a href="<?php echo e(route('teacher.index')); ?>">All Teacher</a></li>
+                                <li><a href="<?php echo e(route('teacher.create')); ?>">Add New Teacher</a></li>
+                                <li><a href="<?php echo e(route('teacher-salary.index')); ?>">Teachers Salary</a></li>
+                            </ul>
+                        </li>
+                          <li>
+                            <a href="#testMenu" class="has-arrow">
+                                <i class="fas fa-clipboard-check"></i>
+                                <span>Test System</span>
+                            </a>
+                            <ul>
+                                <li><a href="<?php echo e(route('test.settings')); ?>">Global Settings</a></li>
+                                <li><a href="<?php echo e(route('test.days')); ?>">Test Days</a></li>
+                                <li><a href="<?php echo e(route('test.bookings.index')); ?>">Test Bookings</a></li>
                             </ul>
                         </li>
                         <li>
@@ -306,7 +309,6 @@
                                     class="fas fa-chalkboard-teacher"></i><span>Courses</span></a></li>
                         <li><a href="<?php echo e(route('message.index')); ?>"><i class="icon-bubbles"></i><span>Messages</span></a>
                         </li>
-                       
                     <?php endif; ?>
 
                 <?php endif; ?>

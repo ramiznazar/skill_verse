@@ -10,9 +10,6 @@ use App\Models\Lead;
 
 class LeadController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
         $query = Lead::with('course')

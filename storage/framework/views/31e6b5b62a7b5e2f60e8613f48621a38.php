@@ -23,6 +23,10 @@
                                 enctype="multipart/form-data">
                                 <?php echo csrf_field(); ?>
 
+                                <?php if(!empty($prefill)): ?>
+                                    <input type="hidden" name="booking_id" value="<?php echo e($prefill->id); ?>">
+                                <?php endif; ?>
+
                                 
                                 <div class="row">
                                     
@@ -33,12 +37,16 @@
                                                 multiple required data-live-search="true"
                                                 title="Choose one or more courses">
                                                 <?php $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                    <option value="<?php echo e($course->id); ?>"
+                                                    <option value="<?php echo e($course->id); ?>" 
+                                                        <?php if(!empty($prefill) && $prefill->course_id == $course->id): ?> selected <?php endif; ?>
+                                                        
                                                         <?php echo e(collect(old('course_ids', []))->contains($course->id) ? 'selected' : ''); ?>>
+
                                                         <?php echo e($course->title); ?>
 
                                                     </option>
                                                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+
                                             </select>
                                             <small class="form-text text-muted">
                                                 Hold <b>CTRL</b> (Windows) or <b>CMD</b> (Mac) to select multiple.
@@ -635,12 +643,14 @@ unset($__errorArgs, $__bag); ?>
 
         // render course blocks based on number of courses
         function renderCourseBlocks(selectedCourses) {
+
             $('#batch-container').empty();
             if (selectedCourses.length === 0) return;
 
             let colSize = selectedCourses.length === 1 ? 'col-12' : 'col-md-6';
 
             selectedCourses.forEach(courseId => {
+
                 const courseTitle = $('#course_id option[value="' + courseId + '"]').text();
 
                 let courseBlock = $(`
@@ -652,10 +662,16 @@ unset($__errorArgs, $__bag); ?>
                             ✕ Remove
                         </button>
                     </div>
+
                     <select name="batch_ids[]" class="form-control batch-select mb-2" required>
                         <option value="">Loading...</option>
                     </select>
-                    <input type="number" name="course_fees[]" class="form-control course-fee-input" placeholder="Auto or manual entry" readonly>
+
+                    <input type="number" 
+                           name="course_fees[]" 
+                           class="form-control course-fee-input" 
+                           placeholder="Auto or manual entry" 
+                           readonly>
                 </div>
             </div>
         `);
@@ -664,18 +680,36 @@ unset($__errorArgs, $__bag); ?>
 
                 // load batches dynamically
                 $.get(`<?php echo e(url('admin/admission/get-batches')); ?>/${courseId}`, function(data) {
+
                     let options = '<option value="">Select Batch</option>';
-                    if (data.length === 0) options += '<option disabled>No batches available</option>';
+
+                    if (data.length === 0)
+                        options += '<option disabled>No batches available</option>';
+
                     data.forEach(batch => {
-                        options += `<option value="${batch.id}" data-fee="${batch.course.min_fee}">
-                    ${batch.title} (${batch.shift})
-                </option>`;
+                        options += `
+                    <option value="${batch.id}" data-fee="${batch.course.min_fee}">
+                        ${batch.title} (${batch.shift})
+                    </option>
+                `;
                     });
+
                     courseBlock.find('select').html(options);
-                }).fail(function(xhr) {
-                    console.error('Error loading batches:', xhr.responseText);
-                    courseBlock.find('select').html('<option disabled>Error loading batches</option>');
+
+                    // =======================
+                    // BOOKING PREFILL SUPPORT
+                    // =======================
+                    <?php if(!empty($prefill)): ?>
+                        if (courseId == '<?php echo e($prefill->course_id); ?>') {
+                            courseBlock.find("select").val('<?php echo e($prefill->batch_id); ?>').trigger("change");
+                            courseBlock.find(".course-fee-input")
+                                .val('<?php echo e($prefill->course->min_fee); ?>')
+                                .prop("readonly", false);
+                        }
+                    <?php endif; ?>
+
                 });
+
             });
 
             adjustBatchLayout();
@@ -887,6 +921,16 @@ unset($__errorArgs, $__bag); ?>
             $(this).closest('.course-block').remove();
             calculateTotalFee();
         });
+        
+        <?php if(!empty($prefill)): ?>
+
+            // Step 1: PRE-SELECT BOOKING COURSE
+            $('#course_id')
+                .selectpicker('val', ['<?php echo e($prefill->course_id); ?>'])
+                .trigger('change');
+
+            // Step 2 is handled inside renderCourseBlocks() automatically.
+        <?php endif; ?>
     </script>
 <?php $__env->stopSection(); ?>
 

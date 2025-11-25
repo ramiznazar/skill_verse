@@ -141,45 +141,10 @@
                                             @enderror
                                         </div>
                                     </div>
-
-
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label>Full Fee</label>
-                                            <input type="text" name="full_fee" class="form-control"
-                                                value="{{ $course->full_fee }}">
-                                            @error('full_fee')
-                                                <small class="text-danger">{{ $message }}</small>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label>Discount (%)</label>
-                                            <input type="text" name="discount" class="form-control"
-                                                value="{{ $course->discount }}" oninput="calculateMinFee()">
-                                            @error('discount')
-                                                <small class="text-danger">{{ $message }}</small>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label>Min Fee</label>
-                                            <input type="text" name="min_fee" class="form-control"
-                                                value="{{ $course->min_fee }}">
-                                            @error('min_fee')
-                                                <small class="text-danger">{{ $message }}</small>
-                                            @enderror
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-3">
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Status</label>
                                             <select name="is_active" class="form-control">
@@ -193,6 +158,61 @@
                                                 </option>
                                             </select>
                                             @error('is_active')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Discount Offer</label>
+                                            <select name="discount_offer" class="form-control">
+                                                <option value="1"
+                                                    {{ old('discount_offer', $course->discount_offer) == 1 ? 'selected' : '' }}>
+                                                    Yes
+                                                </option>
+                                                <option value="0"
+                                                    {{ old('discount_offer', $course->discount_offer) == 0 ? 'selected' : '' }}>
+                                                    No
+                                                </option>
+                                            </select>
+                                            @error('discount_offer')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Full Fee</label>
+                                            <input type="text" name="full_fee" class="form-control"
+                                                value="{{ $course->full_fee }}">
+                                            @error('full_fee')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Discount (%)</label>
+                                            <input type="text" name="discount" class="form-control"
+                                                value="{{ $course->discount }}" oninput="calculateMinFee()">
+                                            @error('discount')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>Min Fee</label>
+                                            <input type="text" name="min_fee" class="form-control"
+                                                value="{{ $course->min_fee }}">
+                                            @error('min_fee')
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>

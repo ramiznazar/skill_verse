@@ -45,15 +45,8 @@
                     @if (Auth::user()->role === 'admin')
                         <li class=""><a href="{{ route('admin') }}"><i
                                     class="icon-home"></i><span>Dashboard</span></a> </li>
-                        <li>
-                            <a href="#uiElements" class="has-arrow"><i class="fas fa-user-tie"></i><span>Teachers</span></a>
-                            <ul>
-                                <li><a href="{{ route('teacher.index') }}">All Teacher</a></li>
-                                <li><a href="{{ route('teacher.create') }}">Add New Teacher</a></li>
-                                <li><a href="{{ route('teacher-salary.index') }}">Teachers Salary</a></li>
-                            </ul>
-                        </li>
-                        <li>
+
+                        {{-- <li>
                             <a href="#" class="has-arrow"><i class="fas fa-coins"></i><span>My Profits</span></a>
                             <ul>
                                 <li><a href="{{ route('admin.partner_profits.index') }}">Partner Profits</a>
@@ -75,15 +68,7 @@
                                         Balances</a></li>
                                 <li><a href="{{ route('admin.partner_profits.full_history') }}">Profit History</a></li>
                             </ul>
-                        </li>
-
-                        <li>
-                            <a href="#uiElements" class="has-arrow"><i class="fas fa-users"></i><span>Batches</span></a>
-                            <ul>
-                                <li><a href="{{ route('batch.index') }}">All Batches</a></li>
-                                <li><a href="{{ route('batch.create') }}">Add New Batch</a></li>
-                            </ul>
-                        </li>
+                        </li> --}}
 
                         <li>
                             <a href="#uiElements" class="has-arrow"><i class="fas fa-user-plus"></i>
@@ -95,11 +80,19 @@
                         </li>
 
                         <li>
-                            <a href="#uiElements" class="has-arrow"><i
-                                    class="fas fa-file-signature"></i><span>Addmissions</span></a>
+                            <a href="#uiElements" class="has-arrow"><i class="fas fa-users"></i><span>Batches</span></a>
                             <ul>
-                                <li><a href="{{ route('admission.index') }}">All Addmissions</a></li>
-                                <li><a href="{{ route('admission.create') }}">Add New Addmission</a></li>
+                                <li><a href="{{ route('batch.index') }}">All Batches</a></li>
+                                <li><a href="{{ route('batch.create') }}">Add New Batch</a></li>
+                            </ul>
+                        </li>
+
+                        <li>
+                            <a href="#uiElements" class="has-arrow"><i class="fas fa-user-tie"></i><span>Teachers</span></a>
+                            <ul>
+                                <li><a href="{{ route('teacher.index') }}">All Teacher</a></li>
+                                <li><a href="{{ route('teacher.create') }}">Add New Teacher</a></li>
+                                <li><a href="{{ route('teacher-salary.index') }}">Teachers Salary</a></li>
                             </ul>
                         </li>
 
@@ -114,8 +107,29 @@
                             </ul>
                         </li>
 
+                        <li>
+                            <a href="#uiElements" class="has-arrow"><i
+                                    class="fas fa-file-signature"></i><span>Addmissions</span></a>
+                            <ul>
+                                <li><a href="{{ route('admission.index') }}">All Addmissions</a></li>
+                                <li><a href="{{ route('admission.create') }}">Add New Addmission</a></li>
+                            </ul>
+                        </li>
+
                         <li><a href="{{ route('fee-submission.index') }}"><i class="fas fa-money-check-alt"></i><span>Fee
                                     Submission</span></a></li>
+
+                        <li>
+                            <a href="#testMenu" class="has-arrow">
+                                <i class="fas fa-clipboard-check"></i>
+                                <span>Test System</span>
+                            </a>
+                            <ul>
+                                <li><a href="{{ route('test.settings') }}">Global Settings</a></li>
+                                <li><a href="{{ route('test.days') }}">Test Days</a></li>
+                                <li><a href="{{ route('test.bookings.index') }}">Test Bookings</a></li>
+                            </ul>
+                        </li>
 
                         <li> <a href="{{ route('referral-commission.index') }}">
                                 <i class="fas fa-handshake"></i><span>Referral Commission</span></a></li>
@@ -261,11 +275,10 @@
                     @if (Auth::user()->role === 'administrator')
                         <li><a href="{{ route('admin') }}"><i class="icon-home"></i><span>Dashboard</span></a></li>
                         <li>
-                            <a href="#" class="has-arrow"><i class="fas fa-user-tie"></i><span>Teachers</span></a>
+                            <a href="#" class="has-arrow"><i class="fas fa-user-plus"></i><span>Leads</span></a>
                             <ul>
-                                <li><a href="{{ route('teacher.index') }}">All Teacher</a></li>
-                                <li><a href="{{ route('teacher.create') }}">Add New Teacher</a></li>
-                                <li><a href="{{ route('teacher-salary.index') }}">Teachers Salary</a></li>
+                                <li><a href="{{ route('lead.index') }}">All Leads</a></li>
+                                <li><a href="{{ route('lead.create') }}">Add New Lead</a></li>
                             </ul>
                         </li>
                         <li>
@@ -276,10 +289,22 @@
                             </ul>
                         </li>
                         <li>
-                            <a href="#" class="has-arrow"><i class="fas fa-user-plus"></i><span>Leads</span></a>
+                            <a href="#" class="has-arrow"><i class="fas fa-user-tie"></i><span>Teachers</span></a>
                             <ul>
-                                <li><a href="{{ route('lead.index') }}">All Leads</a></li>
-                                <li><a href="{{ route('lead.create') }}">Add New Lead</a></li>
+                                <li><a href="{{ route('teacher.index') }}">All Teacher</a></li>
+                                <li><a href="{{ route('teacher.create') }}">Add New Teacher</a></li>
+                                <li><a href="{{ route('teacher-salary.index') }}">Teachers Salary</a></li>
+                            </ul>
+                        </li>
+                          <li>
+                            <a href="#testMenu" class="has-arrow">
+                                <i class="fas fa-clipboard-check"></i>
+                                <span>Test System</span>
+                            </a>
+                            <ul>
+                                <li><a href="{{ route('test.settings') }}">Global Settings</a></li>
+                                <li><a href="{{ route('test.days') }}">Test Days</a></li>
+                                <li><a href="{{ route('test.bookings.index') }}">Test Bookings</a></li>
                             </ul>
                         </li>
                         <li>
@@ -306,7 +331,6 @@
                                     class="fas fa-chalkboard-teacher"></i><span>Courses</span></a></li>
                         <li><a href="{{ route('message.index') }}"><i class="icon-bubbles"></i><span>Messages</span></a>
                         </li>
-                       
                     @endif
 
                 @endauth

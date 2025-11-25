@@ -117,7 +117,44 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-md-3">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Status</label>
+                                            <select name="is_active" class="form-control">
+                                                <option value="1" {{ old('is_active') }}>
+                                                    Active
+                                                </option>
+                                                <option value="0" {{ old('is_active') }}>
+                                                    Inactive
+                                                </option>
+                                            </select>
+                                            @error('is_active')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Discount Offer</label>
+                                            <select name="discount_offer" class="form-control">
+                                                <option value="1" {{ old('discount_offer') }}>
+                                                    Yes
+                                                </option>
+                                                <option value="0" {{ old('discount_offer') }}>
+                                                    No
+                                                </option>
+                                            </select>
+                                            @error('discount_offer')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Full Fee</label>
                                             <input type="text" name="full_fee" class="form-control"
@@ -128,7 +165,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-3">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Discount</label>
                                             <input type="text" name="discount" class="form-control"
@@ -139,7 +176,7 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-3">
+                                    <div class="col-md-4">
                                         <div class="form-group">
                                             <label>Min Fee</label>
                                             <input type="text" name="min_fee" class="form-control"
@@ -150,16 +187,14 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-md-3">
+                                    {{-- <div class="col-md-3">
                                         <div class="form-group">
                                             <label>Status</label>
                                             <select name="is_active" class="form-control">
-                                                <option value="1"
-                                                    {{ old('is_active') }}>
+                                                <option value="1" {{ old('is_active') }}>
                                                     Active
                                                 </option>
-                                                <option value="0"
-                                                    {{ old('is_active')}}>
+                                                <option value="0" {{ old('is_active') }}>
                                                     Inactive
                                                 </option>
                                             </select>
@@ -167,7 +202,7 @@
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>
-                                    </div>
+                                    </div> --}}
 
                                 </div>
 

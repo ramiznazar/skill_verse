@@ -11,6 +11,7 @@ use App\Http\Controllers\Website\{
     EventController,
     CourseController,
     ContactController,
+    TestBookingController,
     CourseDetailController,
     EventDetailController,
     UserMessageController as FrontUserMessageController
@@ -39,7 +40,10 @@ use App\Http\Controllers\Admin\Dashboard\{
     ProfitCalculationController,
     StudentAttendanceController,
     TeacherAttendanceController,
-    ReferralCommissionController
+    ReferralCommissionController,
+    TestDayController,
+    TestSettingController,
+    TestBookingController as AdminTestBookingController
 };
 use App\Http\Controllers\Admin\Website\{
     BannerController,
@@ -78,6 +82,10 @@ Route::get('/blog', [BlogController::class, 'blog'])->name('blog');
 Route::get('/faq', [FaqController::class, 'faq'])->name('faq');
 Route::get('/contact', [ContactController::class, 'contact'])->name('contact');
 Route::post('/user/message', [ContactController::class, 'userMessage'])->name('user.message.store');
+Route::get('/test-booking', [TestBookingController::class, 'create'])->name('test.booking');
+Route::post('/test-booking', [TestBookingController::class, 'store'])->name('test.booking.store');
+Route::get('/test-booking-summary/{id}', [TestBookingController::class, 'summary'])->name('test.booking.summary');
+
 
 /*
 |--------------------------------------------------------------------------
@@ -161,6 +169,34 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
     Route::put('/referral-commission/paid', [ReferralCommissionController::class, 'paid'])->name('referral-commission.paid');
     Route::get('/referral-commission/history/{name}/{contact?}', [ReferralCommissionController::class, 'history'])->name('referral-commission.history');
 
+    Route::prefix('test')->group(function () {
+
+        // Global settings
+        Route::get('/settings', [TestSettingController::class, 'index'])->name('test.settings');
+        Route::post('/settings/update', [TestSettingController::class, 'update'])->name('test.settings.update');
+
+        // Daily limits CRUD
+        Route::get('/days', [TestDayController::class, 'index'])->name('test.days');
+        Route::get('/days/create', [TestDayController::class, 'create'])->name('test.days.create');
+        Route::post('/days/store', [TestDayController::class, 'store'])->name('test.days.store');
+        Route::get('/days/{id}/edit', [TestDayController::class, 'edit'])->name('test.days.edit');
+        Route::post('/days/{id}/update', [TestDayController::class, 'update'])->name('test.days.update');
+        Route::delete('/days/{id}/delete', [TestDayController::class, 'destroy'])->name('test.days.delete');
+
+        // Bookings
+        Route::get('/bookings', [AdminTestBookingController::class, 'index'])->name('test.bookings.index');
+        Route::get('/bookings/{id}/show', [AdminTestBookingController::class, 'show'])->name('test.bookings.show');
+        Route::delete('/bookings/{id}/delete', [AdminTestBookingController::class, 'destroy'])->name('test.bookings.delete');
+        Route::post('/bookings/attendance', [AdminTestBookingController::class, 'markAttendance'])->name('test.booking.attendance');
+        Route::post('/bookings/result', [AdminTestBookingController::class, 'markResult'])->name('test.booking.result');
+        // Load batches for modal
+        Route::get('/test-booking/load-batches', [AdminTestBookingController::class, 'loadBatches'])
+            ->name('test.booking.loadBatches');
+
+        // Confirm pass with batch select
+        Route::post('/test-booking/confirm-pass', [AdminTestBookingController::class, 'confirmPass'])
+            ->name('test.booking.confirmPass');
+    });
 
     // All Admin Resource Controllers
     Route::resources([

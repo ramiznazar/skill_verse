@@ -25,5 +25,8 @@ class Batch extends Model
             ->withPivot(['course_id', 'course_fee'])
             ->withTimestamps();
     }
-
+    public function testBookings()
+    {
+        return $this->hasMany(TestBooking::class, 'batch_id');
+    }
 }

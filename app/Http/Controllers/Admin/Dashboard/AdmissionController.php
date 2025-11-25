@@ -9,6 +9,7 @@ use App\Models\Course;
 use App\Models\Admission;
 use Illuminate\Http\Request;
 use App\Models\Notification;
+use App\Models\TestBooking;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Storage;
@@ -75,13 +76,18 @@ class AdmissionController extends Controller
     public function create(Request $request)
     {
         $lead = null;
+        $prefill = null;
 
         if ($request->has('lead_id')) {
             $lead = Lead::find($request->lead_id);
         }
+        if ($request->has('booking_id')) {
+            $prefill = TestBooking::with(['course', 'batch'])->find($request->booking_id);
+        }
+
         $courses = Course::all();
         $batches = Batch::all();
-        return view('admin.pages.dashboard.admission.create', compact('lead', 'courses', 'batches'));
+        return view('admin.pages.dashboard.admission.create', compact('lead', 'courses', 'batches','prefill'));
     }
 
     public function store(Request $request)
