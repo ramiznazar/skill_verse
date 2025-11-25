@@ -167,13 +167,13 @@
                                         <div class="form-group">
                                             <label>Discount Offer</label>
                                             <select name="discount_offer" class="form-control">
-                                                <option value="1"
-                                                    {{ old('discount_offer', $course->discount_offer) == 1 ? 'selected' : '' }}>
-                                                    Yes
-                                                </option>
                                                 <option value="0"
                                                     {{ old('discount_offer', $course->discount_offer) == 0 ? 'selected' : '' }}>
                                                     No
+                                                </option>
+                                                <option value="1"
+                                                    {{ old('discount_offer', $course->discount_offer) == 1 ? 'selected' : '' }}>
+                                                    Yes
                                                 </option>
                                             </select>
                                             @error('discount_offer')
