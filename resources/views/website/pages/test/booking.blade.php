@@ -10,7 +10,7 @@
                 <div class="section-content">
                     <div class="row">
                         <div class="col-md-12">
-                            <h2 class="title text-white">Discount Interview Booking</h2>
+                            <h2 class="title text-white">Interview Booking</h2>
                             <ol class="breadcrumb text-left text-black mt-10">
                                 <li><a href="{{ route('home') }}">Home</a></li>
                                 <li class="active text-gray-silver">Interview Booking</li>

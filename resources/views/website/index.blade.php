@@ -585,7 +585,7 @@
                 <div class="section-content">
                     <div class="row">
                         <div class="col-md-5">
-                            <img src="{{ asset('assets/website/images/institute/23.jpg') }}" height="350"
+                            <img src="{{ asset('assets/website/images/home/1.jpg') }}" height="350"
                                 class="img-fullwidth" alt="">
                         </div>
                         <div class="col-md-7 pb-sm-20">

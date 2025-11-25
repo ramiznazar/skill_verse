@@ -141,7 +141,7 @@
                                                 <option value="1" {{ old('discount_offer') }}>
                                                     Yes
                                                 </option>
-                                                <option value="0" {{ old('discount_offer') }}>
+                                                <option value="0" {{ old('discount_offer') }} selected>
                                                     No
                                                 </option>
                                             </select>
@@ -186,24 +186,27 @@
                                             @enderror
                                         </div>
                                     </div>
+                                </div>
 
-                                    {{-- <div class="col-md-3">
-                                        <div class="form-group">
-                                            <label>Status</label>
-                                            <select name="is_active" class="form-control">
-                                                <option value="1" {{ old('is_active') }}>
-                                                    Active
-                                                </option>
-                                                <option value="0" {{ old('is_active') }}>
-                                                    Inactive
-                                                </option>
-                                            </select>
-                                            @error('is_active')
-                                                <small class="text-danger">{{ $message }}</small>
-                                            @enderror
+                                <div id="interview-discount-wrapper" style="display: none;">
+                                    <div class="row">
+
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Interview Discount (%)</label>
+                                                <input type="text" name="interview_discount_per" class="form-control"
+                                                    value="{{ old('interview_discount_per') }}">
+                                            </div>
                                         </div>
-                                    </div> --}}
 
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label>Interview Fee After Discount</label>
+                                                <input type="text" name="interview_discount_amount"
+                                                    class="form-control" value="{{ old('interview_discount_amount') }}">
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="form-group">
@@ -258,5 +261,47 @@
 
         document.querySelector('input[name="full_fee"]').addEventListener('input', calculateMinFee);
         document.querySelector('input[name="discount"]').addEventListener('input', calculateMinFee);
+    </script>
+    <script>
+        function calculateInterviewDiscount() {
+            const fullFee = parseFloat(document.querySelector('input[name="full_fee"]').value) || 0;
+            const interviewDiscountPer = parseFloat(document.querySelector('input[name="interview_discount_per"]').value) ||
+                0;
+
+            if (fullFee > 0 && interviewDiscountPer > 0) {
+
+                const discountAmount = (fullFee * interviewDiscountPer) / 100;
+                const remainingFee = fullFee - discountAmount;
+
+                document.querySelector('input[name="interview_discount_amount"]').value = remainingFee.toFixed(2);
+            }
+        }
+
+        document.querySelector('input[name="full_fee"]').addEventListener('input', calculateInterviewDiscount);
+        document.querySelector('input[name="interview_discount_per"]').addEventListener('input',
+            calculateInterviewDiscount);
+    </script>
+    <script>
+        function toggleInterviewDiscountFields() {
+            const offerSelect = document.querySelector('select[name="discount_offer"]');
+            const wrapper = document.getElementById('interview-discount-wrapper');
+
+            if (offerSelect.value === "1") {
+                wrapper.style.display = 'block';
+            } else {
+                wrapper.style.display = 'none';
+
+                // Clear values if not showing
+                document.querySelector('input[name="interview_discount_per"]').value = "";
+                document.querySelector('input[name="interview_discount_amount"]').value = "";
+            }
+        }
+
+        // Run on page load
+        toggleInterviewDiscountFields();
+
+        // Run when user changes option
+        document.querySelector('select[name="discount_offer"]')
+            .addEventListener('change', toggleInterviewDiscountFields);
     </script>
 @endsection

@@ -7,9 +7,9 @@
                     <h2>Courses</h2>
                 </div>
                 {{-- @if (Auth::user()->role !== 'administrator') --}}
-                    <div class="col-md-6 col-sm-12 text-right">
-                        <a href="{{ route('course.create') }}" class="btn btn-sm btn-primary" title="">Create New</a>
-                    </div>
+                <div class="col-md-6 col-sm-12 text-right">
+                    <a href="{{ route('course.create') }}" class="btn btn-sm btn-primary" title="">Create New</a>
+                </div>
                 {{-- @endif --}}
             </div>
         </div>
@@ -62,14 +62,11 @@
                                             <th>#</th>
                                             <th>Image</th>
                                             <th>Title</th>
-                                            {{-- <th>Slug</th> --}}
                                             <th>Category</th>
                                             <th>Duration</th>
                                             <th>FullFee</th>
-                                            <th>Discount%</th>
-                                            <th>MinFee</th>
-                                            {{-- <th>Short Des</th> --}}
-                                            {{-- <th>Des</th> --}}
+                                            <th>Discount(%)</th>
+                                            <th>Extra Discount(%)</th>
                                             <th>Options</th>
                                         </tr>
                                     </thead>
@@ -77,22 +74,35 @@
                                         @foreach ($courses as $course)
                                             <tr>
                                                 <td>{{ $loop->iteration }}</td>
-                                                <td><span><img src="{{ asset($course->image) }}" width="60"
-                                                            height="60" style="border-radius: 50%;"
-                                                            alt=""></span></td>
+                                                <td>
+                                                    <span>
+                                                        <img src="{{ asset($course->image) }}" width="60" height="60"
+                                                            style="border-radius: 50%;" alt="">
+                                                    </span>
+                                                </td>
                                                 <td>{{ $course->title }}</td>
-                                                {{-- <td>{{ $course->slug }}</td> --}}
-                                                <td><span
+                                                <td>
+                                                    <span
                                                         class="text-info">{{ $course->courseCategory->name ?? 'N/A' }}</span>
                                                 </td>
                                                 <td>{{ $course->duration }}</td>
                                                 <td>{{ $course->full_fee }}</td>
-                                                <td>{{ $course->discount }}%</td>
-                                                <td>{{ intval($course->min_fee) }}</td>
-                                                {{-- <td>{{ \Illuminate\Support\Str::words($course->short_description, 5, '...') }} --}}
-                                                {{-- <td>{{ \Illuminate\Support\Str::words($course->description, 7, '...') }} --}}
+                                                <td>
+                                                    <span class="badge badge-primary">
+                                                        {{ $course->discount }}% → {{ intval($course->min_fee) }}
+                                                    </span>
                                                 </td>
-                                                {{-- <td><span class="badge badge-success">Admit</span></td> --}}
+                                                <td>
+                                                    @if ($course->interview_discount_per && $course->interview_discount_amount)
+                                                        <span class="badge badge-info" style="margin-top: 4px;">
+                                                            {{ $course->interview_discount_per }}% →
+                                                            {{ intval($course->interview_discount_amount) }}
+                                                        </span>
+                                                    @else
+                                                        <span class="badge badge-secondary">N/A</span>
+                                                    @endif
+                                                </td>
+                                                </td>
                                                 <td class="actions">
                                                     <div class="d-flex align-items-center" style="column-gap: 5px;">
                                                         {{-- Add LMS --}}
@@ -117,7 +127,7 @@
                                                             <i class="icon-eye"></i>
                                                         </a>
 
-                                                         {{-- @if (Auth::user()->role !== 'administrator') --}}
+                                                        {{-- @if (Auth::user()->role !== 'administrator') --}}
                                                         <!-- Edit Button -->
                                                         <a href="{{ route('course.edit', $course->id) }}"
                                                             class="btn btn-sm btn-icon btn-pure btn-default on-default button-edit"

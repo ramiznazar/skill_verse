@@ -82,8 +82,8 @@ Route::get('/blog', [BlogController::class, 'blog'])->name('blog');
 Route::get('/faq', [FaqController::class, 'faq'])->name('faq');
 Route::get('/contact', [ContactController::class, 'contact'])->name('contact');
 Route::post('/user/message', [ContactController::class, 'userMessage'])->name('user.message.store');
-Route::get('/test-booking', [TestBookingController::class, 'create'])->name('test.booking');
-Route::post('/test-booking', [TestBookingController::class, 'store'])->name('test.booking.store');
+Route::get('/book-interview', [TestBookingController::class, 'create'])->name('test.booking');
+Route::post('/book-interview', [TestBookingController::class, 'store'])->name('test.booking.store');
 Route::get('/test-booking-summary/{id}', [TestBookingController::class, 'summary'])->name('test.booking.summary');
 
 
