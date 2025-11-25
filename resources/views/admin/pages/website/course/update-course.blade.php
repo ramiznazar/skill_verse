@@ -167,13 +167,13 @@
                                         <div class="form-group">
                                             <label>Discount Offer</label>
                                             <select name="discount_offer" class="form-control">
-                                                <option value="0"
-                                                    {{ old('discount_offer', $course->discount_offer) == 0 ? 'selected' : '' }}>
-                                                    No
-                                                </option>
                                                 <option value="1"
                                                     {{ old('discount_offer', $course->discount_offer) == 1 ? 'selected' : '' }}>
                                                     Yes
+                                                </option>
+                                                <option value="0"
+                                                    {{ old('discount_offer', $course->discount_offer) == 0 ? 'selected' : '' }}>
+                                                    No
                                                 </option>
                                             </select>
                                             @error('discount_offer')
@@ -237,7 +237,8 @@
                                             <div class="form-group">
                                                 <label>Interview Fee After Discount</label>
                                                 <input type="text" name="interview_discount_amount"
-                                                    class="form-control" value="{{ $course->interview_discount_amount }}">
+                                                    class="form-control"
+                                                    value="{{ $course->interview_discount_amount }}">
                                                 @error('interview_discount_amount')
                                                     <small class="text-danger">{{ $message }}</small>
                                                 @enderror
@@ -332,7 +333,7 @@
         // event listeners
         document.querySelector('input[name="full_fee"]').addEventListener('input', calculateInterviewDiscount);
         document.querySelector('input[name="interview_discount_per"]').addEventListener('input',
-        calculateInterviewDiscount);
+            calculateInterviewDiscount);
 
         document.querySelector('select[name="discount_offer"]').addEventListener('change', toggleInterviewDiscountFields);
 

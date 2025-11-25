@@ -229,7 +229,7 @@ unset($__errorArgs, $__bag); ?>
                                                     Yes
                                                 </option>
                                                 <option value="0"
-                                                    <?php echo e(old('discount_offer', $course->discount_offer) == 0 ? 'selected' : ''); ?>>
+                                                    <?php echo e(old('discount_offer', $course->discount_offer) == 0 ? 'selected' : ''); ?> selected>
                                                     No
                                                 </option>
                                             </select>
@@ -329,8 +329,8 @@ unset($__errorArgs, $__bag); ?>
                                             <div class="form-group">
                                                 <label>Interview Fee After Discount</label>
                                                 <input type="text" name="interview_discount_amount"
-                                                    class="form-control" value="<?php echo e($course->interview_discount_amount); ?>"
-                                                    readonly>
+                                                    class="form-control"
+                                                    value="<?php echo e($course->interview_discount_amount); ?>">
                                                 <?php $__errorArgs = ['interview_discount_amount'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -446,7 +446,7 @@ unset($__errorArgs, $__bag); ?>
         // event listeners
         document.querySelector('input[name="full_fee"]').addEventListener('input', calculateInterviewDiscount);
         document.querySelector('input[name="interview_discount_per"]').addEventListener('input',
-        calculateInterviewDiscount);
+            calculateInterviewDiscount);
 
         document.querySelector('select[name="discount_offer"]').addEventListener('change', toggleInterviewDiscountFields);
 
