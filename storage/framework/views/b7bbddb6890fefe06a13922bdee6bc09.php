@@ -351,7 +351,8 @@ unset($__errorArgs, $__bag); ?>
             const fullFee = parseFloat(document.querySelector('input[name="full_fee"]').value) || 0;
             const discount = parseFloat(document.querySelector('input[name="discount"]').value) || 0;
 
-            if (fullFee > 0 && discount > 0) {
+            if (fullFee > 0 
+             discount > 0) {
                 const discountAmount = (fullFee * discount) / 100;
                 const minFee = fullFee - discountAmount;
                 document.querySelector('input[name="min_fee"]').value = minFee.toFixed(2);

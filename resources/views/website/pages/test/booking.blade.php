@@ -21,14 +21,89 @@
             </div>
         </section>
 
+        {{-- 🔥 Trending Discount Courses strip --}}
+        @if ($courses->count())
+            <section class="bg-lighter">
+                <div class="container pt-30 pb-10">
+                    <div class="row">
+                        <div class="col-md-12 text-center mb-20">
+                            {{-- <h4 class="text-uppercase font-24">
+                                Trending Courses with <span class="text-theme-colored">Interview Discounts</span>
+                            </h4> --}}
+                            <p class="text-muted">
+                                Book your interview today and lock these special limited-time fees.
+                            </p>
+
+                            <p class="text-muted mt-5" style="font-size:14px;">
+                                <span style="color:#ff5722; font-weight:600;">Sponsored by HMS Tech Solutions</span> —
+                                Empowering Digital Skills & IT Education.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        @foreach ($courses as $course)
+                            @php
+                                $discAmount = $course->full_fee - $course->interview_discount_amount;
+                            @endphp
+
+                            <div class="col-sm-6 col-md-4">
+                                <div class="border-1px bg-white mb-20 p-15 course-discount-card"
+                                    style="border-radius:6px; box-shadow:0 5px 15px rgba(0,0,0,0.05);">
+                                    <h4 class="mt-0 mb-5">{{ $course->title }}</h4>
+
+                                    <p class="mb-5 text-muted">
+                                        <small>Standard Fee</small><br>
+                                        <span style="text-decoration:line-through; color:#999;">
+                                            Rs {{ number_format($course->full_fee) }}
+                                        </span>
+                                    </p>
+
+                                    <p class="mb-5">
+                                        <small>Interview Discount</small><br>
+
+                                        <span class="badge" style="background:#ff9800; color:#fff;">
+                                            {{ number_format($course->interview_discount_per) }}%
+                                            OFF
+                                        </span>
+
+                                        <span class="text-theme-colored ml-5">
+                                            – Rs {{ number_format($discAmount) }}
+                                        </span>
+                                    </p>
+
+                                    <p class="mb-10">
+                                        <small>Interview Fee</small><br>
+                                        <span class="font-18 text-theme-colored font-weight-600">
+                                            Rs {{ number_format($course->interview_discount_amount) }}
+                                        </span>
+                                    </p>
+
+                                    {{-- <p class="text-muted mb-10">
+                                            <small>No special interview discount configured.</small>
+                                        </p> --}}
+
+                                    <p class="mb-0">
+                                        <small class="text-muted">
+                                            *Final fee will be confirmed at admission.
+                                        </small>
+                                    </p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </section>
+        @endif
+
         <!-- Section: Booking Form -->
         <section class="divider">
             <div class="container">
                 <div class="row pt-30">
                     <div class="col-md-12">
-                        {{-- <div class="col-md-8 col-md-offset-2"> --}}
 
-                        <h3 class="line-bottom mt-0 mb-20">Register for 80% Discount Interview</h3>
+                        <h3 class="line-bottom mt-0 mb-20">Register for Interview & Unlock Your Discount</h3>
                         <p class="mb-20">
                             Fill out the form below to receive your interview date and time. Limited slots are available
                             each day, and if today is fully booked, you’ll be automatically scheduled for the next available
@@ -67,7 +142,20 @@
                                         <select name="course_id" class="form-control" required>
                                             <option value="">Select Course</option>
                                             @foreach ($courses as $course)
-                                                <option value="{{ $course->id }}">{{ $course->title }}</option>
+                                                @php
+                                                    $original = (float) ($course->min_fee ?? 0);
+                                                    $discAmount = (float) ($course->interview_discount_amount ?? 0);
+                                                    $final =
+                                                        $original > 0 && $discAmount > 0
+                                                            ? max($original - $discAmount, 0)
+                                                            : $original;
+                                                @endphp
+                                                <option value="{{ $course->id }}">
+                                                    {{ $course->title }}
+                                                    @if ($final > 0)
+                                                        — Interview Fee: Rs {{ number_format($final) }}
+                                                    @endif
+                                                </option>
                                             @endforeach
                                         </select>
                                     </div>
@@ -96,7 +184,6 @@
                                             <small class="text-danger">{{ $message }}</small>
                                         @enderror
                                     </div>
-
                                 </div>
                             </div>
 
@@ -107,7 +194,7 @@
 
                             <button type="submit"
                                 class="btn btn-theme-colored btn-flat text-uppercase 
-                            border-left-theme-color-2-4px">
+                                border-left-theme-color-2-4px">
                                 Book My Test
                             </button>
                         </form>

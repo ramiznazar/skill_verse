@@ -229,7 +229,7 @@ unset($__errorArgs, $__bag); ?>
                                                     Yes
                                                 </option>
                                                 <option value="0"
-                                                    <?php echo e(old('discount_offer', $course->discount_offer) == 0 ? 'selected' : ''); ?> selected>
+                                                    <?php echo e(old('discount_offer', $course->discount_offer) == 0 ? 'selected' : ''); ?>>
                                                     No
                                                 </option>
                                             </select>

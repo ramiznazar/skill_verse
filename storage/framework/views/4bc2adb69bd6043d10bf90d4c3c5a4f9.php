@@ -10,10 +10,10 @@
                 <div class="section-content">
                     <div class="row">
                         <div class="col-md-12">
-                            <h2 class="title text-white">Test Booking Summary</h2>
+                            <h2 class="title text-white">Interview Booking Summary</h2>
                             <ol class="breadcrumb text-left text-black mt-10">
                                 <li><a href="<?php echo e(route('home')); ?>">Home</a></li>
-                                <li class="active text-gray-silver">Test Summary</li>
+                                <li class="active text-gray-silver">Interview Summary</li>
                             </ol>
                         </div>
                     </div>
@@ -118,7 +118,7 @@
                                 <div id="faq3" class="panel-collapse collapse">
                                     <div class="panel-content">
                                         <p>
-                                             No documents or notes are required.
+                                            No documents or notes are required.
                                         </p>
                                     </div>
                                 </div>

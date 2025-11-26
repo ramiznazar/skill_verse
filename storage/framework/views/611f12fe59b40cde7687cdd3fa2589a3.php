@@ -10,7 +10,7 @@
                 <div class="section-content">
                     <div class="row">
                         <div class="col-md-12">
-                            <h2 class="title text-white">Discount Interview Booking</h2>
+                            <h2 class="title text-white">Interview Booking</h2>
                             <ol class="breadcrumb text-left text-black mt-10">
                                 <li><a href="<?php echo e(route('home')); ?>">Home</a></li>
                                 <li class="active text-gray-silver">Interview Booking</li>
@@ -21,14 +21,88 @@
             </div>
         </section>
 
+        
+        <?php if($courses->count()): ?>
+            <section class="bg-lighter">
+                <div class="container pt-30 pb-10">
+                    <div class="row">
+                        <div class="col-md-12 text-center mb-20">
+                            
+                            <p class="text-muted">
+                                Book your interview today and lock these special limited-time fees.
+                            </p>
+
+                            <p class="text-muted mt-5" style="font-size:14px;">
+                                <span style="color:#ff5722; font-weight:600;">Sponsored by HMS Tech Solutions</span> —
+                                Empowering Digital Skills & IT Education.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <?php $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <?php
+                                $discAmount = $course->full_fee - $course->interview_discount_amount;
+                            ?>
+
+                            <div class="col-sm-6 col-md-4">
+                                <div class="border-1px bg-white mb-20 p-15 course-discount-card"
+                                    style="border-radius:6px; box-shadow:0 5px 15px rgba(0,0,0,0.05);">
+                                    <h4 class="mt-0 mb-5"><?php echo e($course->title); ?></h4>
+
+                                    <p class="mb-5 text-muted">
+                                        <small>Standard Fee</small><br>
+                                        <span style="text-decoration:line-through; color:#999;">
+                                            Rs <?php echo e(number_format($course->full_fee)); ?>
+
+                                        </span>
+                                    </p>
+
+                                    <p class="mb-5">
+                                        <small>Interview Discount</small><br>
+
+                                        <span class="badge" style="background:#ff9800; color:#fff;">
+                                            <?php echo e(number_format($course->interview_discount_per)); ?>%
+                                            OFF
+                                        </span>
+
+                                        <span class="text-theme-colored ml-5">
+                                            – Rs <?php echo e(number_format($discAmount)); ?>
+
+                                        </span>
+                                    </p>
+
+                                    <p class="mb-10">
+                                        <small>Interview Fee</small><br>
+                                        <span class="font-18 text-theme-colored font-weight-600">
+                                            Rs <?php echo e(number_format($course->interview_discount_amount)); ?>
+
+                                        </span>
+                                    </p>
+
+                                    
+
+                                    <p class="mb-0">
+                                        <small class="text-muted">
+                                            *Final fee will be confirmed at admission.
+                                        </small>
+                                    </p>
+                                </div>
+                            </div>
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                    </div>
+                </div>
+            </section>
+        <?php endif; ?>
+
         <!-- Section: Booking Form -->
         <section class="divider">
             <div class="container">
                 <div class="row pt-30">
                     <div class="col-md-12">
-                        
 
-                        <h3 class="line-bottom mt-0 mb-20">Register for 80% Discount Interview</h3>
+                        <h3 class="line-bottom mt-0 mb-20">Register for Interview & Unlock Your Discount</h3>
                         <p class="mb-20">
                             Fill out the form below to receive your interview date and time. Limited slots are available
                             each day, and if today is fully booked, you’ll be automatically scheduled for the next available
@@ -67,7 +141,22 @@
                                         <select name="course_id" class="form-control" required>
                                             <option value="">Select Course</option>
                                             <?php $__currentLoopData = $courses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $course): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                <option value="<?php echo e($course->id); ?>"><?php echo e($course->title); ?></option>
+                                                <?php
+                                                    $original = (float) ($course->min_fee ?? 0);
+                                                    $discAmount = (float) ($course->interview_discount_amount ?? 0);
+                                                    $final =
+                                                        $original > 0 && $discAmount > 0
+                                                            ? max($original - $discAmount, 0)
+                                                            : $original;
+                                                ?>
+                                                <option value="<?php echo e($course->id); ?>">
+                                                    <?php echo e($course->title); ?>
+
+                                                    <?php if($final > 0): ?>
+                                                        — Interview Fee: Rs <?php echo e(number_format($final)); ?>
+
+                                                    <?php endif; ?>
+                                                </option>
                                             <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                         </select>
                                     </div>
@@ -105,7 +194,6 @@ if (isset($__messageOriginal)) { $message = $__messageOriginal; }
 endif;
 unset($__errorArgs, $__bag); ?>
                                     </div>
-
                                 </div>
                             </div>
 
@@ -116,7 +204,7 @@ unset($__errorArgs, $__bag); ?>
 
                             <button type="submit"
                                 class="btn btn-theme-colored btn-flat text-uppercase 
-                            border-left-theme-color-2-4px">
+                                border-left-theme-color-2-4px">
                                 Book My Test
                             </button>
                         </form>

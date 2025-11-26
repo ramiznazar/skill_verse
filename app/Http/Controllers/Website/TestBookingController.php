@@ -15,6 +15,11 @@ class TestBookingController extends Controller
 {
     public function create()
     {
+        $setting = TestSetting::first(); // your table is interview_settings now
+        if (!$setting->is_booking_open) {
+            return view('website.pages.test.booking-close');
+        }
+
         // $courses = Course::all();
         $courses = Course::where('discount_offer', 1)
             ->where('is_active', 1)
