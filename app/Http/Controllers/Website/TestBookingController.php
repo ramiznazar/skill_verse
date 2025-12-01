@@ -63,35 +63,54 @@ class TestBookingController extends Controller
         $request->validate([
             'name' => 'required|string',
             'email' => 'required|email',
-            'phone' => 'required|string',
+            'phone' => ['required', 'regex:/^(03[0-9]{9}|[+]92[0-9]{10})$/'],
             'course_id' => 'required|exists:courses,id',
             'slot' => 'required',
+        ], [
+            'phone.regex' => 'Invalid phone number format. Use 03XXXXXXXXX or +92XXXXXXXXXX.',
         ]);
 
-        // Split slot value
+
+        // -------------- CHECK IF USER ALREADY HAS UPCOMING BOOKING ----------------
+        $existing = TestBooking::where('email', $request->email)
+            ->orderByDesc('id')
+            ->first();
+
+        if ($existing) {
+
+            $existingDateTime = \Carbon\Carbon::parse($existing->test_date . ' ' . $existing->slot_time);
+            $now = \Carbon\Carbon::now();
+
+            if ($existingDateTime->gt($now) && !in_array($existing->status, ['cancelled', 'absent'])) {
+                return back()->withErrors([
+                    'email' =>
+                    "You already have an upcoming interview scheduled on " .
+                        $existingDateTime->format('d M Y h:i A') .
+                        ". Please attend your interview first before applying again."
+                ])->withInput();
+            }
+        }
+
+
+        // ---------- PROCESS SLOT ----------
         [$dayId, $slotTime] = explode('|', $request->slot);
 
         $day = TestDay::findOrFail($dayId);
         $slots = json_decode($day->slots, true);
 
-        // Find selected slot
         foreach ($slots as $index => $slot) {
             if ($slot['time'] === $slotTime) {
-
-                // Check if available
                 if ($slot['booked'] >= $slot['capacity']) {
                     return back()->withErrors(['slot' => 'This slot is fully booked now.']);
                 }
-                // Increase booked
                 $slots[$index]['booked']++;
             }
         }
 
-        // Save updated JSON
         $day->slots = json_encode($slots);
         $day->save();
 
-        // Create booking
+        // ---------- CREATE BOOKING ----------
         $booking = TestBooking::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -99,14 +118,14 @@ class TestBookingController extends Controller
             'course_id' => $request->course_id,
             'test_day_id' => $dayId,
             'test_date' => $day->test_date,
-            'slot_time' => $slotTime, // NEW FIELD
+            'slot_time' => $slotTime,
             'purpose' => $request->purpose,
             'status' => 'pending',
         ]);
-        // session(['last_booking_id' => $booking->id]);
 
         return redirect()->route('test.booking.summary', $booking->id);
     }
+
 
     public function summary($id)
     {

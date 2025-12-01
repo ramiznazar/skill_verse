@@ -188,7 +188,6 @@
                                                     </span>
                                                 </td>
 
-
                                                 <!-- Actions -->
                                                 <td>
                                                     <!-- View -->

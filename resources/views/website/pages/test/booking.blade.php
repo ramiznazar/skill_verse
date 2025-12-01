@@ -21,7 +21,6 @@
             </div>
         </section>
 
-        {{-- 🔥 Trending Discount Courses strip --}}
         @if ($courses->count())
             <section class="bg-lighter">
                 <div class="container pt-30 pb-10">
@@ -73,21 +72,11 @@
                                         </span>
                                     </p>
 
-                                    <p class="mb-10">
-                                        <small>Interview Fee</small><br>
-                                        <span class="font-18 text-theme-colored font-weight-600">
+                                    <p class="mb-0">
+                                        <small class="text-muted">Final Fee After Discount</small><br>
+                                        <span class="font-20 text-theme-colored font-weight-700">
                                             Rs {{ number_format($course->interview_discount_amount) }}
                                         </span>
-                                    </p>
-
-                                    {{-- <p class="text-muted mb-10">
-                                            <small>No special interview discount configured.</small>
-                                        </p> --}}
-
-                                    <p class="mb-0">
-                                        <small class="text-muted">
-                                            *Final fee will be confirmed at admission.
-                                        </small>
                                     </p>
                                 </div>
                             </div>
@@ -109,6 +98,19 @@
                             each day, and if today is fully booked, you’ll be automatically scheduled for the next available
                             day.
                         </p>
+
+                        {{-- Show Error Messages (Professional Alert) --}}
+                        @if ($errors->any())
+                            <div class="alert alert-danger"
+                                style="border-radius:6px; padding:15px 20px; font-size:15px; 
+                background:#ffe5e5; border-left:5px solid #d9534f; color:#a94442;">
+                                <strong style="font-size:16px;">⚠️ Please Note:</strong><br>
+
+                                @foreach ($errors->all() as $error)
+                                    <span style="display:block; margin-top:5px;">{{ $error }}</span>
+                                @endforeach
+                            </div>
+                        @endif
 
                         <form action="{{ route('test.booking.store') }}" method="POST">
                             @csrf
@@ -142,19 +144,8 @@
                                         <select name="course_id" class="form-control" required>
                                             <option value="">Select Course</option>
                                             @foreach ($courses as $course)
-                                                @php
-                                                    $original = (float) ($course->min_fee ?? 0);
-                                                    $discAmount = (float) ($course->interview_discount_amount ?? 0);
-                                                    $final =
-                                                        $original > 0 && $discAmount > 0
-                                                            ? max($original - $discAmount, 0)
-                                                            : $original;
-                                                @endphp
                                                 <option value="{{ $course->id }}">
                                                     {{ $course->title }}
-                                                    @if ($final > 0)
-                                                        — Interview Fee: Rs {{ number_format($final) }}
-                                                    @endif
                                                 </option>
                                             @endforeach
                                         </select>

@@ -2,7 +2,6 @@
 
 @section('content')
     <div id="main-content">
-
         <!-- Header -->
         <div class="block-header">
             <div class="row clearfix">
@@ -180,7 +179,6 @@
                                                         {{ ucfirst($item->result_status) }}
                                                     </span>
                                                 </td>
-
 
                                                 <!-- Actions -->
                                                 <td>
