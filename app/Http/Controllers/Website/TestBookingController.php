@@ -15,47 +15,29 @@ class TestBookingController extends Controller
 {
     public function create()
     {
-        $setting = TestSetting::first(); // your table is interview_settings now
+        $setting = TestSetting::first();
         if (!$setting->is_booking_open) {
             return view('website.pages.test.booking-close');
         }
 
-        // $courses = Course::all();
         $courses = Course::where('discount_offer', 1)
             ->where('is_active', 1)
             ->get();
 
         $today = Carbon::today();
 
-        // Get all future open days
+        // Only show open future days
         $days = TestDay::where('is_open', 1)
-            ->whereDate('test_date', '>=', $today)
+            ->when($setting->booking_start_date, function ($q) use ($setting) {
+                $q->whereDate('test_date', '>=', $setting->booking_start_date);
+            })
+            ->when($setting->booking_end_date, function ($q) use ($setting) {
+                $q->whereDate('test_date', '<=', $setting->booking_end_date);
+            })
             ->orderBy('test_date')
             ->get();
 
-        $slots = [];
-        // dd($days);
-        foreach ($days as $day) {
-
-            $daySlots = json_decode($day->slots, true);
-
-            if (empty($daySlots) || !is_array($daySlots)) {
-                continue;
-            }
-
-            foreach ($daySlots as $slot) {
-                if ($slot['booked'] < $slot['capacity']) {
-                    $slots[] = [
-                        'id'        => $day->id,
-                        'date'      => $day->test_date,
-                        'time'      => $slot['time'],
-                        'available' => $slot['capacity'] - $slot['booked'],
-                    ];
-                }
-            }
-        }
-
-        return view('website.pages.test.booking', compact('courses', 'slots'));
+        return view('website.pages.test.booking', compact('courses', 'days'));
     }
 
     public function store(Request $request)
@@ -136,5 +118,35 @@ class TestBookingController extends Controller
         $time = $booking->slot_time;
 
         return view('website.pages.test.summary', compact('booking', 'name', 'date', 'time'));
+    }
+
+    public function getSlots($dayId)
+    {
+        $day = TestDay::find($dayId);
+
+        if (!$day || !$day->is_open) {
+            return response()->json([
+                'slots' => []
+            ]);
+        }
+
+        $slots = [];
+        $daySlots = json_decode($day->slots, true);
+
+        if (!empty($daySlots)) {
+            foreach ($daySlots as $slot) {
+                if ($slot['booked'] < $slot['capacity']) {
+                    $slots[] = [
+                        'time'      => $slot['time'],
+                        'available' => $slot['capacity'] - $slot['booked'],
+                    ];
+                }
+            }
+        }
+
+        return response()->json([
+            'date' => $day->test_date,
+            'slots' => $slots
+        ]);
     }
 }

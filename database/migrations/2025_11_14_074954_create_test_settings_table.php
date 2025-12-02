@@ -14,23 +14,13 @@ return new class extends Migration
     {
         Schema::create('test_settings', function (Blueprint $table) {
             $table->id();
-
-            // Is booking system ON/OFF?
             $table->boolean('is_booking_open')->default(true);
-
-            // Maximum days ahead student can book (example: 15 days)
             $table->integer('max_days_ahead')->default(15);
-
-            // Daily interview start time (for example 10:00 AM)
             $table->time('daily_start_time')->default('10:00');
-
-            // Daily interview end time (for example 04:00 PM)
             $table->time('daily_end_time')->default('16:00');
-
-            // Duration for each interview slot (in minutes)
+            $table->date('booking_start_date')->nullable();
+            $table->date('booking_end_date')->nullable();
             $table->integer('slot_duration_minutes')->default(60);
-
-            // How many students per slot
             $table->integer('slot_capacity')->default(5);
 
             $table->string('admin_note')->nullable();
@@ -47,6 +37,8 @@ return new class extends Migration
             'slot_duration_minutes'  => 60,
             'slot_capacity'          => 5,
             'admin_note'             => null,
+            'booking_start_date' => now()->toDateString(),
+            'booking_end_date'   => now()->addDays(15)->toDateString(),
         ]);
     }
 

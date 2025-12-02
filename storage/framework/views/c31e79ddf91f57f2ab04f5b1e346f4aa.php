@@ -57,6 +57,19 @@
                                     </div>
 
                                 </div>
+                                <div class="row mt-3">
+                                    <div class="col-md-6">
+                                        <label>Booking Start Date</label>
+                                        <input type="date" name="booking_start_date" class="form-control"
+                                            value="<?php echo e($settings->booking_start_date); ?>" required>
+                                    </div>
+
+                                    <div class="col-md-6">
+                                        <label>Booking End Date</label>
+                                        <input type="date" name="booking_end_date" class="form-control"
+                                            value="<?php echo e($settings->booking_end_date); ?>" required>
+                                    </div>
+                                </div>
 
                                 <hr>
 

@@ -22,6 +22,8 @@
 <script src="<?php echo e(asset('assets/admin/vendor/sweetalert/sweetalert.min.js')); ?>"></script>
 <script src="<?php echo e(asset('assets/admin/bundles/mainscripts.bundle.js')); ?>"></script>
 <script src="<?php echo e(asset('assets/admin/js/pages/tables/jquery-datatable.js')); ?>"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {

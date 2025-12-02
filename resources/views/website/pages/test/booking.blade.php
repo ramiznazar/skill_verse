@@ -156,19 +156,24 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <label>Select Interview Slot</label>
-                                        <select name="slot" class="form-control" required>
-                                            <option value="">Select date & time</option>
+                                        <label>Select Interview Date</label>
+                                        <select id="test_date" class="form-control" required>
+                                            <option value="">Select a date</option>
 
-                                            @forelse ($slots as $slot)
-                                                <option value="{{ $slot['id'] }}|{{ $slot['time'] }}">
-                                                    {{ \Carbon\Carbon::parse($slot['date'])->format('d M Y') }}
-                                                    — {{ \Carbon\Carbon::parse($slot['time'])->format('h:i A') }}
-                                                    ({{ $slot['available'] }} seats left)
+                                            @foreach ($days as $day)
+                                                <option value="{{ $day->id }}">
+                                                    {{ \Carbon\Carbon::parse($day->test_date)->format('d M Y') }}
                                                 </option>
-                                            @empty
-                                                <option value="">No interview slots available</option>
-                                            @endforelse
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12" id="slot_container" style="display: none;">
+                                    <div class="form-group">
+                                        <label>Select Time Slot</label>
+                                        <select name="slot" id="slot" class="form-control" required>
+                                            <option value="">Select a date first</option>
                                         </select>
 
                                         @error('slot')
@@ -177,6 +182,7 @@
                                     </div>
                                 </div>
                             </div>
+
 
                             <div class="form-group">
                                 <textarea name="purpose" class="form-control required" rows="5"
@@ -195,4 +201,48 @@
             </div>
         </section>
     </div>
+@endsection
+@section('additional-javascript')
+    <script>
+        document.getElementById('test_date').addEventListener('change', function() {
+
+            let dayId = this.value;
+            let slotDropdown = document.getElementById('slot');
+            let slotContainer = document.getElementById('slot_container');
+
+            // Always hide first
+            slotContainer.style.display = "none";
+            slotDropdown.innerHTML = '<option>Loading...</option>';
+
+            if (!dayId) {
+                slotDropdown.innerHTML = '<option>Select a date first</option>';
+                return;
+            }
+
+            fetch("{{ url('/test/get-slots') }}/" + dayId)
+                .then(response => response.json())
+                .then(res => {
+
+                    // Show slot dropdown now
+                    slotContainer.style.display = "block";
+
+                    slotDropdown.innerHTML = '';
+
+                    if (res.slots.length === 0) {
+                        slotDropdown.innerHTML = '<option value="">No slots available</option>';
+                        return;
+                    }
+
+                    slotDropdown.innerHTML = `<option value="">Select Time Slot</option>`;
+
+                    res.slots.forEach(slot => {
+                        slotDropdown.innerHTML += `
+                        <option value="${dayId}|${slot.time}">
+                            ${slot.time} (${slot.available} seats left)
+                        </option>
+                    `;
+                    });
+                });
+        });
+    </script>
 @endsection

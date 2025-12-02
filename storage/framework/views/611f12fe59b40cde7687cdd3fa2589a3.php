@@ -158,21 +158,25 @@
                             <div class="row">
                                 <div class="col-md-12">
                                     <div class="form-group">
-                                        <label>Select Interview Slot</label>
-                                        <select name="slot" class="form-control" required>
-                                            <option value="">Select date & time</option>
+                                        <label>Select Interview Date</label>
+                                        <select id="test_date" class="form-control" required>
+                                            <option value="">Select a date</option>
 
-                                            <?php $__empty_1 = true; $__currentLoopData = $slots; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $slot): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); $__empty_1 = false; ?>
-                                                <option value="<?php echo e($slot['id']); ?>|<?php echo e($slot['time']); ?>">
-                                                    <?php echo e(\Carbon\Carbon::parse($slot['date'])->format('d M Y')); ?>
+                                            <?php $__currentLoopData = $days; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $day): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <option value="<?php echo e($day->id); ?>">
+                                                    <?php echo e(\Carbon\Carbon::parse($day->test_date)->format('d M Y')); ?>
 
-                                                    — <?php echo e(\Carbon\Carbon::parse($slot['time'])->format('h:i A')); ?>
-
-                                                    (<?php echo e($slot['available']); ?> seats left)
                                                 </option>
-                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); if ($__empty_1): ?>
-                                                <option value="">No interview slots available</option>
-                                            <?php endif; ?>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-12" id="slot_container" style="display: none;">
+                                    <div class="form-group">
+                                        <label>Select Time Slot</label>
+                                        <select name="slot" id="slot" class="form-control" required>
+                                            <option value="">Select a date first</option>
                                         </select>
 
                                         <?php $__errorArgs = ['slot'];
@@ -188,6 +192,7 @@ unset($__errorArgs, $__bag); ?>
                                     </div>
                                 </div>
                             </div>
+
 
                             <div class="form-group">
                                 <textarea name="purpose" class="form-control required" rows="5"
@@ -206,6 +211,50 @@ unset($__errorArgs, $__bag); ?>
             </div>
         </section>
     </div>
+<?php $__env->stopSection(); ?>
+<?php $__env->startSection('additional-javascript'); ?>
+    <script>
+        document.getElementById('test_date').addEventListener('change', function() {
+
+            let dayId = this.value;
+            let slotDropdown = document.getElementById('slot');
+            let slotContainer = document.getElementById('slot_container');
+
+            // Always hide first
+            slotContainer.style.display = "none";
+            slotDropdown.innerHTML = '<option>Loading...</option>';
+
+            if (!dayId) {
+                slotDropdown.innerHTML = '<option>Select a date first</option>';
+                return;
+            }
+
+            fetch("<?php echo e(url('/test/get-slots')); ?>/" + dayId)
+                .then(response => response.json())
+                .then(res => {
+
+                    // Show slot dropdown now
+                    slotContainer.style.display = "block";
+
+                    slotDropdown.innerHTML = '';
+
+                    if (res.slots.length === 0) {
+                        slotDropdown.innerHTML = '<option value="">No slots available</option>';
+                        return;
+                    }
+
+                    slotDropdown.innerHTML = `<option value="">Select Time Slot</option>`;
+
+                    res.slots.forEach(slot => {
+                        slotDropdown.innerHTML += `
+                        <option value="${dayId}|${slot.time}">
+                            ${slot.time} (${slot.available} seats left)
+                        </option>
+                    `;
+                    });
+                });
+        });
+    </script>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('website.layouts.main', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?><?php /**PATH E:\projects\codezy\zain-changes\codezy\resources\views/website/pages/test/booking.blade.php ENDPATH**/ ?>

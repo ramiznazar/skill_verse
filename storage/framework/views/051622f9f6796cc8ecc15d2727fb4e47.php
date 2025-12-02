@@ -2,7 +2,6 @@
 
 <?php $__env->startSection('content'); ?>
     <div id="main-content">
-
         <!-- Header -->
         <div class="block-header">
             <div class="row clearfix">

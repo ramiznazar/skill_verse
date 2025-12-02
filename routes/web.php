@@ -85,6 +85,8 @@ Route::post('/user/message', [ContactController::class, 'userMessage'])->name('u
 Route::get('/book-interview', [TestBookingController::class, 'create'])->name('test.booking');
 Route::post('/book-interview', [TestBookingController::class, 'store'])->name('test.booking.store');
 Route::get('/test-booking-summary/{id}', [TestBookingController::class, 'summary'])->name('test.booking.summary');
+Route::get('/test/get-slots/{dayId}', [TestBookingController::class, 'getSlots'])->name('test.get.slots');
+
 
 
 /*
