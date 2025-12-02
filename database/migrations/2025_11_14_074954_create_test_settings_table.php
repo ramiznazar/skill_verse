@@ -18,8 +18,6 @@ return new class extends Migration
             $table->integer('max_days_ahead')->default(15);
             $table->time('daily_start_time')->default('10:00');
             $table->time('daily_end_time')->default('16:00');
-            $table->date('booking_start_date')->nullable();
-            $table->date('booking_end_date')->nullable();
             $table->integer('slot_duration_minutes')->default(60);
             $table->integer('slot_capacity')->default(5);
 
@@ -37,8 +35,6 @@ return new class extends Migration
             'slot_duration_minutes'  => 60,
             'slot_capacity'          => 5,
             'admin_note'             => null,
-            'booking_start_date' => now()->toDateString(),
-            'booking_end_date'   => now()->addDays(15)->toDateString(),
         ]);
     }
 
