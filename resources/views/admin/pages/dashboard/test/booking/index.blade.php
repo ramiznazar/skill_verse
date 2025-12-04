@@ -426,6 +426,7 @@
 
         // CONFIRM PASS (Assign Batch)
         $(document).on('click', '.js-confirm-pass', function() {
+
             let bookingId = $('#passBookingId').val();
             let batchId = $(this).data('batch');
 
@@ -440,35 +441,37 @@
 
                 success: function(response) {
 
-                    // Close the modal
                     $('#passModal').modal('hide');
 
-                    // Find booking row from table
                     let row = $('button.js-open-pass-modal[data-id="' + bookingId + '"]').closest('tr');
 
-                    // Update PASS badge instantly
+                    // Replace PASS badge
                     row.find('.result-badge').html(`
                 <span class="badge badge-success">Pass</span>
             `);
 
-                    // Disable Pass & Fail buttons
+                    // Disable pass/fail buttons
                     row.find('.js-open-pass-modal').prop('disabled', true);
                     row.find('.js-mark-result[data-result="fail"]').prop('disabled', true);
 
-                    // If email failed (backend returned "email_failed")
-                    if (response.email_status === "failed") {
-                        alert("Student marked PASS, but email was NOT sent.");
-                    } else {
-                        alert("Student marked PASS and assigned to batch successfully.");
+                    // Add Move to Admission (if not added)
+                    if (!row.find('.btn-move-admission').length) {
+                        row.find('td:last').append(`
+                    <a href="/admin/admission/create?booking_id=${bookingId}"
+                       class="btn btn-info btn-sm btn-move-admission ml-1">
+                       Move to Admission
+                    </a>
+                `);
                     }
+
+                    alert("PASS assigned successfully.");
                 },
 
                 error: function(xhr) {
-                    console.log(xhr.responseText); // see real error in console
-                    alert("Server returned an error: " + xhr.status);
+                    alert("Error: " + xhr.responseJSON.message);
                 }
-
             });
+
         });
     </script>
 @endsection

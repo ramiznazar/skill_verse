@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\TestBooking;
 use Illuminate\Http\Request;
 use App\Mail\StudentPassMail;
+use App\Jobs\SendPassEmailJob;
 use Illuminate\Support\Facades\Log;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Mail;
@@ -102,47 +103,43 @@ class TestBookingController extends Controller
             'status' => $request->result
         ]);
     }
+
     public function confirmPass(Request $request)
     {
         try {
             $request->validate([
                 'booking_id' => 'required|exists:test_bookings,id',
-                'batch_id' => 'required|exists:batches,id',
+                'batch_id'   => 'required|exists:batches,id',
             ]);
 
             $booking = TestBooking::findOrFail($request->booking_id);
             $batch   = Batch::findOrFail($request->batch_id);
 
-            // Batch capacity check
-            $assigned = TestBooking::where('batch_id', $batch->id)->count();
-            if ($assigned >= $batch->capacity) {
+            // Check capacity
+            $assignedCount = TestBooking::where('batch_id', $batch->id)->count();
+            if ($assignedCount >= $batch->capacity) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Batch is full'
                 ], 422);
             }
 
-            // Assign batch + pass
-            $booking->result_status = 'pass';
-            $booking->batch_id = $batch->id;
-            $booking->attendance_status = 'attended';
-            $booking->save();
+            // Update booking
+            $booking->update([
+                'result_status'     => 'pass',
+                'batch_id'          => $batch->id,
+                'attendance_status' => 'attended',
+            ]);
 
-            // EMAIL TRY...
-            $emailStatus = "sent";
-
-            try {
-                if ($booking->email) {
-                    Mail::to($booking->email)->send(new StudentPassMail($booking, $batch));
-                }
-            } catch (\Exception $e) {
-                $emailStatus = "failed";
+            // ⭐ Send email directly (NO JOB)
+            if ($booking->email) {
+                Mail::to($booking->email)->send(new StudentPassMail($booking, $batch));
             }
 
-            // VERY IMPORTANT → ALWAYS PURE JSON
             return response()->json([
                 'success' => true,
-                'email_status' => $emailStatus
+                'message' => "PASS assigned successfully.",
+                'booking_id' => $booking->id
             ]);
         } catch (\Exception $e) {
             return response()->json([

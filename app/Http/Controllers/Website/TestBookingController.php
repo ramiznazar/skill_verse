@@ -16,6 +16,7 @@ class TestBookingController extends Controller
     public function create()
     {
         $setting = TestSetting::first();
+
         if (!$setting->is_booking_open) {
             return view('website.pages.test.booking-close');
         }
@@ -26,8 +27,9 @@ class TestBookingController extends Controller
 
         $today = Carbon::today();
 
-        // Only show open future days
+        // Only show upcoming open days
         $days = TestDay::where('is_open', 1)
+            ->whereDate('test_date', '>=', $today) // ⭐ Block past dates
             ->when($setting->booking_start_date, function ($q) use ($setting) {
                 $q->whereDate('test_date', '>=', $setting->booking_start_date);
             })
