@@ -204,8 +204,41 @@
 @endsection
 @section('additional-javascript')
     <script>
-        document.getElementById('test_date').addEventListener('change', function() {
+        // Cache to store pre-fetched slots
+        let slotsCache = {};
+        let isLoadingSlots = false;
 
+        // Pre-fetch all slots when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const dayIds = [
+                @foreach ($days as $day)
+                    {{ $day->id }}{{ !$loop->last ? ',' : '' }}
+                @endforeach
+            ];
+
+            // Fetch slots for all days in parallel
+            if (dayIds.length > 0) {
+                isLoadingSlots = true;
+                const fetchPromises = dayIds.map(dayId => 
+                    fetch("{{ url('/test/get-slots') }}/" + dayId)
+                        .then(response => response.json())
+                        .then(res => {
+                            slotsCache[dayId] = res.slots;
+                        })
+                        .catch(error => {
+                            console.error('Error fetching slots for day ' + dayId + ':', error);
+                            slotsCache[dayId] = [];
+                        })
+                );
+
+                Promise.all(fetchPromises).then(() => {
+                    isLoadingSlots = false;
+                });
+            }
+        });
+
+        // Handle date selection change
+        document.getElementById('test_date').addEventListener('change', function() {
             let dayId = this.value;
             let slotDropdown = document.getElementById('slot');
             let slotContainer = document.getElementById('slot_container');
@@ -219,30 +252,61 @@
                 return;
             }
 
+            // Check if slots are cached
+            if (slotsCache[dayId] !== undefined) {
+                // Use cached slots immediately
+                displaySlots(dayId, slotsCache[dayId], slotDropdown, slotContainer);
+            } else if (isLoadingSlots) {
+                // If still loading, wait a bit and check again
+                setTimeout(function() {
+                    if (slotsCache[dayId] !== undefined) {
+                        displaySlots(dayId, slotsCache[dayId], slotDropdown, slotContainer);
+                    } else {
+                        // Fallback: fetch if not in cache
+                        fetchSlots(dayId, slotDropdown, slotContainer);
+                    }
+                }, 100);
+            } else {
+                // Fallback: fetch if not in cache
+                fetchSlots(dayId, slotDropdown, slotContainer);
+            }
+        });
+
+        // Function to display slots
+        function displaySlots(dayId, slots, slotDropdown, slotContainer) {
+            slotContainer.style.display = "block";
+            slotDropdown.innerHTML = '';
+
+            if (slots.length === 0) {
+                slotDropdown.innerHTML = '<option value="">No slots available</option>';
+                return;
+            }
+
+            slotDropdown.innerHTML = `<option value="">Select Time Slot</option>`;
+
+            slots.forEach(slot => {
+                slotDropdown.innerHTML += `
+                    <option value="${dayId}|${slot.time}">
+                        ${slot.time} (${slot.available} seats left)
+                    </option>
+                `;
+            });
+        }
+
+        // Fallback function to fetch slots if not cached
+        function fetchSlots(dayId, slotDropdown, slotContainer) {
             fetch("{{ url('/test/get-slots') }}/" + dayId)
                 .then(response => response.json())
                 .then(res => {
-
-                    // Show slot dropdown now
+                    // Cache the result
+                    slotsCache[dayId] = res.slots;
+                    displaySlots(dayId, res.slots, slotDropdown, slotContainer);
+                })
+                .catch(error => {
+                    console.error('Error fetching slots:', error);
                     slotContainer.style.display = "block";
-
-                    slotDropdown.innerHTML = '';
-
-                    if (res.slots.length === 0) {
-                        slotDropdown.innerHTML = '<option value="">No slots available</option>';
-                        return;
-                    }
-
-                    slotDropdown.innerHTML = `<option value="">Select Time Slot</option>`;
-
-                    res.slots.forEach(slot => {
-                        slotDropdown.innerHTML += `
-                        <option value="${dayId}|${slot.time}">
-                            ${slot.time} (${slot.available} seats left)
-                        </option>
-                    `;
-                    });
+                    slotDropdown.innerHTML = '<option value="">Error loading slots</option>';
                 });
-        });
+        }
     </script>
 @endsection
