@@ -62,8 +62,8 @@ class TestBookingController extends Controller
 
         if ($existing) {
 
-            $existingDateTime = \Carbon\Carbon::parse($existing->test_date . ' ' . $existing->slot_time);
-            $now = \Carbon\Carbon::now();
+            $existingDateTime = Carbon::parse($existing->test_date . ' ' . $existing->slot_time);
+            $now = Carbon::now();
 
             if ($existingDateTime->gt($now) && !in_array($existing->status, ['cancelled', 'absent'])) {
                 return back()->withErrors([
@@ -132,17 +132,46 @@ class TestBookingController extends Controller
             ]);
         }
 
+        $now = Carbon::now();
+        $today = Carbon::today();
+        $testDate = Carbon::parse($day->test_date);
+        $isToday = $testDate->isSameDay($today);
+        $isPast = $testDate->lt($today);
+
+        // If the date is in the past, return empty slots
+        if ($isPast) {
+            return response()->json([
+                'date' => $day->test_date,
+                'slots' => []
+            ]);
+        }
+
         $slots = [];
         $daySlots = json_decode($day->slots, true);
 
         if (!empty($daySlots)) {
             foreach ($daySlots as $slot) {
-                if ($slot['booked'] < $slot['capacity']) {
-                    $slots[] = [
-                        'time'      => $slot['time'],
-                        'available' => $slot['capacity'] - $slot['booked'],
-                    ];
+                // Check if slot is not fully booked
+                if ($slot['booked'] >= $slot['capacity']) {
+                    continue;
                 }
+
+                // Filter out past time slots (for today or any past date)
+                $slotDateTime = Carbon::parse($day->test_date . ' ' . $slot['time']);
+                
+                // Skip if slot time has passed
+                if ($slotDateTime->lt($now)) {
+                    continue;
+                }
+
+                // Convert 24-hour format to 12-hour format with AM/PM
+                $time12Hour = Carbon::createFromFormat('H:i', $slot['time'])->format('h:i A');
+
+                $slots[] = [
+                    'time'      => $slot['time'], // Keep original 24-hour format for backend processing
+                    'time_display' => $time12Hour, // 12-hour format for display
+                    'available' => $slot['capacity'] - $slot['booked'],
+                ];
             }
         }
 

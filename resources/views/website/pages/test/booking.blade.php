@@ -204,9 +204,44 @@
 @endsection
 @section('additional-javascript')
     <script>
-        // Cache to store pre-fetched slots
+        // Cache to store pre-fetched slots with dates
         let slotsCache = {};
         let isLoadingSlots = false;
+
+        // Store day IDs and their dates for quick lookup
+        const dayDates = {
+            @foreach ($days as $day)
+                {{ $day->id }}: "{{ $day->test_date }}"{{ !$loop->last ? ',' : '' }}
+            @endforeach
+        };
+
+        // Function to check if a slot time has passed
+        function isSlotTimePassed(testDate, slotTime) {
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            
+            // Parse the test date (format: YYYY-MM-DD)
+            const [year, month, day] = testDate.split('-').map(Number);
+            const slotDate = new Date(year, month - 1, day);
+            
+            // If the test date is in the future, slot hasn't passed
+            if (slotDate > today) {
+                return false;
+            }
+            
+            // If the test date is today, check the time
+            if (slotDate.getTime() === today.getTime()) {
+                // Parse slot time (format: HH:MM)
+                const [hours, minutes] = slotTime.split(':').map(Number);
+                const slotDateTime = new Date(year, month - 1, day, hours, minutes);
+                
+                // Check if slot time has passed
+                return slotDateTime < now;
+            }
+            
+            // If the test date is in the past, slot has passed
+            return true;
+        }
 
         // Pre-fetch all slots when page loads
         document.addEventListener('DOMContentLoaded', function() {
@@ -223,11 +258,17 @@
                     fetch("{{ url('/test/get-slots') }}/" + dayId)
                         .then(response => response.json())
                         .then(res => {
-                            slotsCache[dayId] = res.slots;
+                            slotsCache[dayId] = {
+                                date: res.date,
+                                slots: res.slots
+                            };
                         })
                         .catch(error => {
                             console.error('Error fetching slots for day ' + dayId + ':', error);
-                            slotsCache[dayId] = [];
+                            slotsCache[dayId] = {
+                                date: dayDates[dayId] || '',
+                                slots: []
+                            };
                         })
                 );
 
@@ -252,15 +293,29 @@
                 return;
             }
 
+            // Get the selected date to check if it's today
+            const selectedDate = dayDates[dayId];
+            const today = new Date();
+            const todayStr = today.getFullYear() + '-' + 
+                           String(today.getMonth() + 1).padStart(2, '0') + '-' + 
+                           String(today.getDate()).padStart(2, '0');
+            const isToday = selectedDate === todayStr;
+
+            // Always refresh slots for today's date to ensure we have latest data
+            if (isToday) {
+                fetchSlots(dayId, slotDropdown, slotContainer);
+                return;
+            }
+
             // Check if slots are cached
             if (slotsCache[dayId] !== undefined) {
                 // Use cached slots immediately
-                displaySlots(dayId, slotsCache[dayId], slotDropdown, slotContainer);
+                displaySlots(dayId, slotsCache[dayId].slots, slotsCache[dayId].date, slotDropdown, slotContainer);
             } else if (isLoadingSlots) {
                 // If still loading, wait a bit and check again
                 setTimeout(function() {
                     if (slotsCache[dayId] !== undefined) {
-                        displaySlots(dayId, slotsCache[dayId], slotDropdown, slotContainer);
+                        displaySlots(dayId, slotsCache[dayId].slots, slotsCache[dayId].date, slotDropdown, slotContainer);
                     } else {
                         // Fallback: fetch if not in cache
                         fetchSlots(dayId, slotDropdown, slotContainer);
@@ -272,22 +327,44 @@
             }
         });
 
-        // Function to display slots
-        function displaySlots(dayId, slots, slotDropdown, slotContainer) {
+        // Function to display slots (filtering out past slots)
+        function displaySlots(dayId, slots, testDate, slotDropdown, slotContainer) {
             slotContainer.style.display = "block";
             slotDropdown.innerHTML = '';
 
-            if (slots.length === 0) {
+            // Always filter past slots on frontend as well (double-check)
+            const now = new Date();
+            const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const [year, month, day] = testDate.split('-').map(Number);
+            const slotDate = new Date(year, month - 1, day);
+            const isToday = slotDate.getTime() === today.getTime();
+
+            const availableSlots = slots.filter(slot => {
+                // If not today, all slots are available
+                if (!isToday) {
+                    return true;
+                }
+                
+                // If today, check if slot time has passed
+                const [hours, minutes] = slot.time.split(':').map(Number);
+                const slotDateTime = new Date(year, month - 1, day, hours, minutes);
+                
+                return slotDateTime >= now;
+            });
+
+            if (availableSlots.length === 0) {
                 slotDropdown.innerHTML = '<option value="">No slots available</option>';
                 return;
             }
 
             slotDropdown.innerHTML = `<option value="">Select Time Slot</option>`;
 
-            slots.forEach(slot => {
+            availableSlots.forEach(slot => {
+                // Use time_display (AM/PM format) if available, otherwise fallback to time
+                const displayTime = slot.time_display || slot.time;
                 slotDropdown.innerHTML += `
                     <option value="${dayId}|${slot.time}">
-                        ${slot.time} (${slot.available} seats left)
+                        ${displayTime} (${slot.available} seats left)
                     </option>
                 `;
             });
@@ -299,8 +376,11 @@
                 .then(response => response.json())
                 .then(res => {
                     // Cache the result
-                    slotsCache[dayId] = res.slots;
-                    displaySlots(dayId, res.slots, slotDropdown, slotContainer);
+                    slotsCache[dayId] = {
+                        date: res.date,
+                        slots: res.slots
+                    };
+                    displaySlots(dayId, res.slots, res.date, slotDropdown, slotContainer);
                 })
                 .catch(error => {
                     console.error('Error fetching slots:', error);
