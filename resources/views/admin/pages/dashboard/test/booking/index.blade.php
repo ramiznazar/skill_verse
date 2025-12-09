@@ -142,7 +142,9 @@
 
                                                 <!-- Interview Date -->
                                                 <td>
-                                                    @if ($item->testDay)
+                                                    @if ($item->test_date)
+                                                        {{ \Carbon\Carbon::parse($item->test_date)->format('d M Y') }}
+                                                    @elseif ($item->testDay)
                                                         {{ \Carbon\Carbon::parse($item->testDay->test_date)->format('d M Y') }}
                                                     @else
                                                         <span class="text-muted">N/A</span>
@@ -151,8 +153,8 @@
 
                                                 <!-- Interview Time -->
                                                 <td>
-                                                    @if ($item->testDay)
-                                                        {{ \Carbon\Carbon::parse($item->testDay->test_start_time)->format('h:i A') }}
+                                                    @if ($item->slot_time)
+                                                        {{ \Carbon\Carbon::createFromFormat('H:i', $item->slot_time)->format('h:i A') }}
                                                     @else
                                                         <span class="text-muted">N/A</span>
                                                     @endif
