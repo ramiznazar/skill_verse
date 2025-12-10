@@ -167,11 +167,11 @@ class TestBookingController extends Controller
                 // Convert 24-hour format to 12-hour format with AM/PM
                 $time12Hour = Carbon::createFromFormat('H:i', $slot['time'])->format('h:i A');
 
-                $slots[] = [
+                    $slots[] = [
                     'time'      => $slot['time'], // Keep original 24-hour format for backend processing
                     'time_display' => $time12Hour, // 12-hour format for display
-                    'available' => $slot['capacity'] - $slot['booked'],
-                ];
+                        'available' => $slot['capacity'] - $slot['booked'],
+                    ];
             }
         }
 

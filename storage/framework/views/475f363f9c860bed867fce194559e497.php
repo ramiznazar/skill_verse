@@ -105,28 +105,23 @@
                     // Clean empty state
                     html += `
                         <li class="header">Notifications</li>
-                        <li class="text-center p-3 text-muted" style="font-style:italic;">
-                            <i class="fa fa-bell-slash" style="font-size:16px; margin-right:5px;"></i>
-                            No new notifications
+                        <li style="padding: 30px 20px; text-align: center; color: #6c757d;">
+                            <i class="fa fa-bell-slash" style="font-size: 24px; margin-bottom: 10px; display: block; opacity: 0.5;"></i>
+                            <span style="font-size: 14px;">No new notifications</span>
                         </li>
                     `;
                 } else {
-                    html += '<li class="header">You have ' + data.length + ' new Notifications</li>';
+                    html += '<li class="header">You have ' + data.length + ' new Notification' + (data.length > 1 ? 's' : '') + '</li>';
 
                     data.forEach(n => {
                         html += `
-                            <li id="notif-${n.id}" 
-                                style="border-bottom:1px solid #f1f1f1; padding:6px 10px; display:flex; align-items:center; justify-content:space-between;">
-                                
-                                <div style="flex:1; padding-right:8px;">
-                                    <div class="feeds-left"><i class="${n.icon ?? 'fa fa-bell'}"></i></div>
-                                    <div class="feeds-body">
-                                        <h4 class="title mb-0">${n.title}</h4>
-                                        <small class="text-muted">${n.message ?? ''}</small><br>
-                                        <small class="text-secondary">${formatDate(n.created_at)}</small>
-                                    </div>
+                            <li id="notif-${n.id}">
+                                <div class="feeds-left"><i class="${n.icon ?? 'fa fa-bell'}"></i></div>
+                                <div class="feeds-body">
+                                    <h4 class="title">${n.title}</h4>
+                                    ${n.message ? `<small>${n.message}</small>` : ''}
+                                    <small>${formatDate(n.created_at)}</small>
                                 </div>
-
                                 <input type="checkbox" onchange="markRead(${n.id})" title="Mark as read">
                             </li>
                         `;
@@ -187,6 +182,138 @@
 
     // Auto-load notifications when page is ready
     document.addEventListener("DOMContentLoaded", loadNotifications);
+</script>
+
+
+<script>
+    // Format date as Today / Yesterday / d M Y + time
+    function formatMessageDate(dateString) {
+        const date = new Date(dateString);
+        const today = new Date();
+        const yesterday = new Date();
+        yesterday.setDate(today.getDate() - 1);
+
+        const options = {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+        };
+
+        const isToday = date.toDateString() === today.toDateString();
+        const isYesterday = date.toDateString() === yesterday.toDateString();
+
+        if (isToday) return "Today at " + date.toLocaleTimeString('en-US', options);
+        if (isYesterday) return "Yesterday at " + date.toLocaleTimeString('en-US', options);
+
+        return date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric'
+            }) +
+            " at " + date.toLocaleTimeString('en-US', options);
+    }
+
+
+    // Load all unread messages into dropdown
+    function loadMessages() {
+        fetch("<?php echo e(route('messages.index')); ?>")
+            .then(res => res.json())
+            .then(data => {
+                let list = document.getElementById('messageList');
+                let dot = document.getElementById('messageDot');
+
+                // Show dot only if unread messages exist
+                dot.style.display = (data.length > 0) ? "inline-block" : "none";
+
+                let html = '';
+
+                if (data.length === 0) {
+                    // Clean empty state
+                    html += `
+                        <li class="header">Messages</li>
+                        <li class="text-center p-3 text-muted" style="font-style:italic;">
+                            <i class="fa fa-envelope-open" style="font-size:16px; margin-right:5px;"></i>
+                            No new messages
+                        </li>
+                    `;
+                } else {
+                    html += '<li class="header">You have ' + data.length + ' new Message' + (data.length > 1 ? 's' : '') + '</li>';
+
+                    data.forEach(m => {
+                        const icon = m.type === 'contact' ? 'fa fa-envelope' : 'fa fa-calendar-check';
+                        const timeAgo = formatMessageDate(m.created_at);
+                        const title = m.type === 'contact' ? `Contact: ${m.name || 'Unknown'}` : `Booking: ${m.name || 'Unknown'}`;
+                        const messageText = m.message || (m.type === 'booking' ? `Interview booking for ${m.course || 'course'}` : 'No message');
+                        const phoneInfo = m.phone ? ` | Phone: ${m.phone}` : '';
+
+                        html += `
+                            <li id="msg-${m.id}">
+                                <div class="feeds-left"><i class="${icon}"></i></div>
+                                <div class="feeds-body">
+                                    <h4 class="title">${title}</h4>
+                                    <small>${messageText}${phoneInfo}</small>
+                                    <small>${timeAgo}</small>
+                                </div>
+                                <input type="checkbox" onchange="markMessageRead('${m.id}')" title="Mark as read">
+                            </li>
+                        `;
+                    });
+
+                    // Footer link: mark all as read
+                    html += `
+                        <li class="footer text-center">
+                            <a href="javascript:void(0);" onclick="markAllMessagesRead()">Mark all as read</a>
+                        </li>
+                    `;
+                }
+
+                list.innerHTML = html;
+            })
+            .catch(err => console.error("Error loading messages:", err));
+    }
+
+    // Mark single message as read
+    function markMessageRead(id) {
+        fetch("<?php echo e(url('admin/messages')); ?>/" + id + "/read", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                },
+                body: JSON.stringify({})
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    document.getElementById("msg-" + id)?.remove();
+                    loadMessages();
+                }
+            })
+            .catch(err => console.error("Error marking message:", err));
+    }
+
+    // Mark all messages as read
+    function markAllMessagesRead() {
+        fetch("<?php echo e(route('messages.readAll')); ?>", {
+                method: "POST",
+                headers: {
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').getAttribute("content"),
+                    "Content-Type": "application/json",
+                    "Accept": "application/json"
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.success) {
+                    loadMessages();
+                }
+            })
+            .catch(err => console.error("Error marking all messages:", err));
+    }
+
+    // Auto-load messages when page is ready
+    document.addEventListener("DOMContentLoaded", loadMessages);
 </script>
 
 </body>

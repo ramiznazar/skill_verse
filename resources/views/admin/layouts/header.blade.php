@@ -46,6 +46,232 @@
         tr.shown td.details-control {
             background: url("{{ asset('assets/admin/images/details_close.png') }}") no-repeat center center;
         }
+
+        /* Notification Dropdown Styling */
+        #notificationList {
+            width: 360px !important;
+            max-height: 450px !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            padding: 0 !important;
+        }
+
+        #notificationList .header {
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        #notificationList li:not(.header):not(.footer) {
+            padding: 10px 15px !important;
+            border-bottom: 1px solid #f1f1f1 !important;
+            margin: 0 !important;
+            display: flex !important;
+            align-items: flex-start !important;
+            transition: background-color 0.2s ease;
+        }
+
+        #notificationList li:not(.header):not(.footer):hover {
+            background-color: #f8f9fa !important;
+        }
+
+        #notificationList li .feeds-left {
+            margin-right: 12px;
+            margin-top: 2px;
+            color: #007bff;
+        }
+
+        #notificationList li .feeds-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        #notificationList li .feeds-body .title {
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            margin-bottom: 4px !important;
+            color: #333;
+            line-height: 1.3;
+        }
+
+        #notificationList li .feeds-body small {
+            display: block;
+            font-size: 12px;
+            color: #6c757d;
+            line-height: 1.4;
+            margin-top: 2px;
+        }
+
+        #notificationList li input[type="checkbox"] {
+            margin-left: 10px;
+            margin-top: 2px;
+            cursor: pointer;
+        }
+
+        #notificationList .footer {
+            padding: 12px 20px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            text-align: center;
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+        }
+
+        #notificationList .footer a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        #notificationList .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Scrollbar styling for notification dropdown */
+        #notificationList::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #notificationList::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        #notificationList::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        #notificationList::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        @media screen and (max-width: 768px) {
+            #notificationList {
+                width: calc(100vw - 20px) !important;
+                max-width: 360px;
+            }
+        }
+
+        /* Message Dropdown Styling - Same as Notification */
+        #messageList {
+            width: 360px !important;
+            max-height: 450px !important;
+            overflow-y: auto !important;
+            overflow-x: hidden !important;
+            padding: 0 !important;
+        }
+
+        #messageList .header {
+            padding: 15px 20px;
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        #messageList li:not(.header):not(.footer) {
+            padding: 10px 15px !important;
+            border-bottom: 1px solid #f1f1f1 !important;
+            margin: 0 !important;
+            display: flex !important;
+            align-items: flex-start !important;
+            transition: background-color 0.2s ease;
+        }
+
+        #messageList li:not(.header):not(.footer):hover {
+            background-color: #f8f9fa !important;
+        }
+
+        #messageList li .feeds-left {
+            margin-right: 12px;
+            margin-top: 2px;
+            color: #007bff;
+        }
+
+        #messageList li .feeds-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        #messageList li .feeds-body .title {
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            margin-bottom: 4px !important;
+            color: #333;
+            line-height: 1.3;
+        }
+
+        #messageList li .feeds-body small {
+            display: block;
+            font-size: 12px;
+            color: #6c757d;
+            line-height: 1.4;
+            margin-top: 2px;
+        }
+
+        #messageList li input[type="checkbox"] {
+            margin-left: 10px;
+            margin-top: 2px;
+            cursor: pointer;
+        }
+
+        #messageList .footer {
+            padding: 12px 20px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            text-align: center;
+            position: sticky;
+            bottom: 0;
+            z-index: 10;
+        }
+
+        #messageList .footer a {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        #messageList .footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Scrollbar styling for message dropdown */
+        #messageList::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        #messageList::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        #messageList::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        #messageList::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        @media screen and (max-width: 768px) {
+            #messageList {
+                width: calc(100vw - 20px) !important;
+                max-width: 360px;
+            }
+        }
     </style>
 </head>
 
@@ -86,71 +312,14 @@
 
                     <div id="navbar-menu">
                         <ul class="nav navbar-nav">
+                            {{-- Message Icon (Contact & Booking) --}}
                             <li class="dropdown dropdown-animated scale-left">
                                 <a href="javascript:void(0);" class="dropdown-toggle icon-menu" data-toggle="dropdown">
                                     <i class="icon-envelope"></i>
-                                    <span class="notification-dot"></span>
+                                    <span class="notification-dot" id="messageDot" style="display:none;"></span>
                                 </a>
-                                <ul class="dropdown-menu right_chat email">
-                                    <li>
-                                        <a href="javascript:void(0);">
-                                            <div class="media">
-                                                <img class="media-object "
-                                                    src="{{ asset('assets/admin/images/xs/avatar4.jpg') }}"
-                                                    alt="">
-                                                <div class="media-body">
-                                                    <span class="name">James Wert <small class="float-right">Just
-                                                            now</small></span>
-                                                    <span class="message">Lorem ipsum Veniam aliquip culpa laboris
-                                                        minim tempor</span>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0);">
-                                            <div class="media">
-                                                <img class="media-object "
-                                                    src="{{ asset('assets/admin/images/xs/avatar1.jpg') }}"
-                                                    alt="">
-                                                <div class="media-body">
-                                                    <span class="name">Folisise Chosielie <small
-                                                            class="float-right">12min ago</small></span>
-                                                    <span class="message">There are many variations of Lorem Ipsum
-                                                        available, but the majority</span>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0);">
-                                            <div class="media">
-                                                <img class="media-object "
-                                                    src="{{ asset('assets/admin/images/xs/avatar5.jpg') }}"
-                                                    alt="">
-                                                <div class="media-body">
-                                                    <span class="name">Ava Alexander <small
-                                                            class="float-right">38min ago</small></span>
-                                                    <span class="message">Many desktop publishing packages and web page
-                                                        editors</span>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="javascript:void(0);">
-                                            <div class="media mb-0">
-                                                <img class="media-object "
-                                                    src="{{ asset('assets/images/xs/avatar2.jpg') }}" alt="">
-                                                <div class="media-body">
-                                                    <span class="name">Debra Stewart <small class="float-right">2hr
-                                                            ago</small></span>
-                                                    <span class="message">Contrary to popular belief, Lorem Ipsum is
-                                                        not simply random text</span>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </li>
+                                <ul class="dropdown-menu right_chat email" id="messageList">
+                                    <li class="header">Messages</li>
                                 </ul>
                             </li>
 

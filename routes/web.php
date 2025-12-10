@@ -26,6 +26,7 @@ use App\Http\Controllers\Admin\Dashboard\{
     PartnerProfitController,
     NotificationController,
     NotificationTableController,
+    MessageController,
     PartnerBalanceController,
     BatchController,
     AccountController,
@@ -123,6 +124,10 @@ Route::middleware(['auth', 'validuser'])->prefix('admin')->group(function () {
     Route::post('notifications/{id}/read', [NotificationController::class, 'markAsRead']);
     Route::post('notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.readAll');
     //Notification Table
+    //Messages (Contact & Booking)
+    Route::get('messages', [MessageController::class, 'index'])->name('messages.index');
+    Route::post('messages/{id}/read', [MessageController::class, 'markAsRead'])->name('messages.read');
+    Route::post('messages/read-all', [MessageController::class, 'markAllAsRead'])->name('messages.readAll');
     Route::get('notifications/all', [NotificationTableController::class, 'index'])->name('admin.notifications.table');
     Route::get('notifications/{notification}', [NotificationTableController::class, 'show'])->name('admin.notifications.show');
     // (optional) bulk actions

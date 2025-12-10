@@ -145,7 +145,10 @@
 
                                                 <!-- Interview Date -->
                                                 <td>
-                                                    <?php if($item->testDay): ?>
+                                                    <?php if($item->test_date): ?>
+                                                        <?php echo e(\Carbon\Carbon::parse($item->test_date)->format('d M Y')); ?>
+
+                                                    <?php elseif($item->testDay): ?>
                                                         <?php echo e(\Carbon\Carbon::parse($item->testDay->test_date)->format('d M Y')); ?>
 
                                                     <?php else: ?>
@@ -155,8 +158,8 @@
 
                                                 <!-- Interview Time -->
                                                 <td>
-                                                    <?php if($item->testDay): ?>
-                                                        <?php echo e(\Carbon\Carbon::parse($item->testDay->test_start_time)->format('h:i A')); ?>
+                                                    <?php if($item->slot_time): ?>
+                                                        <?php echo e(\Carbon\Carbon::createFromFormat('H:i', $item->slot_time)->format('h:i A')); ?>
 
                                                     <?php else: ?>
                                                         <span class="text-muted">N/A</span>
