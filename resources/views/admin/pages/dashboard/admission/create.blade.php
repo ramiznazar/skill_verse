@@ -34,7 +34,7 @@
                                                 title="Choose one or more courses">
                                                 @foreach ($courses as $course)
                                                     <option value="{{ $course->id }}"
-                                                        {{ collect(old('course_ids', []))->contains($course->id) ? 'selected' : '' }}>
+                                                        {{ collect(old('course_ids', []))->contains($course->id) || (isset($prefill) && $prefill->course_id == $course->id) ? 'selected' : '' }}>
                                                         {{ $course->title }}
                                                     </option>
                                                 @endforeach
@@ -77,7 +77,7 @@
                                         <div class="form-group">
                                             <label>Full Name</label>
                                             <input type="text" name="name"
-                                                value="{{ old('name', $lead->name ?? '') }}" class="form-control" required>
+                                                value="{{ old('name', $prefill->name ?? $lead->name ?? '') }}" class="form-control" required>
                                             @error('name')
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
@@ -135,7 +135,7 @@
                                         <div class="form-group">
                                             <label>Email</label>
                                             <input type="email" name="email"
-                                                value="{{ old('email', $lead->email ?? '') }}" class="form-control">
+                                                value="{{ old('email', $prefill->email ?? $lead->email ?? '') }}" class="form-control">
                                             @error('email')
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
@@ -145,7 +145,7 @@
                                         <div class="form-group">
                                             <label>Phone</label>
                                             <input type="text" name="phone"
-                                                value="{{ old('phone', $lead->phone ?? '') }}" class="form-control"
+                                                value="{{ old('phone', $prefill->phone ?? $lead->phone ?? '') }}" class="form-control"
                                                 required>
                                             @error('phone')
                                                 <small class="text-danger">{{ $message }}</small>
@@ -448,11 +448,40 @@
         // Load batches for each selected course
         $('#course_id').on('change', function() {
             let selectedCourses = $(this).val() || [];
-            renderCourseBlocks(selectedCourses);
+            if (selectedCourses && selectedCourses.length > 0) {
+                renderCourseBlocks(selectedCourses);
+            }
         });
 
+        // Auto-load course and batch if coming from booking
+        @if(isset($prefill) && $prefill->course_id)
+            $(document).ready(function() {
+                // Wait for selectpicker to initialize
+                setTimeout(function() {
+                    // Get the course ID and batch ID from prefill
+                    let courseId = {{ $prefill->course_id }};
+                    @if($prefill->batch_id)
+                        let batchId = {{ $prefill->batch_id }};
+                    @else
+                        let batchId = null;
+                    @endif
+                    
+                    // Set the course value
+                    $('#course_id').val([courseId]);
+                    
+                    // Refresh selectpicker
+                    if ($('#course_id').data('selectpicker')) {
+                        $('#course_id').selectpicker('refresh');
+                    }
+                    
+                    // Manually trigger renderCourseBlocks to load batches with prefill batch ID
+                    renderCourseBlocks([courseId], batchId);
+                }, 800);
+            });
+        @endif
+
         // render course blocks based on number of courses
-        function renderCourseBlocks(selectedCourses) {
+        function renderCourseBlocks(selectedCourses, prefillBatchId = null) {
             $('#batch-container').empty();
             if (selectedCourses.length === 0) return;
 
@@ -485,11 +514,23 @@
                     let options = '<option value="">Select Batch</option>';
                     if (data.length === 0) options += '<option disabled>No batches available</option>';
                     data.forEach(batch => {
-                        options += `<option value="${batch.id}" data-fee="${batch.course.min_fee}">
+                        // Check if this batch should be selected (from prefill parameter)
+                        let selected = '';
+                        if (prefillBatchId && batch.id == prefillBatchId) {
+                            selected = 'selected';
+                        }
+                        
+                        options += `<option value="${batch.id}" data-fee="${batch.course.min_fee}" ${selected}>
                     ${batch.title} (${batch.shift})
                 </option>`;
                     });
                     courseBlock.find('select').html(options);
+                    
+                    // Trigger change to auto-calculate fee if batch is pre-selected
+                    let selectedBatch = courseBlock.find('select').val();
+                    if (selectedBatch) {
+                        courseBlock.find('select').trigger('change');
+                    }
                 }).fail(function(xhr) {
                     console.error('Error loading batches:', xhr.responseText);
                     courseBlock.find('select').html('<option disabled>Error loading batches</option>');

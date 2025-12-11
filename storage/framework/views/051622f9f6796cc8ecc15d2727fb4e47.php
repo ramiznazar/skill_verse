@@ -232,7 +232,7 @@
                                                         Fail
                                                     </button>
 
-                                                    <?php if($item->result_status == 'pass' && $item->batch_id): ?>
+                                                    <?php if($item->result_status == 'pass'): ?>
                                                         <a href="<?php echo e(route('admission.create', ['booking_id' => $item->id])); ?>"
                                                             class="btn btn-info btn-sm">
                                                             Move to Admission

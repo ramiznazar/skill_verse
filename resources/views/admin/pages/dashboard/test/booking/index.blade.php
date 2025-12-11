@@ -224,7 +224,7 @@
                                                         Fail
                                                     </button>
 
-                                                    @if ($item->result_status == 'pass' && $item->batch_id)
+                                                    @if ($item->result_status == 'pass')
                                                         <a href="{{ route('admission.create', ['booking_id' => $item->id]) }}"
                                                             class="btn btn-info btn-sm">
                                                             Move to Admission
