@@ -123,6 +123,7 @@ class AdmissionController extends Controller
 
             'payment_type' => 'required|in:full_fee,installment',
             'full_fee' => 'required|numeric|min:0',
+            'registration_fee' => 'nullable|numeric|min:0',
 
             'installment_count' => 'nullable|in:2,3',
             'installment_1' => 'nullable|numeric|min:0',
@@ -221,6 +222,7 @@ class AdmissionController extends Controller
 
                 'payment_type' => $request->payment_type,
                 'full_fee' => (int) $request->full_fee,
+                'registration_fee' => $request->registration_fee ? (int) $request->registration_fee : 0,
                 'installment_1' => (int) $request->installment_1,
                 'installment_2' => (int) $request->installment_2,
                 'installment_3' => (int) $request->installment_3,
@@ -341,6 +343,7 @@ class AdmissionController extends Controller
             'referral_type' => 'nullable|in:ads,referral,other',
             'payment_type' => 'required|in:full_fee,installment',
             'full_fee' => 'required|numeric|min:0',
+            'registration_fee' => 'nullable|numeric|min:0',
             'installment_count' => 'nullable|in:2,3',
             'installment_1' => 'nullable|numeric|min:0',
             'installment_2' => 'nullable|numeric|min:0',
@@ -414,6 +417,7 @@ class AdmissionController extends Controller
             'referral_type' => $request->referral_type,
             'payment_type' => $request->payment_type,
             'full_fee' => (int) $request->full_fee,
+            'registration_fee' => $request->registration_fee ? (int) $request->registration_fee : 0,
             'installment_1' => (int) $request->installment_1,
             'installment_2' => (int) $request->installment_2,
             'installment_3' => (int) $request->installment_3,

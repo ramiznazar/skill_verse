@@ -143,11 +143,23 @@ class HomeController extends Controller
         $profitData = [];
 
         foreach ($weekRanges as [$start, $end]) {
-            $revenue = FeeSubmission::whereYear('submission_date', $year)
+            // Fee submission revenue
+            $feeSubmissionRevenue = FeeSubmission::whereYear('submission_date', $year)
                 ->whereMonth('submission_date', $month)
                 ->whereDay('submission_date', '>=', $start)
                 ->whereDay('submission_date', '<=', $end)
                 ->sum('amount');
+
+            // Registration fee revenue (from admissions created in this week)
+            $registrationFeeRevenue = Admission::whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->whereDay('created_at', '>=', $start)
+                ->whereDay('created_at', '<=', $end)
+                ->where('registration_fee', '>', 0)
+                ->sum('registration_fee');
+
+            // Total revenue
+            $revenue = $feeSubmissionRevenue + ($registrationFeeRevenue ?? 0);
 
             $expense = Expense::whereYear('date', $year)
                 ->whereMonth('date', $month)
@@ -182,9 +194,19 @@ class HomeController extends Controller
         $profitData = [];
 
         foreach (range(1, 12) as $month) {
-            $revenue = FeeSubmission::whereYear('submission_date', $year)
+            // Fee submission revenue
+            $feeSubmissionRevenue = FeeSubmission::whereYear('submission_date', $year)
                 ->whereMonth('submission_date', $month)
                 ->sum('amount');
+
+            // Registration fee revenue (from admissions created in this month)
+            $registrationFeeRevenue = Admission::whereYear('created_at', $year)
+                ->whereMonth('created_at', $month)
+                ->where('registration_fee', '>', 0)
+                ->sum('registration_fee');
+
+            // Total revenue
+            $revenue = $feeSubmissionRevenue + ($registrationFeeRevenue ?? 0);
 
             $expense = Expense::whereYear('date', $year)
                 ->whereMonth('date', $month)
@@ -209,16 +231,34 @@ class HomeController extends Controller
 
     public function getYearlyData()
     {
-        $years = FeeSubmission::selectRaw('YEAR(submission_date) as year')
+        // Get years from both fee submissions and admissions
+        $feeSubmissionYears = FeeSubmission::selectRaw('YEAR(submission_date) as year')
             ->distinct()
             ->pluck('year');
+        
+        $admissionYears = Admission::selectRaw('YEAR(created_at) as year')
+            ->distinct()
+            ->pluck('year');
+        
+        // Merge and get unique years
+        $years = $feeSubmissionYears->merge($admissionYears)->unique()->sort()->values();
 
         $revenueData = [];
         $expenseData = [];
         $profitData = [];
 
         foreach ($years as $year) {
-            $revenue = FeeSubmission::whereYear('submission_date', $year)->sum('amount');
+            // Fee submission revenue
+            $feeSubmissionRevenue = FeeSubmission::whereYear('submission_date', $year)->sum('amount');
+            
+            // Registration fee revenue (from admissions created in this year)
+            $registrationFeeRevenue = Admission::whereYear('created_at', $year)
+                ->where('registration_fee', '>', 0)
+                ->sum('registration_fee');
+            
+            // Total revenue
+            $revenue = $feeSubmissionRevenue + ($registrationFeeRevenue ?? 0);
+            
             $expense = Expense::whereYear('date', $year)->sum('amount');
             $profit = $revenue - $expense;
 

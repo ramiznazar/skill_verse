@@ -231,12 +231,22 @@
 
                                 {{-- Fee Section --}}
                                 <div class="row mt-3">
-                                    <div class="col-md-12">
+                                    <div class="col-md-6">
                                         <div class="form-group">
                                             <label>Total Fee</label>
                                             <input type="number" id="full_fee" name="full_fee" class="form-control"
                                                 value="{{ old('full_fee', $admission->full_fee) }}">
                                             @error('full_fee')
+                                                <small class="text-danger">{{ $message }}</small>
+                                            @enderror
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label>Registration Fee</label>
+                                            <input type="number" name="registration_fee" class="form-control"
+                                                value="{{ old('registration_fee', $admission->registration_fee ?? 0) }}" min="0">
+                                            @error('registration_fee')
                                                 <small class="text-danger">{{ $message }}</small>
                                             @enderror
                                         </div>

@@ -79,6 +79,7 @@
                         <div class="col-md-6">
                             <p><strong>Address:</strong> {{ $admission->address }}</p>
                             <p><strong>Total Fee:</strong> ₨{{ number_format($admission->full_fee) }}</p>
+                            <p><strong>Registration Fee:</strong> ₨{{ number_format($admission->registration_fee ?? 0) }}</p>
                             <p><strong>Payment Type:</strong> {{ ucfirst($admission->payment_type) }}</p>
                             <p><strong>Installments:</strong>
                                 1: ₨{{ $admission->installment_1 ?? 0 }},
