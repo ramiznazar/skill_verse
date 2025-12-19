@@ -34,6 +34,7 @@ class StudentAttendanceController extends Controller
 
         // Pull admissions (students) by Course + Shift (+ optional search)
         $admissionsQuery = Admission::with(['course:id,title', 'batch:id,title,shift'])
+            ->where('student_status', 'active')
             ->when($selectedCourseId, fn($q) => $q->where('course_id', $selectedCourseId))
             ->when($selectedShift, function ($q) use ($selectedShift) {
                 $q->whereHas('batch', fn($b) => $b->where('shift', $selectedShift));
@@ -195,6 +196,7 @@ class StudentAttendanceController extends Controller
 
         // Pull admissions matching filters
         $admissions = Admission::where('course_id', $request->course_id)
+            ->where('student_status', 'active')
             ->whereHas('batch', fn($b) => $b->where('shift', $request->shift))
             ->get(['id', 'batch_id']);
 
