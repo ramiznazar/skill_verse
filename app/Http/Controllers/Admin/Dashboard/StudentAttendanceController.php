@@ -33,6 +33,7 @@ class StudentAttendanceController extends Controller
         $search = trim((string) $request->input('search', ''));
 
         // Pull admissions (students) by Course + Shift (+ optional search)
+        // Only show active students (exclude completed and unactive)
         $admissionsQuery = Admission::with(['course:id,title', 'batch:id,title,shift'])
             ->where('student_status', 'active')
             ->when($selectedCourseId, fn($q) => $q->where('course_id', $selectedCourseId))
@@ -195,6 +196,7 @@ class StudentAttendanceController extends Controller
         $teacherId = Auth::id();
 
         // Pull admissions matching filters
+        // Only include active students (exclude completed and unactive)
         $admissions = Admission::where('course_id', $request->course_id)
             ->where('student_status', 'active')
             ->whereHas('batch', fn($b) => $b->where('shift', $request->shift))
