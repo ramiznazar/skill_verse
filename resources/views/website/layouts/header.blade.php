@@ -3,7 +3,7 @@
 
         <!-- Header -->
         <header id="header" class="header">
-            {{-- <div class="header-top bg-theme-color-2 sm-text-center p-0">
+            <div class="header-top bg-theme-color-2 sm-text-center p-0">
                 <div class="container">
                     <div class="row">
                         <div class="col-md-4">
@@ -39,10 +39,10 @@
                         </div>
                     </div>
                 </div>
-            </div> --}}
+            </div>
 
             <!-- 70% Discount Test Banner -->
-            <div class="discount-test-banner bg-theme-color-2 text-white text-center"
+            {{-- <div class="discount-test-banner bg-theme-color-2 text-white text-center"
                 onclick="window.location.href='{{ route('test.booking') }}'">
 
                 <span class="icon">🎉</span>
@@ -141,7 +141,7 @@
                 .discount-test-banner:hover {
                     opacity: 0.95;
                 }
-            </style>
+            </style> --}}
 
             <div class="header-nav">
                 <div class="header-nav-wrapper navbar-scrolltofixed bg-theme-colored border-bottom-theme-color-2-1px">
